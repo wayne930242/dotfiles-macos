@@ -1,5 +1,7 @@
 # macOS Dotfiles - Cyberpunk Edition
 
+[繁體中文](README.zh-TW.md)
+
 My personal macOS configuration files for a cyberpunk-themed desktop environment.
 
 ## Components
@@ -10,7 +12,7 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 
 ## Screenshots
 
-<!-- Add your screenshots here -->
+![Cyberpunk Desktop](screenshot.png)
 
 ## Quick Install
 
