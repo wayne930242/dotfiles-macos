@@ -1,6 +1,6 @@
-# macOS Dotfiles - 賽博龐克風格
+# macOS Dotfiles - 電馭叛客風格
 
-個人 macOS 設定檔，打造賽博龐克風格的桌面環境。
+個人 macOS 設定檔，打造電馭叛客風格的桌面環境。
 
 ## 元件
 
@@ -10,7 +10,7 @@
 
 ## 截圖
 
-![Cyberpunk Desktop](screenshot.png)
+![電馭叛客桌面](screenshot.png)
 
 ## 快速安裝
 
@@ -86,7 +86,7 @@ brew services start borders
 
 ## 主題配色
 
-賽博龐克色票：
+電馭叛客色票：
 - 主色：`#00fff7` (霓虹青)
 - 副色：`#ff00ff` (洋紅)
 - 強調色：`#ff6600` (橘色)
