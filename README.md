@@ -25,9 +25,18 @@ cd ~/dotfiles-macos
 The install script will:
 1. Install Homebrew (if not present)
 2. Install AeroSpace, SketchyBar, JankyBorders, and dependencies
-3. Backup your existing configs
+3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks to the dotfiles
 5. Start all services
+
+### Other Commands
+
+```bash
+./install.sh install    # Install (default)
+./install.sh uninstall  # Remove symlinks and stop services
+./install.sh restore    # Restore from a previous backup
+./install.sh help       # Show help
+```
 
 ## Manual Installation
 

@@ -23,9 +23,18 @@ cd ~/dotfiles-macos
 安裝腳本會自動：
 1. 安裝 Homebrew（如未安裝）
 2. 安裝 AeroSpace、SketchyBar、JankyBorders 及相依套件
-3. 備份現有設定
+3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 symlinks
 5. 啟動所有服務
+
+### 其他指令
+
+```bash
+./install.sh install    # 安裝（預設）
+./install.sh uninstall  # 移除 symlinks 並停止服務
+./install.sh restore    # 從備份還原
+./install.sh help       # 顯示說明
+```
 
 ## 手動安裝
 
