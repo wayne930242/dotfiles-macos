@@ -12,7 +12,22 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 
 <!-- Add your screenshots here -->
 
-## Installation
+## Quick Install
+
+```bash
+git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
+cd ~/dotfiles-macos
+./install.sh
+```
+
+The install script will:
+1. Install Homebrew (if not present)
+2. Install AeroSpace, SketchyBar, JankyBorders, and dependencies
+3. Backup your existing configs
+4. Create symlinks to the dotfiles
+5. Start all services
+
+## Manual Installation
 
 ### Prerequisites
 
@@ -28,7 +43,7 @@ brew install nowplaying-cli  # For media widget
 
 ```bash
 # Clone this repo
-git clone https://github.com/weihung/dotfiles-macos.git ~/dotfiles-macos
+git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 
 # Symlink configurations
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
