@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║                     SKETCHYBAR - CYBERPUNK EDITION                        ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+
+source "$CONFIG_DIR/colors.sh"
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
+
+FONT="Hack Nerd Font Mono"
+PADDINGS=3
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BAR APPEARANCE
+# ══════════════════════════════════════════════════════════════════════════════
+
+bar=(
+    height=40
+    color=$BAR_COLOR
+    border_width=2
+    border_color=$BORDER_COLOR
+    shadow=on
+    position=top
+    sticky=on
+    padding_right=10
+    padding_left=10
+    y_offset=5
+    margin=10
+    corner_radius=12
+    blur_radius=30
+    notch_width=188
+)
+
+sketchybar --bar "${bar[@]}"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DEFAULT VALUES
+# ══════════════════════════════════════════════════════════════════════════════
+
+defaults=(
+    icon.font="$FONT:Bold:14.0"
+    icon.color=$ICON_COLOR
+    icon.padding_left=8
+    icon.padding_right=4
+    label.font="$FONT:Semibold:13.0"
+    label.color=$LABEL_COLOR
+    label.padding_left=4
+    label.padding_right=8
+    padding_right=4
+    padding_left=4
+    background.height=28
+    background.corner_radius=8
+    background.border_width=1
+    background.padding_left=4
+    background.padding_right=4
+    popup.background.border_width=2
+    popup.background.corner_radius=8
+    popup.background.border_color=$POPUP_BORDER_COLOR
+    popup.background.color=$POPUP_BACKGROUND_COLOR
+    popup.blur_radius=20
+    popup.background.shadow.drawing=on
+)
+
+sketchybar --default "${defaults[@]}"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# LEFT SIDE - WORKSPACES
+# ══════════════════════════════════════════════════════════════════════════════
+
+source "$ITEM_DIR/spaces.sh"
+
+# Spacer after workspaces
+sketchybar --add item spacer_left left \
+           --set spacer_left width=10 background.drawing=off
+
+source "$ITEM_DIR/front_app.sh"
+
+# Spacer after front_app
+sketchybar --add item spacer_left2 left \
+           --set spacer_left2 width=10 background.drawing=off
+
+source "$ITEM_DIR/git.sh"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# RIGHT SIDE - SYSTEM INFO
+# ══════════════════════════════════════════════════════════════════════════════
+
+source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/volume.sh"
+source "$ITEM_DIR/input.sh"
+source "$ITEM_DIR/battery.sh"
+source "$ITEM_DIR/weather.sh"
+source "$ITEM_DIR/network.sh"
+source "$ITEM_DIR/media.sh"
+source "$ITEM_DIR/cpu.sh"
+source "$ITEM_DIR/memory.sh"
+
+# ══════════════════════════════════════════════════════════════════════════════
+# FINALIZE
+# ══════════════════════════════════════════════════════════════════════════════
+
+sketchybar --update
