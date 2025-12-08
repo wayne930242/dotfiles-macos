@@ -5,7 +5,7 @@
 
 options=(
     style=round
-    width=4.0
+    width=2.0
     hidpi=off
     order=above
     active_color=0xff00fff7   # Neon cyan (same as sketchybar border)
