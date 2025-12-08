@@ -50,7 +50,7 @@ exec-on-workspace-change = ['/bin/bash', '-c', 'sketchybar --trigger aerospace_w
     inner.vertical = 12
     outer.left = 10
     outer.bottom = 10
-    outer.top = 16  # SketchyBar floats above
+    outer.top = 15  # SketchyBar floats above
     outer.right = 10
 
 # Window rules - Auto floating for system apps
