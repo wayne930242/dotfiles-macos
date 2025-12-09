@@ -36,6 +36,20 @@ automatically-unhide-macos-hidden-apps = false
 # N: Obsidian (Notes)
 persistent-workspaces = ["1", "2", "3", "T", "B", "G", "S", "P", "D", "A", "N"]
 
+# When external monitor is disconnected, workspaces fall back to main
+[workspace-to-monitor-force-assignment]
+1 = 'main'
+2 = ['secondary', 'main']
+3 = ['secondary', 'main']
+T = 'main'
+B = 'main'
+G = ['secondary', 'main']
+S = ['secondary', 'main']
+P = ['secondary', 'main']
+D = ['secondary', 'main']
+A = 'main'
+N = ['secondary', 'main']
+
 on-mode-changed = []
 
 # SketchyBar integration - notify on workspace change
@@ -168,6 +182,9 @@ run = 'move-node-to-workspace N'
     r = ['flatten-workspace-tree', 'mode main']  # Reset layout
     f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
+
+    # Summon all windows to current workspace (rescue lost windows) + re-tile
+    s = ['exec-and-forget aerospace list-windows --all --format %{window-id} | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree', 'mode main']
 
     alt-shift-h = ['join-with left', 'mode main']
     alt-shift-j = ['join-with down', 'mode main']
