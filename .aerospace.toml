@@ -23,6 +23,15 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 # Unhide hidden apps
 automatically-unhide-macos-hidden-apps = false
 
+# SketchyBar integration - notify on workspace change
+exec-on-workspace-change = [
+    '/bin/bash',
+    '-c',
+    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
+]
+
+on-mode-changed = []
+
 # Persistent workspaces
 # Numbers: general use
 # T: Terminal (WezTerm)
@@ -36,35 +45,36 @@ automatically-unhide-macos-hidden-apps = false
 # N: Obsidian (Notes)
 persistent-workspaces = ["1", "2", "3", "T", "B", "G", "S", "P", "D", "A", "N"]
 
-# When external monitor is disconnected, workspaces fall back to main
+# Workspace-to-monitor assignment
+# Main monitor: core work (Terminal, Browser, AI, general)
+# Secondary monitor: reference/social (Notes, Social, Project, Game, Docker)
 [workspace-to-monitor-force-assignment]
 1 = 'main'
-2 = ['secondary', 'main']
+2 = 'main'
 3 = ['secondary', 'main']
 T = 'main'
 B = 'main'
+A = 'main'
 G = ['secondary', 'main']
 S = ['secondary', 'main']
 P = ['secondary', 'main']
 D = ['secondary', 'main']
-A = 'main'
 N = ['secondary', 'main']
-
-on-mode-changed = []
-
-# SketchyBar integration - notify on workspace change
-exec-on-workspace-change = ['/bin/bash', '-c', 'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE']
 
 [key-mapping]
     preset = 'qwerty'
 
 # Gaps for better visual separation
+# Per-monitor top gap: built-in (notch) = 10, external = 50 for SketchyBar
 [gaps]
     inner.horizontal = 12
     inner.vertical = 12
     outer.left = 10
     outer.bottom = 10
-    outer.top = 15  # SketchyBar floats above
+    outer.top = [
+        { monitor."built-in" = 10 },
+        50
+    ]
     outer.right = 10
 
 # Window rules - Auto floating for system apps
@@ -183,8 +193,9 @@ run = 'move-node-to-workspace N'
     f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
 
-    # Summon all windows to current workspace (rescue lost windows) + re-tile
-    s = ['exec-and-forget aerospace list-windows --all --format %{window-id} | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree', 'mode main']
+    # Summon all windows to current workspace (rescue lost windows) + re-tile + reload sketchybar
+    # Excludes Social apps (Discord, Slack, Telegram)
+    s = ['exec-and-forget aerospace list-windows --all --format "%{app-name}|%{window-id}" | grep -v -E "^(Discord|Slack|Telegram)\\|" | cut -d"|" -f2 | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree && sketchybar --reload', 'mode main']
 
     alt-shift-h = ['join-with left', 'mode main']
     alt-shift-j = ['join-with down', 'mode main']
