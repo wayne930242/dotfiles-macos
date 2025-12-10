@@ -46,20 +46,20 @@ on-mode-changed = []
 persistent-workspaces = ["1", "2", "3", "T", "B", "G", "S", "P", "D", "A", "N"]
 
 # Workspace-to-monitor assignment
-# Main monitor: core work (Terminal, Browser, AI, general)
-# Secondary monitor: reference/social (Notes, Social, Project, Game, Docker)
+# Built-in (main): all letter workspaces (T, B, G, S, P, D, A, N)
+# Extended (secondary): 1, 2, 3 when available, fallback to main
 [workspace-to-monitor-force-assignment]
-1 = 'main'
-2 = 'main'
+1 = ['secondary', 'main']
+2 = ['secondary', 'main']
 3 = ['secondary', 'main']
 T = 'main'
 B = 'main'
+G = 'main'
+S = 'main'
+P = 'main'
+D = 'main'
 A = 'main'
-G = ['secondary', 'main']
-S = ['secondary', 'main']
-P = ['secondary', 'main']
-D = ['secondary', 'main']
-N = ['secondary', 'main']
+N = 'main'
 
 [key-mapping]
     preset = 'qwerty'
