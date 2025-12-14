@@ -5,7 +5,7 @@ source "$CONFIG_DIR/colors.sh"
 sketchybar --add item obsidian right \
            --set obsidian \
                  icon="󱓧" \
-                 icon.color=$PURPLE \
+                 icon.color=0xffffffff \
                  icon.padding_left=8 \
                  icon.padding_right=8 \
                  label.drawing=off \
