@@ -30,20 +30,21 @@ exec-on-workspace-change = [
     'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
 ]
 
-on-mode-changed = []
+# Note: on-mode-changed not yet implemented in aerospace
+# Workaround: trigger sketchybar manually in each mode keybinding
 
 # Persistent workspaces
 # Numbers: general use
 # T: Terminal (WezTerm)
-# B: Browser (Comet)
-# C: Cursor
+# W: Web Browser (Comet, Chrome)
 # G: Game/Chill
 # S: Social (Discord, Slack, Telegram)
 # P: Linear (Project management)
 # D: Docker
 # A: AI/Agents
-# N: Obsidian (Notes)
-persistent-workspaces = ["1", "2", "3", "T", "B", "G", "S", "P", "D", "A", "N"]
+# Z: Obsidian (Notes)
+# X: Xcode
+persistent-workspaces = ["1", "2", "3", "T", "W", "G", "S", "P", "D", "A", "Z", "X"]
 
 # Workspace-to-monitor assignment
 # Built-in (main): all letter workspaces (T, B, G, S, P, D, A, N)
@@ -53,13 +54,14 @@ persistent-workspaces = ["1", "2", "3", "T", "B", "G", "S", "P", "D", "A", "N"]
 2 = ['secondary', 'main']
 3 = ['secondary', 'main']
 T = 'main'
-B = 'main'
+W = 'main'
 G = 'main'
 S = 'main'
 P = 'main'
 D = 'main'
 A = 'main'
-N = 'main'
+Z = 'main'
+X = 'main'
 
 [key-mapping]
     preset = 'qwerty'
@@ -93,11 +95,11 @@ run = 'move-node-to-workspace T'
 
 [[on-window-detected]]
 if.app-id = 'ai.perplexity.comet'
-run = 'move-node-to-workspace B'
+run = 'move-node-to-workspace W'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace B'
+run = 'move-node-to-workspace W'
 
 
 [[on-window-detected]]
@@ -122,7 +124,15 @@ run = 'move-node-to-workspace D'
 
 [[on-window-detected]]
 if.app-id = 'md.obsidian'
-run = 'move-node-to-workspace N'
+run = 'move-node-to-workspace Z'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.dt.Xcode'
+run = 'move-node-to-workspace X'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.iphonesimulator'
+run = 'move-node-to-workspace X'
 
 # Main binding mode
 [mode.main.binding]
@@ -160,13 +170,14 @@ run = 'move-node-to-workspace N'
 
     # Letter workspaces (meaningful names)
     alt-t = 'workspace T'  # Terminal
-    alt-b = 'workspace B'  # Browser
+    alt-w = 'workspace W'  # Web Browser
     alt-g = 'workspace G'  # Game/Chill
     alt-s = 'workspace S'  # Social
     alt-p = 'workspace P'  # Linear (Project)
     alt-d = 'workspace D'  # Docker
     alt-a = 'workspace A'  # AI/Agents
-    alt-n = 'workspace N'  # Obsidian (Notes)
+    alt-z = 'workspace Z'  # Obsidian (Notes)
+    alt-x = 'workspace X'  # Xcode
 
     # Move to number workspaces
     alt-shift-1 = ['move-node-to-workspace 1', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
@@ -175,33 +186,34 @@ run = 'move-node-to-workspace N'
 
     # Move to letter workspaces
     alt-shift-t = ['move-node-to-workspace T', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-b = ['move-node-to-workspace B', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-w = ['move-node-to-workspace W', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-g = ['move-node-to-workspace G', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-s = ['move-node-to-workspace S', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-p = ['move-node-to-workspace P', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-d = ['move-node-to-workspace D', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-a = ['move-node-to-workspace A', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-n = ['move-node-to-workspace N', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-z = ['move-node-to-workspace Z', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-x = ['move-node-to-workspace X', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
     # Workspace navigation
     alt-tab = 'workspace-back-and-forth'
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
     # Enter service mode
-    alt-shift-semicolon = 'mode service'
+    alt-shift-semicolon = ['mode service', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=service']
 
 # Service mode for advanced operations
 [mode.service.binding]
-    esc = ['reload-config', 'mode main']
-    r = ['flatten-workspace-tree', 'mode main']  # Reset layout
-    f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
-    backspace = ['close-all-windows-but-current', 'mode main']
+    esc = ['reload-config', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    r = ['flatten-workspace-tree', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']  # Reset layout
+    f = ['layout floating tiling', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']  # Toggle floating/tiling
+    backspace = ['close-all-windows-but-current', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
 
     # Summon all windows to current workspace (rescue lost windows) + re-tile + reload sketchybar
     # Excludes Social apps (Discord, Slack, Telegram)
-    s = ['exec-and-forget aerospace list-windows --all --format "%{app-name}|%{window-id}" | grep -v -E "^(Discord|Slack|Telegram)\\|" | cut -d"|" -f2 | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree && sketchybar --reload', 'mode main']
+    s = ['exec-and-forget aerospace list-windows --all --format "%{app-name}|%{window-id}" | grep -v -E "^(Discord|Slack|Telegram)\\|" | cut -d"|" -f2 | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree && sketchybar --trigger aerospace_mode_change MODE=main && sketchybar --reload', 'mode main']
 
-    alt-shift-h = ['join-with left', 'mode main']
-    alt-shift-j = ['join-with down', 'mode main']
-    alt-shift-k = ['join-with up', 'mode main']
-    alt-shift-l = ['join-with right', 'mode main']
+    alt-shift-h = ['join-with left', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    alt-shift-j = ['join-with down', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    alt-shift-k = ['join-with up', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    alt-shift-l = ['join-with right', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']

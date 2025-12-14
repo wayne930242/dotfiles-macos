@@ -69,6 +69,7 @@ sketchybar --default "${defaults[@]}"
 # LEFT SIDE - WORKSPACES
 # ══════════════════════════════════════════════════════════════════════════════
 
+source "$ITEM_DIR/mode_indicator.sh"
 source "$ITEM_DIR/spaces.sh"
 
 # Spacer after workspaces
