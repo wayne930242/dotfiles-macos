@@ -2,9 +2,9 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-sketchybar --add item calendar right \
-           --set calendar \
-                 icon="󰃰" \
+sketchybar --add item system_stats right \
+           --set system_stats \
+                 icon="󰻠" \
                  icon.color=$CYAN \
                  icon.padding_left=8 \
                  icon.padding_right=6 \
@@ -16,6 +16,6 @@ sketchybar --add item calendar right \
                  background.border_width=1 \
                  background.border_color=$CYAN \
                  background.drawing=on \
-                 update_freq=30 \
-                 script="$PLUGIN_DIR/calendar.sh" \
-                 click_script="open 'https://calendar.google.com'"
+                 update_freq=3 \
+                 script="$PLUGIN_DIR/system_stats.sh" \
+                 click_script="open -a 'Activity Monitor'"

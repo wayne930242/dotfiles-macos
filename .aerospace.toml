@@ -95,6 +95,10 @@ run = 'move-node-to-workspace T'
 if.app-id = 'ai.perplexity.comet'
 run = 'move-node-to-workspace B'
 
+[[on-window-detected]]
+if.app-id = 'com.google.Chrome'
+run = 'move-node-to-workspace B'
+
 
 [[on-window-detected]]
 if.app-id = 'com.hnc.Discord'

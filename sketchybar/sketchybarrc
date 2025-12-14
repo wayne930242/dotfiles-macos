@@ -81,21 +81,21 @@ source "$ITEM_DIR/front_app.sh"
 sketchybar --add item spacer_left2 left \
            --set spacer_left2 width=10 background.drawing=off
 
-source "$ITEM_DIR/git.sh"
-
 # ══════════════════════════════════════════════════════════════════════════════
 # RIGHT SIDE - SYSTEM INFO
 # ══════════════════════════════════════════════════════════════════════════════
 
 source "$ITEM_DIR/calendar.sh"
+source "$ITEM_DIR/obsidian.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/input.sh"
 source "$ITEM_DIR/battery.sh"
 source "$ITEM_DIR/weather.sh"
 source "$ITEM_DIR/network.sh"
 source "$ITEM_DIR/media.sh"
-source "$ITEM_DIR/cpu.sh"
-source "$ITEM_DIR/memory.sh"
+source "$ITEM_DIR/system_stats.sh"
+source "$ITEM_DIR/temperature.sh"
+source "$ITEM_DIR/disk.sh"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FINALIZE
