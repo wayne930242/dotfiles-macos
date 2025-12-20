@@ -134,6 +134,10 @@ run = 'move-node-to-workspace X'
 if.app-id = 'com.apple.iphonesimulator'
 run = 'move-node-to-workspace X'
 
+[[on-window-detected]]
+if.app-id = 'com.google.android.studio'
+run = 'move-node-to-workspace X'
+
 # Main binding mode
 [mode.main.binding]
 
