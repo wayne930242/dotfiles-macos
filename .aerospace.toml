@@ -39,12 +39,12 @@ exec-on-workspace-change = [
 # C: Web Browser (Comet, Chrome)
 # G: Game/Chill
 # S: Social (Discord, Slack, Telegram)
-# P: Linear (Project management)
+# Q: Linear + Slack (Project management)
 # D: Docker
 # A: AI/Agents
 # Z: Obsidian (Notes)
 # X: Xcode
-persistent-workspaces = ["1", "2", "3", "W", "C", "G", "S", "P", "D", "A", "Z", "X"]
+persistent-workspaces = ["1", "2", "3", "W", "C", "G", "S", "Q", "D", "A", "Z", "X"]
 
 # Workspace-to-monitor assignment
 # Built-in (main): all letter workspaces (T, B, G, S, P, D, A, N)
@@ -57,7 +57,7 @@ W = 'main'
 C = 'main'
 G = 'main'
 S = 'main'
-P = 'main'
+Q = 'main'
 D = 'main'
 A = 'main'
 Z = 'main'
@@ -101,14 +101,13 @@ run = 'move-node-to-workspace C'
 if.app-id = 'com.google.Chrome'
 run = 'move-node-to-workspace C'
 
-
 [[on-window-detected]]
 if.app-id = 'com.hnc.Discord'
 run = 'move-node-to-workspace S'
 
 [[on-window-detected]]
 if.app-id = 'com.tinyspeck.slackmacgap'
-run = 'move-node-to-workspace S'
+run = 'move-node-to-workspace Q'
 
 [[on-window-detected]]
 if.app-id = 'com.tdesktop.Telegram'
@@ -116,7 +115,7 @@ run = 'move-node-to-workspace S'
 
 [[on-window-detected]]
 if.app-id = 'com.linear'
-run = 'move-node-to-workspace P'
+run = 'move-node-to-workspace Q'
 
 [[on-window-detected]]
 if.app-id = 'com.electron.dockerdesktop'
@@ -177,7 +176,7 @@ run = 'move-node-to-workspace X'
     alt-c = 'workspace C'  # Chrome/Comet (Web Browser)
     alt-g = 'workspace G'  # Game/Chill
     alt-s = 'workspace S'  # Social
-    alt-p = 'workspace P'  # Linear (Project)
+    alt-q = 'workspace Q'  # Linear + Slack (Project)
     alt-d = 'workspace D'  # Docker
     alt-a = 'workspace A'  # AI/Agents
     alt-z = 'workspace Z'  # Obsidian (Notes)
@@ -193,7 +192,7 @@ run = 'move-node-to-workspace X'
     alt-shift-c = ['move-node-to-workspace C', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-g = ['move-node-to-workspace G', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-s = ['move-node-to-workspace S', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-p = ['move-node-to-workspace P', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-q = ['move-node-to-workspace Q', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-d = ['move-node-to-workspace D', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-a = ['move-node-to-workspace A', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-z = ['move-node-to-workspace Z', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
