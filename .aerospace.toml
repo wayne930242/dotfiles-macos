@@ -88,6 +88,11 @@ run = 'layout floating'
 if.app-id = 'com.apple.finder'
 run = 'layout floating'
 
+# Force Zed to use floating (workaround tiling bug)
+[[on-window-detected]]
+if.app-id = 'dev.zed.Zed'
+run = 'layout floating'
+
 # Auto move apps to designated workspaces
 [[on-window-detected]]
 if.app-id = 'com.github.wez.wezterm'
@@ -122,10 +127,6 @@ if.app-id = 'com.electron.dockerdesktop'
 run = 'move-node-to-workspace D'
 
 [[on-window-detected]]
-if.app-id = 'md.obsidian'
-run = 'move-node-to-workspace Z'
-
-[[on-window-detected]]
 if.app-id = 'com.apple.dt.Xcode'
 run = 'move-node-to-workspace X'
 
@@ -149,6 +150,24 @@ run = 'move-node-to-workspace X'
 
     # Fullscreen toggle
     alt-f = 'fullscreen'
+
+    # Maximize floating window (dynamic, reserve space for SketchyBar)
+    alt-m = '''exec-and-forget osascript -e '
+        set barHeight to 55
+        set margin to 10
+        tell application "Finder"
+            set screenBounds to bounds of window of desktop
+            set screenWidth to item 3 of screenBounds
+            set screenHeight to item 4 of screenBounds
+        end tell
+        tell application "System Events"
+            set frontApp to first process whose frontmost is true
+            tell frontApp
+                set position of window 1 to {margin, barHeight}
+                set size of window 1 to {screenWidth - (margin * 2), screenHeight - barHeight - margin}
+            end tell
+        end tell'
+    '''
 
     # Focus (Vim-style)
     alt-h = 'focus left'
