@@ -88,11 +88,6 @@ run = 'layout floating'
 if.app-id = 'com.apple.finder'
 run = 'layout floating'
 
-# Force Zed to use floating (workaround tiling bug)
-[[on-window-detected]]
-if.app-id = 'dev.zed.Zed'
-run = 'layout floating'
-
 # Auto move apps to designated workspaces
 [[on-window-detected]]
 if.app-id = 'com.github.wez.wezterm'
