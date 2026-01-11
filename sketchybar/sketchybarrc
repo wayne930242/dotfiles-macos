@@ -24,7 +24,6 @@ bar=(
     shadow=on
     position=top
     sticky=on
-    topmost=on
     show_in_fullscreen=on
     padding_right=10
     padding_left=10
