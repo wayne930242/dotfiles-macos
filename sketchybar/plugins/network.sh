@@ -3,22 +3,25 @@
 # shellcheck disable=SC1091
 source "$CONFIG_DIR/colors.sh"
 
-# Get current WiFi SSID using system_profiler (more reliable on modern macOS)
-SSID=$(system_profiler SPAirPortDataType 2>/dev/null | awk -F': ' '/Current Network Information:/{getline; gsub(/^[ \t]+/, ""); gsub(/:$/, ""); print; exit}')
+# Check WiFi power state
+WIFI_POWER=$(networksetup -getairportpower en0 2>/dev/null | awk '{print $4}')
 
-if [ -n "$SSID" ]; then
-    ICON="󰖩"
-    # Truncate SSID if too long
-    if [ ${#SSID} -gt 12 ]; then
-        LABEL="${SSID:0:10}.."
+if [ "$WIFI_POWER" = "On" ]; then
+    # Check if connected (has IP address)
+    WIFI_IP=$(ipconfig getifaddr en0 2>/dev/null)
+    if [ -n "$WIFI_IP" ]; then
+        ICON="󰖩"
+        LABEL="WiFi"
+        COLOR=$BLUE
     else
-        LABEL="$SSID"
+        ICON="󰖪"
+        LABEL="--"
+        COLOR=$YELLOW
     fi
-    COLOR=$BLUE
 else
-    # Check ethernet on common interfaces
-    ETHERNET=$(ifconfig 2>/dev/null | grep -B4 'status: active' | grep -E '^en[0-9]+:' | head -1)
-    if [ -n "$ETHERNET" ]; then
+    # Check ethernet
+    ETH_IP=$(ipconfig getifaddr en1 2>/dev/null || ipconfig getifaddr en2 2>/dev/null)
+    if [ -n "$ETH_IP" ]; then
         ICON="󰈀"
         LABEL="ETH"
         COLOR=$BLUE
