@@ -9,7 +9,7 @@ sketchybar --add item weather right \
                  icon.color="$ORANGE" \
                  icon.padding_left=8 \
                  icon.padding_right=6 \
-                 label="--°C" \
+                 label="--" \
                  label.padding_left=0 \
                  label.padding_right=8 \
                  background.color=0x33ff6600 \
