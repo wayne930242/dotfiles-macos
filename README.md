@@ -9,6 +9,7 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - Tiling window manager
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - Custom menu bar
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - Window borders
+- **[WezTerm](https://wezfurlong.org/wezterm/)** - Terminal with tmux-like leader keybindings and persistent sessions via unix-domain mux
 
 ## Screenshots
 
@@ -60,6 +61,7 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
+ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 
 # Start services
 brew services start sketchybar

@@ -59,6 +59,11 @@ backup_configs() {
         echo "   ✅ Backed up .aerospace.toml"
     fi
 
+    if [ -f "$HOME/.wezterm.lua" ] && [ ! -L "$HOME/.wezterm.lua" ]; then
+        cp "$HOME/.wezterm.lua" "$BACKUP_DIR/"
+        echo "   ✅ Backed up .wezterm.lua"
+    fi
+
     # Check if backup dir is empty
     if [ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
         rmdir "$BACKUP_DIR"
@@ -78,17 +83,21 @@ create_symlinks() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
+    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -d "$HOME/.config/sketchybar" ] && rm -rf "$HOME/.config/sketchybar"
     [ -d "$HOME/.config/borders" ] && rm -rf "$HOME/.config/borders"
     [ -f "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
+    [ -f "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
 
     ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
     ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
     ln -sf "$DOTFILES_DIR/.aerospace.toml" "$HOME/.aerospace.toml"
+    ln -sf "$DOTFILES_DIR/.wezterm.lua" "$HOME/.wezterm.lua"
 
     echo "   ✅ sketchybar -> ~/.config/sketchybar"
     echo "   ✅ borders -> ~/.config/borders"
     echo "   ✅ .aerospace.toml -> ~/.aerospace.toml"
+    echo "   ✅ .wezterm.lua -> ~/.wezterm.lua"
 }
 
 set_permissions() {
@@ -153,6 +162,7 @@ do_uninstall() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar" && echo "   ✅ Removed sketchybar symlink"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders" && echo "   ✅ Removed borders symlink"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml" && echo "   ✅ Removed .aerospace.toml symlink"
+    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua" && echo "   ✅ Removed .wezterm.lua symlink"
 
     echo ""
     echo "✅ Uninstall complete!"
@@ -207,11 +217,13 @@ do_restore() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
+    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
 
     # Restore from backup
     [ -d "$RESTORE_DIR/sketchybar" ] && cp -r "$RESTORE_DIR/sketchybar" "$HOME/.config/" && echo "   ✅ Restored sketchybar"
     [ -d "$RESTORE_DIR/borders" ] && cp -r "$RESTORE_DIR/borders" "$HOME/.config/" && echo "   ✅ Restored borders"
     [ -f "$RESTORE_DIR/.aerospace.toml" ] && cp "$RESTORE_DIR/.aerospace.toml" "$HOME/" && echo "   ✅ Restored .aerospace.toml"
+    [ -f "$RESTORE_DIR/.wezterm.lua" ] && cp "$RESTORE_DIR/.wezterm.lua" "$HOME/" && echo "   ✅ Restored .wezterm.lua"
 
     start_services
 

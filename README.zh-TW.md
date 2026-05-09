@@ -7,6 +7,7 @@
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - 平鋪式視窗管理器
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - 自訂選單列
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
+- **[WezTerm](https://wezfurlong.org/wezterm/)** - 終端機，配置 tmux-like leader 快捷鍵與 unix-domain mux 持久會話
 
 ## 截圖
 
@@ -58,6 +59,7 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
+ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 
 # 啟動服務
 brew services start sketchybar
