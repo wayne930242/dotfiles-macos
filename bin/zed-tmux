@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Zed terminal panel tmux launcher
+# 把 tmux session 名綁到目前工作目錄的 basename,讓不同專案各有獨立 session,
+# 同一專案開多個 Zed terminal panel 仍 attach 到同一個 session(共用 panes)。
+
+set -euo pipefail
+
+project="$(basename "${PWD}")"
+# 清掉特殊字元,只留英數、底線、減號
+session="zed-${project//[^a-zA-Z0-9_-]/_}"
+
+exec /opt/homebrew/bin/tmux new-session -A -s "${session}"
