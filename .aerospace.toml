@@ -97,7 +97,7 @@ run = 'layout tiling'
 # Auto move apps to designated workspaces
 [[on-window-detected]]
 if.app-id = 'com.github.wez.wezterm'
-run = 'move-node-to-workspace W'
+run = ['layout tiling', 'move-node-to-workspace W']
 
 [[on-window-detected]]
 if.app-id = 'ai.perplexity.comet'
