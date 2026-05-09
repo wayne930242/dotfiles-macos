@@ -8,6 +8,7 @@
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - 自訂選單列
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
 - **[WezTerm](https://wezfurlong.org/wezterm/)** - 終端機，配置 tmux-like leader 快捷鍵與 unix-domain mux 持久會話
+- **[tmux](https://github.com/tmux/tmux)** - 終端機多工器，鍵位對齊 WezTerm leader；附 `bin/zed-tmux` wrapper 讓 Zed 各專案有獨立的 persistent session
 
 ## 截圖
 
@@ -47,6 +48,8 @@ brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install nowplaying-cli  # 媒體小工具需要
+brew install --cask wezterm
+brew install tmux
 ```
 
 ### 設定
@@ -60,25 +63,44 @@ ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
 ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
+ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
 
 # 啟動服務
 brew services start sketchybar
 brew services start borders
 ```
 
+## Zed 整合
+
+`bin/zed-tmux` wrapper 讓 Zed terminal panel 接到專案專屬的 tmux session(命名為 `zed-<專案資料夾名>`),每個專案各自保留 shell 狀態,跨 Zed 重啟仍持續。
+
+在 `~/.config/zed/settings.json` 加上:
+
+```jsonc
+"terminal": {
+  "shell": {
+    "with_arguments": {
+      "program": "/Users/<你>/dotfiles-macos/bin/zed-tmux",
+      "args": []
+    }
+  }
+}
+```
+
 ## 工作區
 
 | 快捷鍵 | 工作區 | 用途 |
 |--------|--------|------|
-| `alt-1/2/3` | 1, 2, 3 | 一般使用 |
-| `alt-t` | T | 終端機 (WezTerm) |
-| `alt-b` | B | 瀏覽器 |
-| `alt-g` | G | 遊戲/休閒 |
+| `alt-1` ~ `alt-5` | 1–5 | 一般使用 |
+| `alt-w` | W | 終端機 (WezTerm) |
+| `alt-c` | C | 瀏覽器 (Chrome / Comet) |
+| `alt-g` | G | 遊戲 / 休閒 |
 | `alt-s` | S | 社交 (Discord, Slack, Telegram) |
-| `alt-p` | P | Linear (專案管理) |
+| `alt-q` | Q | 專案 (Linear + Slack) |
 | `alt-d` | D | Docker |
-| `alt-a` | A | AI/Agents |
-| `alt-n` | N | Obsidian (筆記) |
+| `alt-a` | A | AI / Agents |
+| `alt-z` | Z | Obsidian (筆記) |
+| `alt-x` | X | Xcode |
 
 ## SketchyBar 小工具
 
