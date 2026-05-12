@@ -28,7 +28,9 @@ config.macos_window_background_blur = 10
 -- 標籤列設定
 -- ============================================
 
-config.hide_tab_bar_if_only_one_tab = true
+-- 保持 tab bar 常駐：right status (含 LEADER 指示) 是渲染在 tab bar 內，
+-- 若隱藏會導致 leader 啟動時無處顯示
+config.hide_tab_bar_if_only_one_tab = false
 config.use_fancy_tab_bar = false
 config.tab_bar_at_bottom = false
 
@@ -55,11 +57,11 @@ config.default_gui_startup_args = { "connect", "unix" }
 -- CTRL+a 為 leader，按下後 2 秒內接收下個鍵
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 2000 }
 
--- Leader active 時強制顯示 tab bar + 右上角橘色 LEADER 標籤
+-- Leader active 時於 tab bar 右側顯示橘色 LEADER 指示
+-- 注意：避免在此 handler 內呼叫 set_config_overrides，會觸發 window-config-reloaded
+-- 進而造成重複渲染與閃爍
 wezterm.on("update-status", function(window, _)
-	local overrides = window:get_config_overrides() or {}
 	if window:leader_is_active() then
-		overrides.hide_tab_bar_if_only_one_tab = false
 		window:set_right_status(wezterm.format({
 			{ Background = { Color = "#fab387" } },
 			{ Foreground = { Color = "#11111b" } },
@@ -67,10 +69,8 @@ wezterm.on("update-status", function(window, _)
 			{ Text = " LEADER " },
 		}))
 	else
-		overrides.hide_tab_bar_if_only_one_tab = true
 		window:set_right_status("")
 	end
-	window:set_config_overrides(overrides)
 end)
 
 -- ============================================
