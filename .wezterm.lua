@@ -55,6 +55,24 @@ config.default_gui_startup_args = { "connect", "unix" }
 -- CTRL+a 為 leader，按下後 2 秒內接收下個鍵
 config.leader = { key = "a", mods = "CTRL", timeout_milliseconds = 2000 }
 
+-- Leader active 時強制顯示 tab bar + 右上角橘色 LEADER 標籤
+wezterm.on("update-status", function(window, _)
+	local overrides = window:get_config_overrides() or {}
+	if window:leader_is_active() then
+		overrides.hide_tab_bar_if_only_one_tab = false
+		window:set_right_status(wezterm.format({
+			{ Background = { Color = "#fab387" } },
+			{ Foreground = { Color = "#11111b" } },
+			{ Attribute = { Intensity = "Bold" } },
+			{ Text = " LEADER " },
+		}))
+	else
+		overrides.hide_tab_bar_if_only_one_tab = true
+		window:set_right_status("")
+	end
+	window:set_config_overrides(overrides)
+end)
+
 -- ============================================
 -- 快捷鍵設定
 -- ============================================
