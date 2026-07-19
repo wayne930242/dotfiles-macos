@@ -74,10 +74,46 @@ wezterm.on("update-status", function(window, _)
 end)
 
 -- ============================================
+-- Neovim 無縫導航 (smart-splits.nvim)
+-- ============================================
+
+-- smart-splits.nvim 啟動時會設定 IS_NVIM user var；靠它判斷目前 pane 是否在跑 nvim
+local function is_vim(pane)
+	return pane:get_user_vars().IS_NVIM == "true"
+end
+
+local direction_keys = {
+	h = "Left",
+	j = "Down",
+	k = "Up",
+	l = "Right",
+}
+
+-- CTRL+h/j/k/l：在 nvim 內原樣送入 (由 smart-splits 處理)，否則切換 wezterm pane
+local function split_nav(key)
+	return {
+		key = key,
+		mods = "CTRL",
+		action = wezterm.action_callback(function(win, pane)
+			if is_vim(pane) then
+				win:perform_action({ SendKey = { key = key, mods = "CTRL" } }, pane)
+			else
+				win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
+			end
+		end),
+	}
+end
+
+-- ============================================
 -- 快捷鍵設定
 -- ============================================
 
 config.keys = {
+	-- ─── Neovim 無縫導航 ───
+	split_nav("h"),
+	split_nav("j"),
+	split_nav("k"),
+	split_nav("l"),
 	-- ─── macOS 慣例 (CMD-based) ───
 	{ key = "t", mods = "CMD", action = act.SpawnTab("CurrentPaneDomain") },
 	{ key = "w", mods = "CMD", action = act.CloseCurrentPane({ confirm = false }) },
@@ -141,8 +177,9 @@ config.keys = {
 	{ key = "[", mods = "LEADER", action = act.ActivateCopyMode },
 	{ key = "]", mods = "LEADER", action = act.PasteFrom("Clipboard") },
 
-	-- ─── 命令面板 ───
+	-- ─── 命令面板 / 快速鍵查詢 ───
 	{ key = ":", mods = "LEADER", action = act.ActivateCommandPalette },
+	{ key = "?", mods = "LEADER", action = act.ShowLauncherArgs({ flags = "FUZZY|KEY_ASSIGNMENTS" }) },
 
 	-- ─── Workspace (對應 tmux session) ───
 	-- s: 切換 workspace (launcher 內也可輸入新名稱直接建立)
