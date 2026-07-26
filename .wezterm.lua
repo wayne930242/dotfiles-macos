@@ -9,7 +9,16 @@ local config = wezterm.config_builder()
 -- 外觀設定
 -- ============================================
 
-config.font = wezterm.font("MesloLGS NF")
+-- MesloLGS NF 不含中文字。WezTerm 用 freetype/harfbuzz，取不到 macOS 的系統
+-- font fallback，只能靠一份內建的猜測清單；猜不到時該有字的地方會直接變成空白
+-- （官方 FAQ: "spaces where glyphs should be" 就是 fallback 問題）。
+-- 這裡明確指定，並釘住 TC 變體 —— 隱式 fallback 會落到 PingFang HK，
+-- 部分字形與台灣標準不同，而且它位於 MobileAsset 隨選下載路徑而非固定路徑。
+config.font = wezterm.font_with_fallback({
+	"MesloLGS NF",
+	"PingFang TC",
+	"Heiti TC",
+})
 config.font_size = 14.0
 
 -- 主題列表: https://wezfurlong.org/wezterm/colorschemes/index.html
