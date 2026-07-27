@@ -200,6 +200,10 @@ config.keys = {
 	{ key = "z", mods = "LEADER", action = act.TogglePaneZoomState },
 	{ key = "x", mods = "LEADER", action = act.CloseCurrentPane({ confirm = false }) },
 	{ key = "Space", mods = "LEADER", action = act.RotatePanes("Clockwise") },
+	-- !: 把選中的 pane 拆到新 tab (對應 tmux break-pane)。
+	-- 同一個 tab 內無法把 pane 移到樹的別層 (無 tmux join-pane 等價物)，
+	-- 但整格拆出去獨立是做得到的
+	{ key = "!", mods = "LEADER", action = act.PaneSelect({ mode = "MoveToNewTab", alphabet = "asdfghjkl;" }) },
 
 	-- ─── Tab 操作 (tmux 慣例) ───
 	{ key = "c", mods = "LEADER", action = act.SpawnTab("CurrentPaneDomain") },
