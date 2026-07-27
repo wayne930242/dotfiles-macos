@@ -43,6 +43,9 @@ config.hide_tab_bar_if_only_one_tab = false
 config.use_fancy_tab_bar = false
 config.tab_bar_at_bottom = false
 
+-- 預設 16 glyphs，開多 tab 時標題很快被截斷
+config.tab_max_width = 32
+
 -- ============================================
 -- Multiplex / 持久會話 (對應 tmux session persistence)
 -- ============================================
@@ -143,6 +146,9 @@ config.keys = {
 	{ key = "k", mods = "LEADER", action = act.ActivatePaneDirection("Up") },
 	{ key = "l", mods = "LEADER", action = act.ActivatePaneDirection("Right") },
 	{ key = ";", mods = "LEADER", action = act.ActivatePaneDirection("Prev") },
+	-- q: 標記選擇 (對應 tmux display-panes)。pane 多時比連按方向鍵快，
+	-- 字母表限定 home row，手不必離開基準位置
+	{ key = "q", mods = "LEADER", action = act.PaneSelect({ alphabet = "asdfghjkl;" }) },
 
 	-- ─── Pane 大小調整 ───
 	{ key = "LeftArrow", mods = "LEADER", action = act.AdjustPaneSize({ "Left", 5 }) },
@@ -166,12 +172,16 @@ config.keys = {
 		action = act.PromptInputLine({
 			description = "重新命名 tab",
 			action = wezterm.action_callback(function(window, _, line)
-				if line then
+				if line and #line > 0 then
 					window:active_tab():set_title(line)
 				end
 			end),
 		}),
 	},
+
+	-- ─── Tab 順序調整 (對應 tmux swap-window) ───
+	{ key = "<", mods = "LEADER", action = act.MoveTabRelative(-1) },
+	{ key = ">", mods = "LEADER", action = act.MoveTabRelative(1) },
 	{ key = "1", mods = "LEADER", action = act.ActivateTab(0) },
 	{ key = "2", mods = "LEADER", action = act.ActivateTab(1) },
 	{ key = "3", mods = "LEADER", action = act.ActivateTab(2) },
