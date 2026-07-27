@@ -11,6 +11,7 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - Window borders
 - **[WezTerm](https://wezfurlong.org/wezterm/)** - Terminal with tmux-like leader keybindings and persistent sessions via unix-domain mux
 - **[tmux](https://github.com/tmux/tmux)** - Multiplexer mirroring the WezTerm leader keymap; ships with a `bin/zed-tmux` wrapper that gives each Zed project its own persistent session
+- **[LazyVim](https://www.lazyvim.org/)** - Neovim configuration with CJK-aware wrapping, Yazi, Sidekick, Snacks Explorer, and seamless pane navigation
 
 ## Screenshots
 
@@ -28,8 +29,8 @@ The install script will:
 1. Install Homebrew (if not present)
 2. Install AeroSpace, SketchyBar, JankyBorders, and dependencies
 3. Backup your existing configs to `~/.dotfiles-backup/`
-4. Create symlinks to the dotfiles
-5. Start all services
+4. Create symlinks to the dotfiles, including `~/.config/nvim`
+5. Start all services and restart AeroSpace so the CLI and app server use the same version
 
 ### Other Commands
 
@@ -52,6 +53,7 @@ brew install borders
 brew install nowplaying-cli  # For media widget
 brew install --cask wezterm
 brew install tmux
+brew install neovim yazi
 ```
 
 ### Setup
@@ -63,6 +65,7 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 # Symlink configurations
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
+ln -sf ~/dotfiles-macos/nvim ~/.config/nvim
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
 ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
@@ -71,6 +74,8 @@ ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
 brew services start sketchybar
 brew services start borders
 ```
+
+On the first Neovim launch, LazyVim bootstraps `lazy.nvim` and installs the plugins pinned in `nvim/lazy-lock.json`.
 
 ## Zed Integration
 

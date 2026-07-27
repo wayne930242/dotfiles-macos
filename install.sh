@@ -35,6 +35,8 @@ install_deps() {
     brew install sketchybar 2>/dev/null || echo "   SketchyBar already installed or skipped"
     brew install borders 2>/dev/null || echo "   Borders already installed or skipped"
     brew install nowplaying-cli 2>/dev/null || echo "   nowplaying-cli already installed or skipped"
+    brew install neovim 2>/dev/null || echo "   Neovim already installed or skipped"
+    brew install yazi 2>/dev/null || echo "   Yazi already installed or skipped"
 }
 
 backup_configs() {
@@ -52,6 +54,11 @@ backup_configs() {
     if [ -d "$HOME/.config/borders" ] && [ ! -L "$HOME/.config/borders" ]; then
         cp -r "$HOME/.config/borders" "$BACKUP_DIR/"
         echo "   ✅ Backed up borders"
+    fi
+
+    if [ -d "$HOME/.config/nvim" ] && [ ! -L "$HOME/.config/nvim" ]; then
+        cp -r "$HOME/.config/nvim" "$BACKUP_DIR/"
+        echo "   ✅ Backed up nvim"
     fi
 
     if [ -f "$HOME/.aerospace.toml" ] && [ ! -L "$HOME/.aerospace.toml" ]; then
@@ -87,23 +94,27 @@ create_symlinks() {
     # Remove existing symlinks or directories
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
+    [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
     [ -d "$HOME/.config/sketchybar" ] && rm -rf "$HOME/.config/sketchybar"
     [ -d "$HOME/.config/borders" ] && rm -rf "$HOME/.config/borders"
+    [ -d "$HOME/.config/nvim" ] && rm -rf "$HOME/.config/nvim"
     [ -f "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -f "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -f "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
 
     ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
     ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
+    ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
     ln -sf "$DOTFILES_DIR/.aerospace.toml" "$HOME/.aerospace.toml"
     ln -sf "$DOTFILES_DIR/.wezterm.lua" "$HOME/.wezterm.lua"
     ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
 
     echo "   ✅ sketchybar -> ~/.config/sketchybar"
     echo "   ✅ borders -> ~/.config/borders"
+    echo "   ✅ nvim -> ~/.config/nvim"
     echo "   ✅ .aerospace.toml -> ~/.aerospace.toml"
     echo "   ✅ .wezterm.lua -> ~/.wezterm.lua"
     echo "   ✅ .tmux.conf -> ~/.tmux.conf"
@@ -120,12 +131,45 @@ set_permissions() {
     echo "   ✅ Permissions set"
 }
 
+restart_aerospace() {
+    echo ""
+    echo "🚀 Restarting AeroSpace..."
+
+    if pgrep -x AeroSpace &>/dev/null; then
+        osascript -e 'tell application "AeroSpace" to quit' 2>/dev/null || {
+            echo "   ⚠️  AeroSpace could not be stopped"
+            return 0
+        }
+
+        for ((restart_attempt = 0; restart_attempt < 20; restart_attempt++)); do
+            pgrep -x AeroSpace &>/dev/null || break
+            sleep 0.5
+        done
+    fi
+
+    if ! open -a AeroSpace >/dev/null 2>&1; then
+        echo "   ⚠️  AeroSpace could not be opened"
+        return 0
+    fi
+
+    for ((readiness_attempt = 0; readiness_attempt < 30; readiness_attempt++)); do
+        if aerospace list-modes &>/dev/null; then
+            echo "   ✅ AeroSpace restarted"
+            return 0
+        fi
+        sleep 0.5
+    done
+
+    echo "   ⚠️  AeroSpace started but its server is not responding"
+}
+
 start_services() {
     echo ""
     echo "🚀 Starting services..."
 
     brew services restart sketchybar 2>/dev/null && echo "   ✅ SketchyBar started" || echo "   ⚠️  SketchyBar failed to start"
     brew services restart borders 2>/dev/null && echo "   ✅ Borders started" || echo "   ⚠️  Borders failed to start"
+    restart_aerospace
 }
 
 stop_services() {
@@ -151,9 +195,8 @@ do_install() {
     echo "║                    INSTALLATION COMPLETE!                     ║"
     echo "╠═══════════════════════════════════════════════════════════════╣"
     echo "║  Next steps:                                                  ║"
-    echo "║  1. Open AeroSpace app                                        ║"
-    echo "║  2. Grant accessibility permissions when prompted             ║"
-    echo "║  3. Press alt+shift+; then esc to reload AeroSpace config     ║"
+    echo "║  1. Grant accessibility permissions when prompted             ║"
+    echo "║  2. Press alt+shift+; then esc to reload AeroSpace config     ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
     echo "🎨 Enjoy your Cyberpunk desktop!"
@@ -170,6 +213,7 @@ do_uninstall() {
 
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar" && echo "   ✅ Removed sketchybar symlink"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders" && echo "   ✅ Removed borders symlink"
+    [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim" && echo "   ✅ Removed nvim symlink"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml" && echo "   ✅ Removed .aerospace.toml symlink"
     [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua" && echo "   ✅ Removed .wezterm.lua symlink"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf" && echo "   ✅ Removed .tmux.conf symlink"
@@ -226,6 +270,7 @@ do_restore() {
     # Remove current symlinks
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
+    [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
@@ -233,6 +278,7 @@ do_restore() {
     # Restore from backup
     [ -d "$RESTORE_DIR/sketchybar" ] && cp -r "$RESTORE_DIR/sketchybar" "$HOME/.config/" && echo "   ✅ Restored sketchybar"
     [ -d "$RESTORE_DIR/borders" ] && cp -r "$RESTORE_DIR/borders" "$HOME/.config/" && echo "   ✅ Restored borders"
+    [ -d "$RESTORE_DIR/nvim" ] && cp -r "$RESTORE_DIR/nvim" "$HOME/.config/" && echo "   ✅ Restored nvim"
     [ -f "$RESTORE_DIR/.aerospace.toml" ] && cp "$RESTORE_DIR/.aerospace.toml" "$HOME/" && echo "   ✅ Restored .aerospace.toml"
     [ -f "$RESTORE_DIR/.wezterm.lua" ] && cp "$RESTORE_DIR/.wezterm.lua" "$HOME/" && echo "   ✅ Restored .wezterm.lua"
     [ -f "$RESTORE_DIR/.tmux.conf" ] && cp "$RESTORE_DIR/.tmux.conf" "$HOME/" && echo "   ✅ Restored .tmux.conf"

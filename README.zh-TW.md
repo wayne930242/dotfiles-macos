@@ -9,6 +9,7 @@
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
 - **[WezTerm](https://wezfurlong.org/wezterm/)** - 終端機，配置 tmux-like leader 快捷鍵與 unix-domain mux 持久會話
 - **[tmux](https://github.com/tmux/tmux)** - 終端機多工器，鍵位對齊 WezTerm leader；附 `bin/zed-tmux` wrapper 讓 Zed 各專案有獨立的 persistent session
+- **[LazyVim](https://www.lazyvim.org/)** - Neovim 設定，包含適合 CJK 的折行、Yazi、Sidekick、Snacks Explorer 與跨 pane 導航
 
 ## 截圖
 
@@ -26,8 +27,8 @@ cd ~/dotfiles-macos
 1. 安裝 Homebrew（如未安裝）
 2. 安裝 AeroSpace、SketchyBar、JankyBorders 及相依套件
 3. 備份現有設定至 `~/.dotfiles-backup/`
-4. 建立 symlinks
-5. 啟動所有服務
+4. 建立 symlinks，包括 `~/.config/nvim`
+5. 啟動所有服務並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
 
 ### 其他指令
 
@@ -50,6 +51,7 @@ brew install borders
 brew install nowplaying-cli  # 媒體小工具需要
 brew install --cask wezterm
 brew install tmux
+brew install neovim yazi
 ```
 
 ### 設定
@@ -61,6 +63,7 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 # 建立 symlinks
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
+ln -sf ~/dotfiles-macos/nvim ~/.config/nvim
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
 ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
@@ -69,6 +72,8 @@ ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
 brew services start sketchybar
 brew services start borders
 ```
+
+第一次啟動 Neovim 時，LazyVim 會自動啟動 `lazy.nvim`，並安裝 `nvim/lazy-lock.json` 鎖定的外掛版本。
 
 ## Zed 整合
 
