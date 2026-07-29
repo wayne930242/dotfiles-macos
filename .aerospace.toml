@@ -3,6 +3,9 @@
 
 config-version = 2
 
+# Override AeroSpace's smart startup layout for the project workspace
+after-startup-command = ['layout --workspace Q --root h_tiles']
+
 # Start AeroSpace at login
 start-at-login = true
 
