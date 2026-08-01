@@ -6,14 +6,14 @@ return {
       mux = { enabled = false },
       tools = {
         codex = {
-          cmd = { "codex", "--ask-for-approval", "on-request" },
+          cmd = { "codex", "--dangerously-bypass-approvals-and-sandbox" },
           -- never adopt codex processes running elsewhere (e.g. other tmux panes)
           is_proc = function()
             return false
           end,
         },
         claude = {
-          cmd = { "claude", "--permission-mode", "auto" },
+          cmd = { "claude", "--dangerously-skip-permissions" },
           -- the zsh `claude` wrapper sets this; sidekick runs the binary directly
           env = { FORCE_COLOR = "3" },
           -- never adopt claude processes running elsewhere (e.g. Zed's tmux panes)
