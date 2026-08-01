@@ -52,6 +52,10 @@ config.tab_max_width = 32
 -- 關掉視窗 → server 仍在背景；再開 wezterm 自動 attach 回去，
 -- 執行中的 vim/ssh/REPL 都會保留。對應 tmux 的 detach/attach。
 -- 備註：系統重開機後 mux server 不會自動拉起，需要再開 wezterm 重建。
+-- 重開機後想拿回 layout/cwd/指令，靠下方 Session 存檔/還原章節手動
+-- LEADER R 還原——試過把它掛在 gui-startup 自動觸發，但實測 + 其他使用者
+-- 回報都指出 resurrect.wezterm 跟這種常駐 unix mux domain 搭配不穩定
+-- (回報過亂版面、tab bar 消失)，所以刻意不自動化，維持手動觸發
 config.unix_domains = {
 	{ name = "unix" },
 }
@@ -120,6 +124,19 @@ local function split_nav(key)
 		end),
 	}
 end
+
+-- ============================================
+-- Session 存檔 / 還原 (resurrect.wezterm)
+-- ============================================
+
+-- mux server 只能撐過「關視窗」，撐不過「重開機」——OS 重開會把 mux-server
+-- 這個 process 連同底下所有 pane 一起殺光，沒有東西可以復原（見開頭 Multiplex
+-- 章節備註）。這個 plugin 是額外把 layout / cwd / 執行中的指令存到硬碟，
+-- 還原時重新排版並重新執行同一條指令，不是讓被砍掉的 process 真的復活
+-- (nvim/ssh 不會接回原本的 session，只是重新開一個一樣的指令)
+local resurrect = wezterm.plugin.require("https://github.com/MLFlexer/resurrect.wezterm")
+
+resurrect.state_manager.periodic_save()
 
 -- ============================================
 -- 快捷鍵設定
@@ -262,6 +279,43 @@ config.keys = {
 	},
 	-- 備註：關閉視窗 (CMD+Q 或紅綠燈) 即等於 tmux detach，
 	-- mux server 與所有 panes/程序留在背景，下次開 wezterm 自動 attach 回來
+
+	-- S: 存目前 workspace 的 layout / cwd / 執行中指令到硬碟
+	-- (對應 tmux-resurrect 的 save，重開機後靠這份存檔重建佈局)
+	{
+		key = "S",
+		mods = "LEADER",
+		action = wezterm.action_callback(function(win, pane)
+			resurrect.state_manager.save_state(resurrect.workspace_state.get_workspace_state())
+		end),
+	},
+	-- R: fuzzy finder 挑一份存檔還原 (workspace/window/tab 皆可)
+	{
+		key = "R",
+		mods = "LEADER",
+		action = wezterm.action_callback(function(win, pane)
+			resurrect.fuzzy_loader.fuzzy_load(win, pane, function(id, label)
+				local state_type = string.match(id, "^([^/]+)") -- '/' 前的類型 (workspace/window/tab)
+				id = string.match(id, "([^/]+)$") -- '/' 後的檔名
+				id = string.match(id, "(.+)%..+$") -- 去掉副檔名
+				local opts = {
+					relative = true,
+					restore_text = true,
+					on_pane_restore = resurrect.tab_state.default_on_pane_restore,
+				}
+				if state_type == "workspace" then
+					local state = resurrect.state_manager.load_state(id, "workspace")
+					resurrect.workspace_state.restore_workspace(state, opts)
+				elseif state_type == "window" then
+					local state = resurrect.state_manager.load_state(id, "window")
+					resurrect.window_state.restore_window(pane:window(), state, opts)
+				elseif state_type == "tab" then
+					local state = resurrect.state_manager.load_state(id, "tab")
+					resurrect.tab_state.restore_tab(pane:tab(), state, opts)
+				end
+			end)
+		end),
+	},
 
 	-- ─── Reload / 送出 leader 字面 ───
 	-- automatically_reload_config 預設 true，存檔即自動 reload，
