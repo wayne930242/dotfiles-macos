@@ -2,50 +2,39 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-# Get current input source
-INPUT_SOURCE=$(defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources 2>/dev/null | grep "KeyboardLayout Name" | head -1 | awk -F'"' '{print $2}')
+# The active keyboard/IME source is the last non-"Non Keyboard Input Method"
+# entry in AppleSelectedInputSources. AppleCurrentKeyboardLayoutInputSourceID
+# is unreliable for third-party IMEs (e.g. vChewing) since it tracks the
+# underlying keyboard layout, not the active input method.
+SOURCE_ID=$(defaults read com.apple.HIToolbox AppleSelectedInputSources 2>/dev/null \
+    | plutil -convert json -o - - 2>/dev/null \
+    | jq -r '[.[] | select(.InputSourceKind != "Non Keyboard Input Method")]
+              | last
+              | (."Input Mode" // ."KeyboardLayout Name" // ."Bundle ID" // "")' 2>/dev/null)
 
-# If not found via that method, try another approach
-if [ -z "$INPUT_SOURCE" ]; then
-    INPUT_SOURCE=$(defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleCurrentKeyboardLayoutInputSourceID 2>/dev/null | awk -F'.' '{print $NF}')
-fi
-
-# Fallback to checking input source list
-if [ -z "$INPUT_SOURCE" ]; then
-    INPUT_SOURCE=$(defaults read ~/Library/Preferences/com.apple.HIToolbox.plist AppleSelectedInputSources 2>/dev/null | grep -A1 "InputSourceKind" | grep "Input Mode" | awk -F'"' '{print $2}')
-fi
-
-# Map common input sources to display names
-case "$INPUT_SOURCE" in
-    "ABC"|"US"|"U.S."|"USExtended")
-        LABEL="EN"
-        ICON="󰌌"
+case "$SOURCE_ID" in
+    *vChewing*)
+        LABEL="威"
         ;;
-    "Zhuyin"|"Bopomofo"|"TraditionalChinese")
+    *Zhuyin*|*Bopomofo*)
         LABEL="注"
-        ICON="󰗊"
         ;;
-    "Pinyin"|"SimplifiedChinese"|"SCIM")
+    *Pinyin*|*SCIM*)
         LABEL="拼"
-        ICON="󰗊"
         ;;
-    "Cangjie"|"Quick")
+    *Cangjie*)
         LABEL="倉"
-        ICON="󰗊"
         ;;
-    "Japanese"|"Hiragana"|"Katakana")
-        LABEL="JP"
-        ICON="󰗊"
+    *Japanese*|*Kotoeri*)
+        LABEL="日"
+        ;;
+    ""|*ABC*|*[Uu][Ss]*)
+        LABEL="英"
         ;;
     *)
-        # Try to extract a short name
-        if [ -n "$INPUT_SOURCE" ]; then
-            LABEL="${INPUT_SOURCE:0:3}"
-        else
-            LABEL="??"
-        fi
-        ICON="󰌌"
+        LABEL="${SOURCE_ID##*.}"
+        LABEL="${LABEL:0:2}"
         ;;
 esac
 
-sketchybar --set "$NAME" label="$LABEL" icon="$ICON"
+sketchybar --set "$NAME" icon="󰌌" label="$LABEL"

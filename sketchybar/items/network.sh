@@ -16,5 +16,5 @@ sketchybar --add item network right \
                  background.border_width=1 \
                  background.border_color=$BLUE \
                  background.drawing=on \
-                 update_freq=5 \
+                 update_freq=30 \
                  script="$PLUGIN_DIR/network.sh"

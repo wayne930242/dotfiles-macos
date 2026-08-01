@@ -3,7 +3,7 @@
 # shellcheck disable=SC1091
 source "$CONFIG_DIR/colors.sh"
 
-WORKSPACES=("1" "2" "3" "4" "5" "W" "C" "G" "S" "Q" "D" "A" "Z" "X")
+WORKSPACES=("1" "2" "3" "C" "G" "S" "Q" "D" "A" "Z" "X")
 
 # Add custom event for aerospace
 sketchybar --add event aerospace_workspace_change
