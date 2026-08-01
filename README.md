@@ -98,8 +98,8 @@ Add to `~/.config/zed/settings.json`:
 
 | Key | Workspace | Purpose |
 |-----|-----------|---------|
-| `alt-1` ~ `alt-5` | 1–5 | General use |
-| `alt-w` | W | Terminal (WezTerm) |
+| `alt-1` | 1 | Terminal (WezTerm) |
+| `alt-2` ~ `alt-3` | 2–3 | General use |
 | `alt-c` | C | Browser (Chrome / Comet) |
 | `alt-g` | G | Game / Chill |
 | `alt-s` | S | Social (Discord, Slack, Telegram) |

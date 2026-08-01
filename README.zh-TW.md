@@ -96,8 +96,8 @@ brew services start borders
 
 | 快捷鍵 | 工作區 | 用途 |
 |--------|--------|------|
-| `alt-1` ~ `alt-5` | 1–5 | 一般使用 |
-| `alt-w` | W | 終端機 (WezTerm) |
+| `alt-1` | 1 | 終端機 (WezTerm) |
+| `alt-2` ~ `alt-3` | 2–3 | 一般使用 |
 | `alt-c` | C | 瀏覽器 (Chrome / Comet) |
 | `alt-g` | G | 遊戲 / 休閒 |
 | `alt-s` | S | 社交 (Discord, Slack, Telegram) |
