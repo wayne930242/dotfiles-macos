@@ -95,37 +95,6 @@ wezterm.on("update-status", function(window, _)
 end)
 
 -- ============================================
--- Neovim 無縫導航 (smart-splits.nvim)
--- ============================================
-
--- smart-splits.nvim 啟動時會設定 IS_NVIM user var；靠它判斷目前 pane 是否在跑 nvim
-local function is_vim(pane)
-	return pane:get_user_vars().IS_NVIM == "true"
-end
-
-local direction_keys = {
-	h = "Left",
-	j = "Down",
-	k = "Up",
-	l = "Right",
-}
-
--- CTRL+h/j/k/l：在 nvim 內原樣送入 (由 smart-splits 處理)，否則切換 wezterm pane
-local function split_nav(key)
-	return {
-		key = key,
-		mods = "CTRL",
-		action = wezterm.action_callback(function(win, pane)
-			if is_vim(pane) then
-				win:perform_action({ SendKey = { key = key, mods = "CTRL" } }, pane)
-			else
-				win:perform_action({ ActivatePaneDirection = direction_keys[key] }, pane)
-			end
-		end),
-	}
-end
-
--- ============================================
 -- Session 存檔 / 還原 (resurrect.wezterm)
 -- ============================================
 
@@ -143,20 +112,24 @@ resurrect.state_manager.periodic_save()
 -- ============================================
 
 config.keys = {
-	-- ─── Neovim 無縫導航 ───
-	split_nav("h"),
-	split_nav("j"),
-	split_nav("k"),
-	split_nav("l"),
 	-- ─── macOS 慣例 (CMD-based) ───
 	{ key = "t", mods = "CMD", action = act.SpawnTab("CurrentPaneDomain") },
 	{ key = "w", mods = "CMD", action = act.CloseCurrentPane({ confirm = false }) },
-	{ key = "k", mods = "CMD", action = act.ClearScrollback("ScrollbackAndViewport") },
+	{ key = "K", mods = "CMD|SHIFT", action = act.ClearScrollback("ScrollbackAndViewport") },
 	{ key = "1", mods = "CMD", action = act.ActivateTab(0) },
 	{ key = "2", mods = "CMD", action = act.ActivateTab(1) },
 	{ key = "3", mods = "CMD", action = act.ActivateTab(2) },
 	{ key = "4", mods = "CMD", action = act.ActivateTab(3) },
 	{ key = "5", mods = "CMD", action = act.ActivateTab(4) },
+
+	-- ─── Pane 切換 (CMD+hjkl) ───
+	-- CTRL+hjkl 留給 nvim (smart-splits.nvim) 專用，避免跟 LazyVim 預設搶鍵；
+	-- wezterm pane 切換改用 CMD+hjkl，兩者鍵位不重疊，不需要 is_vim() 偵測。
+	-- 覆蓋掉 WezTerm 內建預設 CMD+h (HideApplication) 與原本 CMD+k (ClearScrollback，已搬到 CMD+SHIFT+K)
+	{ key = "h", mods = "CMD", action = act.ActivatePaneDirection("Left") },
+	{ key = "j", mods = "CMD", action = act.ActivatePaneDirection("Down") },
+	{ key = "k", mods = "CMD", action = act.ActivatePaneDirection("Up") },
+	{ key = "l", mods = "CMD", action = act.ActivatePaneDirection("Right") },
 
 	-- ─── Pane 分割 ───
 	-- 佈局模型：一個 tab 的 panes 是二元樹，每次分割是「把某個節點一分為二」。
@@ -360,6 +333,9 @@ config.scrollback_lines = 10000
 
 config.default_cursor_style = "BlinkingBar"
 config.cursor_blink_rate = 500
+
+-- 內建螢幕是 ProMotion (最高 120Hz)，預設 60fps 沒吃滿更新率
+config.max_fps = 120
 
 config.check_for_updates = false
 
