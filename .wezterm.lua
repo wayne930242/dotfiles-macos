@@ -21,6 +21,10 @@ config.font = wezterm.font_with_fallback({
 })
 config.font_size = 14.0
 
+-- 混排 MesloLGS NF (Latin) 與 PingFang TC/Heiti TC (CJK) 時，Normal hinting
+-- 容易讓筆畫偏粗、中英文粗細不一致；Light 保留更多字形原始輪廓，兩者搭配更一致
+config.freetype_load_target = "Light"
+
 -- 主題列表: https://wezfurlong.org/wezterm/colorschemes/index.html
 config.color_scheme = "Dracula (Official)"
 
@@ -29,6 +33,15 @@ config.window_padding = {
 	right = 10,
 	top = 10,
 	bottom = 10,
+}
+
+-- 隱藏 macOS 原生標題列，保留可調整視窗大小的邊框
+config.window_decorations = "RESIZE"
+
+-- 非焦點 pane 調暗，多分割時能一眼看出目前焦點在哪格
+config.inactive_pane_hsb = {
+	saturation = 0.9,
+	brightness = 0.6,
 }
 -- ============================================
 -- 標籤列設定
