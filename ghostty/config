@@ -46,6 +46,11 @@ macos-option-as-alt = true
 cursor-style = bar
 cursor-style-blink = true
 
+# shell-integration 預設會依 prompt 狀態改游標樣式，herdr 自己也在管游標，
+# 兩邊搶著畫容易互相蓋掉（社群設定 SergioDiez/SergioDiez 的 ghostty config
+# 也是這樣做）
+shell-integration-features = no-cursor
+
 # 半透明背景，僅為了 quick terminal 才開（原本 theme_contract.sh 鎖住不透明
 # 的決定已經跟使用者確認推翻，一般視窗也會一起半透明，Ghostty 沒有 per-surface
 # 設定可以只套用在 quick terminal 上）
@@ -64,6 +69,28 @@ keybind = global:f19=toggle_quick_terminal
 
 # Split 導航/建立、視窗重新命名都交給 herdr（prefix+v/prefix+minus 分割、
 # prefix+h/j/k/l 切 pane、CMD+L rename tab），這裡不再自己定義 Ghostty
-# 原生 keybind，避免跟 herdr 自己的 pane 系統打架
+# 原生 keybind，避免跟 herdr 自己的 pane 系統打架。
+#
+# 但這樣不夠：Ghostty 內建的原生 split/tab 快速鍵（CMD+D 系列、CMD+[ ]、
+# CMD+OPT+方向鍵、CMD+CTRL+方向鍵）預設還是活著，沒被覆蓋掉的話照樣會在
+# Ghostty 這層再切一個 split／再開一個原生 tab，裡面又跑一個 herdr client
+# 接去同一個 session，直接跟 herdr 自己的 pane 系統打架。全部明確 unbind。
+keybind = super+d=unbind
+keybind = super+shift+d=unbind
+keybind = super+[=unbind
+keybind = super+]=unbind
+keybind = super+alt+arrow_up=unbind
+keybind = super+alt+arrow_down=unbind
+keybind = super+alt+arrow_left=unbind
+keybind = super+alt+arrow_right=unbind
+keybind = super+ctrl+arrow_up=unbind
+keybind = super+ctrl+arrow_down=unbind
+keybind = super+ctrl+arrow_left=unbind
+keybind = super+ctrl+arrow_right=unbind
+keybind = super+ctrl+==unbind
+keybind = super+shift+enter=unbind
+keybind = super+shift+[=unbind
+keybind = super+shift+]=unbind
+keybind = super+alt+w=unbind
 
 config-file = /Users/weihung/.config/native-shortcuts-herd/ghostty.conf
