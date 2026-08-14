@@ -32,6 +32,7 @@ install_deps() {
     brew tap nikitabobko/tap 2>/dev/null || true
 
     brew install --cask nikitabobko/tap/aerospace 2>/dev/null || echo "   AeroSpace already installed or skipped"
+    brew install --cask hammerspoon 2>/dev/null || echo "   Hammerspoon already installed or skipped"
     brew install sketchybar 2>/dev/null || echo "   SketchyBar already installed or skipped"
     brew install borders 2>/dev/null || echo "   Borders already installed or skipped"
     brew install nowplaying-cli 2>/dev/null || echo "   nowplaying-cli already installed or skipped"
@@ -66,9 +67,14 @@ backup_configs() {
         echo "   ✅ Backed up .aerospace.toml"
     fi
 
-    if [ -f "$HOME/.wezterm.lua" ] && [ ! -L "$HOME/.wezterm.lua" ]; then
-        cp "$HOME/.wezterm.lua" "$BACKUP_DIR/"
-        echo "   ✅ Backed up .wezterm.lua"
+    if [ -d "$HOME/.hammerspoon" ] && [ ! -L "$HOME/.hammerspoon" ]; then
+        cp -r "$HOME/.hammerspoon" "$BACKUP_DIR/"
+        echo "   ✅ Backed up .hammerspoon"
+    fi
+
+    if [ -d "$HOME/.config/ghostty" ] && [ ! -L "$HOME/.config/ghostty" ]; then
+        cp -r "$HOME/.config/ghostty" "$BACKUP_DIR/"
+        echo "   ✅ Backed up ghostty"
     fi
 
     if [ -f "$HOME/.tmux.conf" ] && [ ! -L "$HOME/.tmux.conf" ]; then
@@ -95,29 +101,33 @@ create_symlinks() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
     [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
+    [ -L "$HOME/.config/ghostty" ] && rm "$HOME/.config/ghostty"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
-    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
+    [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon"
     [ -d "$HOME/.config/sketchybar" ] && rm -rf "$HOME/.config/sketchybar"
     [ -d "$HOME/.config/borders" ] && rm -rf "$HOME/.config/borders"
     [ -d "$HOME/.config/nvim" ] && rm -rf "$HOME/.config/nvim"
+    [ -d "$HOME/.config/ghostty" ] && rm -rf "$HOME/.config/ghostty"
+    [ -d "$HOME/.hammerspoon" ] && rm -rf "$HOME/.hammerspoon"
     [ -f "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
-    [ -f "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -f "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
 
     ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
     ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
     ln -sf "$DOTFILES_DIR/nvim" "$HOME/.config/nvim"
+    ln -sf "$DOTFILES_DIR/ghostty" "$HOME/.config/ghostty"
     ln -sf "$DOTFILES_DIR/.aerospace.toml" "$HOME/.aerospace.toml"
-    ln -sf "$DOTFILES_DIR/.wezterm.lua" "$HOME/.wezterm.lua"
     ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
+    ln -sf "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
 
     echo "   ✅ sketchybar -> ~/.config/sketchybar"
     echo "   ✅ borders -> ~/.config/borders"
     echo "   ✅ nvim -> ~/.config/nvim"
+    echo "   ✅ ghostty -> ~/.config/ghostty"
     echo "   ✅ .aerospace.toml -> ~/.aerospace.toml"
-    echo "   ✅ .wezterm.lua -> ~/.wezterm.lua"
     echo "   ✅ .tmux.conf -> ~/.tmux.conf"
+    echo "   ✅ hammerspoon -> ~/.hammerspoon"
 }
 
 set_permissions() {
@@ -197,6 +207,8 @@ do_install() {
     echo "║  Next steps:                                                  ║"
     echo "║  1. Grant accessibility permissions when prompted             ║"
     echo "║  2. Press alt+shift+; then esc to reload AeroSpace config     ║"
+    echo "║  3. Open Hammerspoon once, grant Accessibility permission,    ║"
+    echo "║     then enable 'Launch at Login' from its menu bar icon      ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
     echo "🎨 Enjoy your Cyberpunk desktop!"
@@ -214,9 +226,10 @@ do_uninstall() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar" && echo "   ✅ Removed sketchybar symlink"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders" && echo "   ✅ Removed borders symlink"
     [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim" && echo "   ✅ Removed nvim symlink"
+    [ -L "$HOME/.config/ghostty" ] && rm "$HOME/.config/ghostty" && echo "   ✅ Removed ghostty symlink"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml" && echo "   ✅ Removed .aerospace.toml symlink"
-    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua" && echo "   ✅ Removed .wezterm.lua symlink"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf" && echo "   ✅ Removed .tmux.conf symlink"
+    [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon" && echo "   ✅ Removed hammerspoon symlink"
 
     echo ""
     echo "✅ Uninstall complete!"
@@ -271,16 +284,18 @@ do_restore() {
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
     [ -L "$HOME/.config/borders" ] && rm "$HOME/.config/borders"
     [ -L "$HOME/.config/nvim" ] && rm "$HOME/.config/nvim"
+    [ -L "$HOME/.config/ghostty" ] && rm "$HOME/.config/ghostty"
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
-    [ -L "$HOME/.wezterm.lua" ] && rm "$HOME/.wezterm.lua"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
+    [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon"
 
     # Restore from backup
     [ -d "$RESTORE_DIR/sketchybar" ] && cp -r "$RESTORE_DIR/sketchybar" "$HOME/.config/" && echo "   ✅ Restored sketchybar"
     [ -d "$RESTORE_DIR/borders" ] && cp -r "$RESTORE_DIR/borders" "$HOME/.config/" && echo "   ✅ Restored borders"
     [ -d "$RESTORE_DIR/nvim" ] && cp -r "$RESTORE_DIR/nvim" "$HOME/.config/" && echo "   ✅ Restored nvim"
+    [ -d "$RESTORE_DIR/ghostty" ] && cp -r "$RESTORE_DIR/ghostty" "$HOME/.config/" && echo "   ✅ Restored ghostty"
+    [ -d "$RESTORE_DIR/.hammerspoon" ] && cp -r "$RESTORE_DIR/.hammerspoon" "$HOME/" && echo "   ✅ Restored .hammerspoon"
     [ -f "$RESTORE_DIR/.aerospace.toml" ] && cp "$RESTORE_DIR/.aerospace.toml" "$HOME/" && echo "   ✅ Restored .aerospace.toml"
-    [ -f "$RESTORE_DIR/.wezterm.lua" ] && cp "$RESTORE_DIR/.wezterm.lua" "$HOME/" && echo "   ✅ Restored .wezterm.lua"
     [ -f "$RESTORE_DIR/.tmux.conf" ] && cp "$RESTORE_DIR/.tmux.conf" "$HOME/" && echo "   ✅ Restored .tmux.conf"
 
     start_services

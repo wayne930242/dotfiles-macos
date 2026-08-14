@@ -7,8 +7,8 @@
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - 平鋪式視窗管理器
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - 自訂選單列
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
-- **[WezTerm](https://wezfurlong.org/wezterm/)** - 終端機，配置 tmux-like leader 快捷鍵與 unix-domain mux 持久會話
-- **[tmux](https://github.com/tmux/tmux)** - 終端機多工器，鍵位對齊 WezTerm leader；附 `bin/zed-tmux` wrapper 讓 Zed 各專案有獨立的 persistent session
+- **[Ghostty](https://ghostty.org/)** - 終端機，本身不建立任何 tab/split，只是薄薄一層 GUI；雙擊 CMD (透過 Hammerspoon) 召喚 quick terminal
+- **[tmux](https://github.com/tmux/tmux)** - 唯一的 multiplexer，pane/window/resize/copy mode/持久會話全部由它管，Ghostty 的 CMD 系列快捷鍵直接轉發進 tmux 的 leader 鍵位。附 `bin/zed-tmux` wrapper 讓 Zed 各專案有獨立的 persistent session
 - **[LazyVim](https://www.lazyvim.org/)** - Neovim 設定，包含適合 CJK 的折行、Yazi、Sidekick、Snacks Explorer 與跨 pane 導航
 
 ## 截圖
@@ -49,7 +49,7 @@ brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install nowplaying-cli  # 媒體小工具需要
-brew install --cask wezterm
+brew install --cask ghostty
 brew install tmux
 brew install neovim yazi
 ```
@@ -64,8 +64,8 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
 ln -sf ~/dotfiles-macos/nvim ~/.config/nvim
+ln -sf ~/dotfiles-macos/ghostty ~/.config/ghostty
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
-ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
 
 # 啟動服務
@@ -96,7 +96,7 @@ brew services start borders
 
 | 快捷鍵 | 工作區 | 用途 |
 |--------|--------|------|
-| `alt-1` | 1 | 終端機 (WezTerm) |
+| `alt-1` | 1 | 終端機 (Ghostty) |
 | `alt-2` ~ `alt-3` | 2–3 | 一般使用 |
 | `alt-c` | C | 瀏覽器 (Chrome / Comet) |
 | `alt-g` | G | 遊戲 / 休閒 |

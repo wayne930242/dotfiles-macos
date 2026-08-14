@@ -9,8 +9,8 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - Tiling window manager
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - Custom menu bar
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - Window borders
-- **[WezTerm](https://wezfurlong.org/wezterm/)** - Terminal with tmux-like leader keybindings and persistent sessions via unix-domain mux
-- **[tmux](https://github.com/tmux/tmux)** - Multiplexer mirroring the WezTerm leader keymap; ships with a `bin/zed-tmux` wrapper that gives each Zed project its own persistent session
+- **[Ghostty](https://ghostty.org/)** - Terminal; stays a thin GUI layer with zero native tabs/splits of its own, quick terminal summoned by double-tapping CMD (via Hammerspoon)
+- **[tmux](https://github.com/tmux/tmux)** - Owns all multiplexing (panes, windows, resize, copy mode, persistent sessions); Ghostty forwards its CMD-based shortcuts straight into tmux's leader keymap. Also ships with a `bin/zed-tmux` wrapper that gives each Zed project its own persistent session
 - **[LazyVim](https://www.lazyvim.org/)** - Neovim configuration with CJK-aware wrapping, Yazi, Sidekick, Snacks Explorer, and seamless pane navigation
 
 ## Screenshots
@@ -51,7 +51,7 @@ brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install nowplaying-cli  # For media widget
-brew install --cask wezterm
+brew install --cask ghostty
 brew install tmux
 brew install neovim yazi
 ```
@@ -66,8 +66,8 @@ git clone https://github.com/wayne930242/dotfiles-macos.git ~/dotfiles-macos
 ln -sf ~/dotfiles-macos/sketchybar ~/.config/sketchybar
 ln -sf ~/dotfiles-macos/borders ~/.config/borders
 ln -sf ~/dotfiles-macos/nvim ~/.config/nvim
+ln -sf ~/dotfiles-macos/ghostty ~/.config/ghostty
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
-ln -sf ~/dotfiles-macos/.wezterm.lua ~/.wezterm.lua
 ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
 
 # Start services
@@ -98,7 +98,7 @@ Add to `~/.config/zed/settings.json`:
 
 | Key | Workspace | Purpose |
 |-----|-----------|---------|
-| `alt-1` | 1 | Terminal (WezTerm) |
+| `alt-1` | 1 | Terminal (Ghostty) |
 | `alt-2` ~ `alt-3` | 2–3 | General use |
 | `alt-c` | C | Browser (Chrome / Comet) |
 | `alt-g` | G | Game / Chill |

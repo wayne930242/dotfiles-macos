@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# 手動 tmux session 啟動器（社群建議做法：不讓 Ghostty 自動接 tmux，
+# 需要持久化時才手動叫，session 用有意義的名稱分開，同名字才會共用）
+# 用法：
+#   tm            依目前工作目錄名稱當 session 名
+#   tm work       指定 session 名稱為 work
+
+set -euo pipefail
+
+name="${1:-$(basename "${PWD}")}"
+# 清掉特殊字元,只留英數、底線、減號
+session="${name//[^a-zA-Z0-9_-]/_}"
+
+exec /opt/homebrew/bin/tmux new-session -A -s "${session}"

@@ -78,6 +78,9 @@ sketchybar --add item spacer_left left \
            --set spacer_left width=10 background.drawing=off
 
 source "$ITEM_DIR/front_app.sh"
+# ghostty_tabs 停用：改用 herdr 自己管 tab/workspace，Ghostty 只剩一個
+# NSWindow，不再需要外部 tab bar 補視覺（見 ghostty/config 架構說明）
+# source "$ITEM_DIR/ghostty_tabs.sh"
 
 # Spacer after front_app
 sketchybar --add item spacer_left2 left \

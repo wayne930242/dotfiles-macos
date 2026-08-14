@@ -1,0 +1,69 @@
+# Ghostty 配置檔
+# 位置: dotfiles-macos/ghostty/config → symlink 到 ~/.config/ghostty/config
+#
+# 架構：Ghostty 只是 herdr 的宿主 surface，不管 tab/split/多視窗。command 直接
+# 開進 herdr（單一 persistent session），herdr 自己畫 workspace/tab/pane，
+# macOS 層級只會看到一個 NSWindow，AeroSpace 從根源不會誤判。tab/split/rename
+# 全部交給 herdr（見 ~/.config/herdr/config.toml 的 prefix+ 系列 keybind）+
+# native-shortcuts-herd 裝的 Ghostty keybind sidecar（CMD+1-9/CMD+T/CMD+W 等
+# macOS 手感轉成送給 herdr 的 escape sequence，見 ~/.config/native-shortcuts-herd/
+# ghostty.conf，這個檔尾端的 config-file include 就是引用它）。
+#
+# 之前試過的路都放棄了：tmux 當 multiplexer（command 轉發 tmux prefix）跟
+# AeroSpace+SketchyBar+Hammerspoon 自製 tab bar，都是因為「Ghostty 原生 tab
+# 底層是各自獨立 NSWindow，AeroSpace 一定誤判平鋪」在打補丁，herdr 這個方案
+# 直接讓多視窗這件事不存在，不用再繞。
+
+# ============================================
+# 外觀設定 (對齊 .wezterm.lua)
+# ============================================
+
+font-family = "MesloLGS NF"
+font-family = "PingFang TC"
+font-family = "Heiti TC"
+font-size = 14
+
+theme = "Dracula"
+
+# herdr 官方建議的宿主設定：滿版、無邊距，因為畫面內容（tab/pane 邊框、
+# sidebar）全部由 herdr 自己畫
+window-padding-x = 0
+window-padding-y = 0
+maximize = true
+
+# 完全關閉視窗裝飾，包含原生 tab toolbar，讓 macOS 層級只看到一個 NSWindow
+# （原因見檔案開頭架構說明）
+window-decoration = none
+
+# herdr 是唯一會在這個 surface 裡跑的程式：單一 persistent session，
+# tab/workspace/pane 全部在 herdr 內部管理，不會產生新的 NSWindow
+command = /opt/homebrew/bin/herdr
+
+# Option 鍵當 Alt，讓終端機序列（例如 alt+左右移動游標）正常運作，
+# 對應 wezterm 的 send_composed_key_when_*_alt_is_pressed = false
+macos-option-as-alt = true
+
+cursor-style = bar
+cursor-style-blink = true
+
+# 半透明背景，僅為了 quick terminal 才開（原本 theme_contract.sh 鎖住不透明
+# 的決定已經跟使用者確認推翻，一般視窗也會一起半透明，Ghostty 沒有 per-surface
+# 設定可以只套用在 quick terminal 上）
+background-opacity = 0.90
+background-blur = true
+
+# ============================================
+# Quick Terminal（雙擊 CMD 召喚，見 hammerspoon/init.lua）
+# ============================================
+
+# Ghostty 不支援「modifier 連按兩下」這種 trigger，雙擊 CMD 的偵測交給
+# Hammerspoon 做，偵測到後送出合成按鍵 F19（實體鍵盤通常沒有，不會跟其他
+# 快速鍵衝突），這裡用 global keybind 接住它，即使 Ghostty 不是前景 app 也能動作
+quick-terminal-position = top
+keybind = global:f19=toggle_quick_terminal
+
+# Split 導航/建立、視窗重新命名都交給 herdr（prefix+v/prefix+minus 分割、
+# prefix+h/j/k/l 切 pane、CMD+L rename tab），這裡不再自己定義 Ghostty
+# 原生 keybind，避免跟 herdr 自己的 pane 系統打架
+
+config-file = /Users/weihung/.config/native-shortcuts-herd/ghostty.conf

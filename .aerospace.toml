@@ -23,6 +23,11 @@ default-root-container-orientation = 'auto'
 # Mouse follows focus when focused monitor changes
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
+# on-focus-changed 觸發自製 Ghostty tab bar 的 hook 已停用：改用 herdr 自己
+# 管 tab/workspace，Ghostty 只剩一個 NSWindow，不需要 AeroSpace 幫忙追蹤
+# 內部 tab 切換了（見 ghostty/config 架構說明、sketchybar/sketchybarrc）
+# on-focus-changed = ['exec-and-forget sketchybar --trigger ghostty_focus_changed']
+
 # Unhide hidden apps
 automatically-unhide-macos-hidden-apps = false
 
@@ -37,7 +42,7 @@ exec-on-workspace-change = [
 # Workaround: trigger sketchybar manually in each mode keybinding
 
 # Persistent workspaces
-# 1: Terminal (WezTerm)
+# 1: Terminal (Ghostty)
 # 2-3: general use
 # C: Web Browser (Comet, Chrome)
 # G: Game/Chill
@@ -96,7 +101,7 @@ run = 'layout tiling'
 
 # Auto move apps to designated workspaces
 [[on-window-detected]]
-if.app-id = 'com.github.wez.wezterm'
+if.app-id = 'com.mitchellh.ghostty'
 run = ['layout tiling', 'move-node-to-workspace 1']
 
 [[on-window-detected]]
@@ -142,8 +147,8 @@ run = 'move-node-to-workspace X'
 # Main binding mode
 [mode.main.binding]
 
-    # Open WezTerm with Alt + Enter (like i3)
-    alt-enter = 'exec-and-forget open -a "WezTerm"'
+    # Open Ghostty with Alt + Enter (like i3)
+    alt-enter = 'exec-and-forget open -a "Ghostty"'
 
     # Layout switching
     alt-slash = 'layout tiles horizontal vertical'

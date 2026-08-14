@@ -12,7 +12,7 @@ FRONT_APP=$(osascript -e 'tell application "System Events" to get name of first 
 GIT_DIR=""
 
 case "$FRONT_APP" in
-    "WezTerm"|"Terminal"|"iTerm2"|"Alacritty"|"kitty")
+    "Ghostty"|"ghostty"|"Terminal"|"iTerm2"|"Alacritty"|"kitty")
         # For terminals, try to get the current directory via lsof
         FRONT_PID=$(osascript -e 'tell application "System Events" to get unix id of first process whose frontmost is true' 2>/dev/null)
         if [ -n "$FRONT_PID" ]; then

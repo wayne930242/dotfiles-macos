@@ -3,7 +3,7 @@
 set -euo pipefail
 
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-WEZTERM_CONFIG="$PROJECT_DIR/.wezterm.lua"
+GHOSTTY_CONFIG="$PROJECT_DIR/ghostty/config"
 LAZY_CONFIG="$PROJECT_DIR/nvim/lua/config/lazy.lua"
 COLORSCHEME_CONFIG="$PROJECT_DIR/nvim/lua/plugins/colorscheme.lua"
 
@@ -27,14 +27,8 @@ assert_absent() {
     fi
 }
 
-check_wezterm() {
-    assert_contains "$WEZTERM_CONFIG" 'config.color_scheme = "Dracula (Official)"'
-    # 只斷言色碼本身，不綁 `Color = ` 前綴：色碼可能出現在共用 badge helper
-    # 的參數位置而非 wezterm.format 字面表格內，綁前綴會讓純重構誤報 FAIL
-    assert_contains "$WEZTERM_CONFIG" '"#ffb86c"'
-    assert_contains "$WEZTERM_CONFIG" '"#282a36"'
-    assert_absent "$WEZTERM_CONFIG" 'config.window_background_opacity'
-    assert_absent "$WEZTERM_CONFIG" 'config.macos_window_background_blur'
+check_ghostty() {
+    assert_contains "$GHOSTTY_CONFIG" 'theme = "Dracula"'
 }
 
 check_lazyvim() {
@@ -46,18 +40,18 @@ check_lazyvim() {
 target="${1:-all}"
 
 case "$target" in
-    wezterm)
-        check_wezterm
+    ghostty)
+        check_ghostty
         ;;
     lazyvim)
         check_lazyvim
         ;;
     all)
-        check_wezterm
+        check_ghostty
         check_lazyvim
         ;;
     *)
-        echo "usage: $0 [wezterm|lazyvim|all]" >&2
+        echo "usage: $0 [ghostty|lazyvim|all]" >&2
         exit 2
         ;;
 esac
