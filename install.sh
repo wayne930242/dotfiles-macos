@@ -82,6 +82,12 @@ backup_configs() {
         echo "   ✅ Backed up .tmux.conf"
     fi
 
+    if [ -f "$HOME/.config/herdr/config.toml" ] && [ ! -L "$HOME/.config/herdr/config.toml" ]; then
+        mkdir -p "$BACKUP_DIR/herdr"
+        cp "$HOME/.config/herdr/config.toml" "$BACKUP_DIR/herdr/"
+        echo "   ✅ Backed up herdr config.toml"
+    fi
+
     # Check if backup dir is empty
     if [ -z "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
         rmdir "$BACKUP_DIR"
@@ -105,6 +111,7 @@ create_symlinks() {
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon"
+    [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml"
     [ -d "$HOME/.config/sketchybar" ] && rm -rf "$HOME/.config/sketchybar"
     [ -d "$HOME/.config/borders" ] && rm -rf "$HOME/.config/borders"
     [ -d "$HOME/.config/nvim" ] && rm -rf "$HOME/.config/nvim"
@@ -112,6 +119,7 @@ create_symlinks() {
     [ -d "$HOME/.hammerspoon" ] && rm -rf "$HOME/.hammerspoon"
     [ -f "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -f "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
+    [ -f "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml"
 
     ln -sf "$DOTFILES_DIR/sketchybar" "$HOME/.config/sketchybar"
     ln -sf "$DOTFILES_DIR/borders" "$HOME/.config/borders"
@@ -120,6 +128,8 @@ create_symlinks() {
     ln -sf "$DOTFILES_DIR/.aerospace.toml" "$HOME/.aerospace.toml"
     ln -sf "$DOTFILES_DIR/.tmux.conf" "$HOME/.tmux.conf"
     ln -sf "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
+    mkdir -p "$HOME/.config/herdr"
+    ln -sf "$DOTFILES_DIR/herdr/config.toml" "$HOME/.config/herdr/config.toml"
 
     echo "   ✅ sketchybar -> ~/.config/sketchybar"
     echo "   ✅ borders -> ~/.config/borders"
@@ -128,6 +138,7 @@ create_symlinks() {
     echo "   ✅ .aerospace.toml -> ~/.aerospace.toml"
     echo "   ✅ .tmux.conf -> ~/.tmux.conf"
     echo "   ✅ hammerspoon -> ~/.hammerspoon"
+    echo "   ✅ herdr config.toml -> ~/.config/herdr/config.toml"
 }
 
 set_permissions() {
@@ -230,6 +241,7 @@ do_uninstall() {
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml" && echo "   ✅ Removed .aerospace.toml symlink"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf" && echo "   ✅ Removed .tmux.conf symlink"
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon" && echo "   ✅ Removed hammerspoon symlink"
+    [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml" && echo "   ✅ Removed herdr config.toml symlink"
 
     echo ""
     echo "✅ Uninstall complete!"
@@ -288,6 +300,7 @@ do_restore() {
     [ -L "$HOME/.aerospace.toml" ] && rm "$HOME/.aerospace.toml"
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon"
+    [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml"
 
     # Restore from backup
     [ -d "$RESTORE_DIR/sketchybar" ] && cp -r "$RESTORE_DIR/sketchybar" "$HOME/.config/" && echo "   ✅ Restored sketchybar"
@@ -297,6 +310,7 @@ do_restore() {
     [ -d "$RESTORE_DIR/.hammerspoon" ] && cp -r "$RESTORE_DIR/.hammerspoon" "$HOME/" && echo "   ✅ Restored .hammerspoon"
     [ -f "$RESTORE_DIR/.aerospace.toml" ] && cp "$RESTORE_DIR/.aerospace.toml" "$HOME/" && echo "   ✅ Restored .aerospace.toml"
     [ -f "$RESTORE_DIR/.tmux.conf" ] && cp "$RESTORE_DIR/.tmux.conf" "$HOME/" && echo "   ✅ Restored .tmux.conf"
+    [ -f "$RESTORE_DIR/herdr/config.toml" ] && mkdir -p "$HOME/.config/herdr" && cp "$RESTORE_DIR/herdr/config.toml" "$HOME/.config/herdr/" && echo "   ✅ Restored herdr config.toml"
 
     start_services
 

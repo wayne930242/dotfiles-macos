@@ -3,16 +3,20 @@
 #
 # 架構：Ghostty 只是 herdr 的宿主 surface，不管 tab/split/多視窗。command 直接
 # 開進 herdr（單一 persistent session），herdr 自己畫 workspace/tab/pane，
-# macOS 層級只會看到一個 NSWindow，AeroSpace 從根源不會誤判。tab/split/rename
-# 全部交給 herdr（見 ~/.config/herdr/config.toml 的 prefix+ 系列 keybind）+
-# native-shortcuts-herd 裝的 Ghostty keybind sidecar（CMD+1-9/CMD+T/CMD+W 等
-# macOS 手感轉成送給 herdr 的 escape sequence，見 ~/.config/native-shortcuts-herd/
-# ghostty.conf，這個檔尾端的 config-file include 就是引用它）。
+# macOS 層級只會看到一個 NSWindow，AeroSpace 從根源不會誤判。
 #
 # 之前試過的路都放棄了：tmux 當 multiplexer（command 轉發 tmux prefix）跟
 # AeroSpace+SketchyBar+Hammerspoon 自製 tab bar，都是因為「Ghostty 原生 tab
 # 底層是各自獨立 NSWindow，AeroSpace 一定誤判平鋪」在打補丁，herdr 這個方案
 # 直接讓多視窗這件事不存在，不用再繞。
+#
+# 快速鍵刻意不自訂：試過用 native-shortcuts-herd 把 CMD 系列快速鍵轉譯成
+# herdr escape sequence，結果它寫出的設定值（例如 new_tab = "t"，沒有
+# literal 的 "prefix+" 字首）違反 herdr 自己「prefix-first，避免直接綁定
+# 攔截打字」的安全原則，被 herdr 的設定驗證直接停用，CMD+T 等一整組都失效。
+# 已用 native-shortcuts-herd 官方 uninstall 指令拆乾淨，改成全部用 herdr
+# 原生的 Ctrl+B prefix 手感（tab/workspace/pane 操作見 herdr --default-config
+# 或 herdr --skill），不引入額外轉譯層。
 
 # ============================================
 # 外觀設定 (對齊 .wezterm.lua)
@@ -67,14 +71,12 @@ background-blur = true
 quick-terminal-position = top
 keybind = global:f19=toggle_quick_terminal
 
-# Split 導航/建立、視窗重新命名都交給 herdr（prefix+v/prefix+minus 分割、
-# prefix+h/j/k/l 切 pane、CMD+L rename tab），這裡不再自己定義 Ghostty
-# 原生 keybind，避免跟 herdr 自己的 pane 系統打架。
-#
-# 但這樣不夠：Ghostty 內建的原生 split/tab 快速鍵（CMD+D 系列、CMD+[ ]、
-# CMD+OPT+方向鍵、CMD+CTRL+方向鍵）預設還是活著，沒被覆蓋掉的話照樣會在
-# Ghostty 這層再切一個 split／再開一個原生 tab，裡面又跑一個 herdr client
-# 接去同一個 session，直接跟 herdr 自己的 pane 系統打架。全部明確 unbind。
+# Ghostty 內建的原生 split/tab 快速鍵（CMD+D 系列、CMD+[ ]、CMD+OPT+方向鍵、
+# CMD+CTRL+方向鍵）預設是活的，沒被覆蓋掉的話會在 Ghostty 這層再切一個
+# split／再開一個原生 tab，裡面又跑一個 herdr client 接去同一個 session，
+# 直接跟 herdr 自己的 pane 系統打架，全部明確 unbind（這不是快速鍵客製化，
+# 是避免衝突的結構性修正，split/tab/rename 全部交給 herdr 自己的 Ctrl+B
+# prefix 處理）。
 keybind = super+d=unbind
 keybind = super+shift+d=unbind
 keybind = super+[=unbind
@@ -93,4 +95,3 @@ keybind = super+shift+[=unbind
 keybind = super+shift+]=unbind
 keybind = super+alt+w=unbind
 
-config-file = /Users/weihung/.config/native-shortcuts-herd/ghostty.conf
