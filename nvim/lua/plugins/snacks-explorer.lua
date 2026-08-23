@@ -15,6 +15,12 @@ return {
         explorer = {
           hidden = true,
           git_status_open = true,
+          finder = function(opts, ctx)
+            return require("config.explorer_git").finder(opts, ctx)
+          end,
+          transform = function(item)
+            return require("config.explorer_git").transform(item)
+          end,
           -- include 優先於 hidden/ignored/exclude,用來放行被 .gitignore
           -- 擋掉的密碼/密鑰類檔案,又不必開 ignored 讓 node_modules 灌進側欄
           include = { ".env*", ".vault_pass", ".secrets/**", ".token-override", "*.pem", "*.key" },
