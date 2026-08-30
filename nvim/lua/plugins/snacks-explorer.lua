@@ -30,11 +30,20 @@ return {
                 require("yazi").yazi(nil, Snacks.picker.util.path(item))
               end
             end,
+            open_image_or_confirm = function(picker, item, action)
+              local path = item and Snacks.picker.util.path(item)
+              if path and require("config.file_open").openImage(path) then
+                return
+              end
+
+              require("snacks.explorer.actions").actions.confirm(picker, item, action)
+            end,
           },
           win = {
             list = {
               keys = {
-                ["o"] = "confirm",
+                ["o"] = "open_image_or_confirm",
+                ["<2-LeftMouse>"] = "open_image_or_confirm",
                 ["<CR>"] = "explorer_yazi",
               },
             },

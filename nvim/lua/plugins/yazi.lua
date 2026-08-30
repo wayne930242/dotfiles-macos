@@ -1,3 +1,11 @@
+local function openFile(path)
+  if require("config.file_open").openImage(path) then
+    return
+  end
+
+  vim.cmd.edit({ args = { path } })
+end
+
 return {
   "mikavilpas/yazi.nvim",
   version = "*",
@@ -19,6 +27,7 @@ return {
   },
   opts = {
     open_for_directories = false,
+    open_file_function = openFile,
     keymaps = { show_help = "<f1>" },
   },
 }
