@@ -25,6 +25,8 @@
 font-family = "MesloLGS NF"
 font-family = "PingFang TC"
 font-family = "Heiti TC"
+# 台、客語缺字備援（安裝：brew install --cask font-iansui）
+font-family = "Iansui"
 font-size = 14
 
 theme = "Dracula"
