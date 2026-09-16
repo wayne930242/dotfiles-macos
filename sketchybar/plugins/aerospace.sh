@@ -15,7 +15,7 @@ if [ "$1" = "$FOCUSED_WORKSPACE" ]; then
                background.color=$SPACE_BACKGROUND_ACTIVE
 else
     # Check if this workspace has any windows
-    WINDOW_COUNT=$(aerospace list-windows --workspace "$1" 2>/dev/null | wc -l | tr -d ' ')
+    WINDOW_COUNT=$(timeout 3 aerospace list-windows --workspace "$1" 2>/dev/null | wc -l | tr -d ' ')
 
     if [ "$WINDOW_COUNT" -gt 0 ]; then
         # Has windows but not focused
