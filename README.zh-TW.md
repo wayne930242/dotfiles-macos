@@ -7,9 +7,11 @@
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - 平鋪式視窗管理器
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - 自訂選單列
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
-- **[Ghostty](https://ghostty.org/)** - 終端機，本身不建立任何 tab/split，只是薄薄一層 GUI；雙擊 CMD (透過 Hammerspoon) 召喚 quick terminal
-- **[tmux](https://github.com/tmux/tmux)** - 唯一的 multiplexer，pane/window/resize/copy mode/持久會話全部由它管，Ghostty 的 CMD 系列快捷鍵直接轉發進 tmux 的 leader 鍵位。附 `bin/zed-tmux` wrapper 讓 Zed 各專案有獨立的 persistent session
-- **[LazyVim](https://www.lazyvim.org/)** - Neovim 設定，包含適合 CJK 的折行、Yazi、Sidekick、Snacks Explorer 與跨 pane 導航
+- **[Ghostty](https://ghostty.org/)** - 終端機，只當 herdr 的宿主 surface：啟動直接進 herdr，原生 tab/split 快捷鍵全部 unbind、關閉視窗裝飾，macOS 層級只會看到一個視窗
+- **[herdr](https://herdr.dev)** - Agent multiplexer，workspace/tab/pane 全部在單一 persistent session 裡管理（預設 `Ctrl+B` prefix）
+- **[Hammerspoon](https://www.hammerspoon.org/)** - 偵測雙擊 CMD 後送出 F19，由 Ghostty 的 global keybind 開關 quick terminal
+- **[tmux](https://github.com/tmux/tmux)** - 選用、需要時才手動開：`bin/tm [名稱]` 接到指定名稱的 session，`bin/zed-tmux` 讓 Zed 各專案有獨立的 persistent session
+- **[LazyVim](https://www.lazyvim.org/)** - Neovim 設定，包含適合 CJK 的折行與拼字檢查、Yazi、Snacks Explorer（顯示 git 與 submodule 狀態）、Claude Code 整合、依目錄自動還原 session，以及 smart-splits 視窗導航
 
 ## 截圖
 
@@ -25,10 +27,14 @@ cd ~/dotfiles-macos
 
 安裝腳本會自動：
 1. 安裝 Homebrew（如未安裝）
-2. 安裝 AeroSpace、SketchyBar、JankyBorders 及相依套件
+2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、nowplaying-cli、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
-4. 建立 symlinks，包括 `~/.config/nvim`
+4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
 5. 啟動所有服務並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
+
+Ghostty、herdr、tmux 與字型不在腳本安裝範圍內，請見[前置需求](#前置需求)。
+
+安裝完成後，先開一次 Hammerspoon、授予輔助使用權限，再從選單列圖示啟用「Launch at Login」。
 
 ### 其他指令
 
@@ -45,14 +51,19 @@ cd ~/dotfiles-macos
 
 ```bash
 brew install --cask nikitabobko/tap/aerospace
+brew install --cask hammerspoon
 brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install nowplaying-cli  # 媒體小工具需要
 brew install --cask ghostty
-brew install tmux
+brew install herdr
+brew install tmux            # 選用，bin/tm 與 bin/zed-tmux 需要
 brew install neovim yazi
+brew install --cask font-iansui  # Ghostty 的台、客語缺字備援
 ```
+
+Ghostty 另外需要 `MesloLGS NF`，SketchyBar 使用 `Hack Nerd Font Mono`。
 
 ### 設定
 
@@ -67,6 +78,9 @@ ln -sf ~/dotfiles-macos/nvim ~/.config/nvim
 ln -sf ~/dotfiles-macos/ghostty ~/.config/ghostty
 ln -sf ~/dotfiles-macos/.aerospace.toml ~/.aerospace.toml
 ln -sf ~/dotfiles-macos/.tmux.conf ~/.tmux.conf
+ln -sf ~/dotfiles-macos/hammerspoon ~/.hammerspoon
+mkdir -p ~/.config/herdr
+ln -sf ~/dotfiles-macos/herdr/config.toml ~/.config/herdr/config.toml
 
 # 啟動服務
 brew services start sketchybar
@@ -100,26 +114,39 @@ brew services start borders
 | `alt-2` ~ `alt-3` | 2–3 | 一般使用 |
 | `alt-c` | C | 瀏覽器 (Chrome / Comet) |
 | `alt-g` | G | 遊戲 / 休閒 |
-| `alt-s` | S | 社交 (Discord, Slack, Telegram) |
+| `alt-s` | S | 社交 (Discord, Telegram) |
 | `alt-q` | Q | 專案 (Linear + Slack) |
 | `alt-d` | D | Docker |
 | `alt-a` | A | AI / Agents |
 | `alt-z` | Z | Obsidian (筆記) |
-| `alt-x` | X | Xcode |
+| `alt-x` | X | Xcode（含 Simulator 與 Android Studio） |
+
+有外接螢幕時，工作區 1–3 放在副螢幕；字母工作區固定在主螢幕。
+`alt-enter` 開啟 Ghostty，`alt-shift-;` 進入 service mode（按 `esc` 重新載入設定）。
 
 ## SketchyBar 小工具
 
-**左側：** 工作區 | 前景 App | Git 分支
+**左側：** 模式指示（service mode）| 工作區 | 前景 App
 
-**右側：** 日曆 | 音量/麥克風 | 輸入法 | 電池 | 天氣 | 網路 | 媒體 | CPU | 記憶體
+**右側：** 日曆 | 音訊（音量 + 麥克風）| 電池 | 溫度 | 輸入法 | 網路 | 媒體 | CPU / 記憶體
 
 ## 主題配色
 
-電馭叛客色票：
+SketchyBar 與 JankyBorders 使用電馭叛客色票：
 - 主色：`#00fff7` (霓虹青)
 - 副色：`#ff00ff` (洋紅)
 - 強調色：`#ff6600` (橘色)
 - 背景：`#0a0a0f` (深色)
+
+Ghostty 使用 `Dracula` 主題，90% 不透明度加模糊；herdr 使用 `vesper`。
+
+## 測試
+
+`tests/` 放的是 AeroSpace 設定、安裝腳本與主題設定的 shell contract 檢查：
+
+```bash
+for t in tests/*.sh; do bash "$t"; done
+```
 
 ## 授權
 
