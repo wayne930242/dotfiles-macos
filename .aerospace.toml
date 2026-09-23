@@ -23,11 +23,6 @@ default-root-container-orientation = 'auto'
 # Mouse follows focus when focused monitor changes
 on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 
-# on-focus-changed 觸發自製 Ghostty tab bar 的 hook 已停用：改用 herdr 自己
-# 管 tab/workspace，Ghostty 只剩一個 NSWindow，不需要 AeroSpace 幫忙追蹤
-# 內部 tab 切換了（見 ghostty/config 架構說明、sketchybar/sketchybarrc）
-# on-focus-changed = ['exec-and-forget sketchybar --trigger ghostty_focus_changed']
-
 # Unhide hidden apps
 automatically-unhide-macos-hidden-apps = false
 

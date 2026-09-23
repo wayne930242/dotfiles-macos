@@ -56,10 +56,8 @@ cmdDoubleTapFlagsWatcher:start()
 cmdDoubleTapKeyDownWatcher:start()
 
 -- CMD+1~9 多視窗切換器停用：改用 herdr 管 tab/workspace，Ghostty 只剩一個
--- NSWindow 可切，CMD+1-9 現在由 native-shortcuts-herd 裝的 Ghostty keybind
--- sidecar（~/.config/native-shortcuts-herd/ghostty.conf）直接轉成 escape
--- sequence 送給 herdr，不需要 Hammerspoon 代勞了。留著沒啟用是因為如果哪天
--- 放棄 herdr、要走回多視窗模式，這段邏輯還能直接復用。
+-- NSWindow 可切，tab 切換改用 herdr 原生的 Ctrl+B prefix。留著沒啟用是因為
+-- 如果哪天放棄 herdr、要走回多視窗模式，這段邏輯還能直接復用。
 --[[
 local AEROSPACE_BIN = "/opt/homebrew/bin/aerospace"
 local GHOSTTY_BUNDLE_ID = "com.mitchellh.ghostty"

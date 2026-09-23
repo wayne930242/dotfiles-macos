@@ -19,7 +19,7 @@
 # 或 herdr --skill），不引入額外轉譯層。
 
 # ============================================
-# 外觀設定 (對齊 .wezterm.lua)
+# 外觀設定
 # ============================================
 
 font-family = "MesloLGS NF"
@@ -45,8 +45,7 @@ window-decoration = none
 # tab/workspace/pane 全部在 herdr 內部管理，不會產生新的 NSWindow
 command = /opt/homebrew/bin/herdr
 
-# Option 鍵當 Alt，讓終端機序列（例如 alt+左右移動游標）正常運作，
-# 對應 wezterm 的 send_composed_key_when_*_alt_is_pressed = false
+# Option 鍵當 Alt，讓終端機序列（例如 alt+左右移動游標）正常運作
 macos-option-as-alt = true
 
 cursor-style = bar
