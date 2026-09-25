@@ -29,7 +29,7 @@ font-family = "Heiti TC"
 font-family = "Iansui"
 font-size = 14
 
-theme = "Dracula"
+theme = "Catppuccin Mocha"
 
 # herdr 官方建議的宿主設定：滿版、無邊距，因為畫面內容（tab/pane 邊框、
 # sidebar）全部由 herdr 自己畫
