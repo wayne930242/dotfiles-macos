@@ -140,7 +140,7 @@ Cyberpunk color palette for SketchyBar and JankyBorders:
 - Accent: `#ff6600` (Orange)
 - Background: `#0a0a0f` (Dark)
 
-Ghostty uses the `Dracula` theme at 90% opacity with blur, and herdr uses `vesper`.
+Ghostty uses the `Dracula` theme with an opaque background, and herdr uses `vesper`.
 
 ## Tests
 

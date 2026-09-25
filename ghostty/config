@@ -56,12 +56,6 @@ cursor-style-blink = true
 # 也是這樣做）
 shell-integration-features = no-cursor
 
-# 半透明背景，僅為了 quick terminal 才開（原本 theme_contract.sh 鎖住不透明
-# 的決定已經跟使用者確認推翻，一般視窗也會一起半透明，Ghostty 沒有 per-surface
-# 設定可以只套用在 quick terminal 上）
-background-opacity = 0.90
-background-blur = true
-
 # ============================================
 # Quick Terminal（雙擊 CMD 召喚，見 hammerspoon/init.lua）
 # ============================================

@@ -138,7 +138,7 @@ SketchyBar 與 JankyBorders 使用電馭叛客色票：
 - 強調色：`#ff6600` (橘色)
 - 背景：`#0a0a0f` (深色)
 
-Ghostty 使用 `Dracula` 主題，90% 不透明度加模糊；herdr 使用 `vesper`。
+Ghostty 使用 `Dracula` 主題，背景不透明；herdr 使用 `vesper`。
 
 ## 測試
 
