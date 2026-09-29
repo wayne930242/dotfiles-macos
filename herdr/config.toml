@@ -6,8 +6,9 @@ name = "catppuccin"
 show_agent_labels_on_pane_borders = true
 agent_panel_sort = "spaces"
 
+# system 會用 osascript 發 macOS 通知，多一個不受 herdr 控制的系統提示音；改成只在 herdr 裡顯示
 [ui.toast]
-delivery = "system"
+delivery = "herdr"
 
 # 內建提示音太大聲，專注時會被嚇到，herdr 沒有音量設定，只能換成本身小聲的檔案。
 # 用 macOS 內建音效降約 15dB 轉 mp3：Done 用 Tink、Request 用 Pop，聽聲音就分得出
