@@ -8,3 +8,11 @@ agent_panel_sort = "spaces"
 
 [ui.toast]
 delivery = "system"
+
+# 內建提示音太大聲，專注時會被嚇到，herdr 沒有音量設定，只能換成本身小聲的檔案。
+# 用 macOS 內建音效降約 15dB 轉 mp3：Done 用 Tink、Request 用 Pop，聽聲音就分得出
+# 是做完還是在等人。相對路徑以 config 所在目錄解析，install.sh 會把 sounds/ 也
+# symlink 到 ~/.config/herdr/。
+[ui.sound]
+done_path = "sounds/done.mp3"
+request_path = "sounds/request.mp3"

@@ -112,6 +112,7 @@ create_symlinks() {
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf"
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon"
     [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml"
+    [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds"
     [ -d "$HOME/.config/sketchybar" ] && rm -rf "$HOME/.config/sketchybar"
     [ -d "$HOME/.config/borders" ] && rm -rf "$HOME/.config/borders"
     [ -d "$HOME/.config/nvim" ] && rm -rf "$HOME/.config/nvim"
@@ -130,6 +131,7 @@ create_symlinks() {
     ln -sf "$DOTFILES_DIR/hammerspoon" "$HOME/.hammerspoon"
     mkdir -p "$HOME/.config/herdr"
     ln -sf "$DOTFILES_DIR/herdr/config.toml" "$HOME/.config/herdr/config.toml"
+    ln -sf "$DOTFILES_DIR/herdr/sounds" "$HOME/.config/herdr/sounds"
 
     echo "   ✅ sketchybar -> ~/.config/sketchybar"
     echo "   ✅ borders -> ~/.config/borders"
@@ -139,6 +141,7 @@ create_symlinks() {
     echo "   ✅ .tmux.conf -> ~/.tmux.conf"
     echo "   ✅ hammerspoon -> ~/.hammerspoon"
     echo "   ✅ herdr config.toml -> ~/.config/herdr/config.toml"
+    echo "   ✅ herdr sounds -> ~/.config/herdr/sounds"
 }
 
 set_permissions() {
@@ -242,6 +245,7 @@ do_uninstall() {
     [ -L "$HOME/.tmux.conf" ] && rm "$HOME/.tmux.conf" && echo "   ✅ Removed .tmux.conf symlink"
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon" && echo "   ✅ Removed hammerspoon symlink"
     [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml" && echo "   ✅ Removed herdr config.toml symlink"
+    [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds" && echo "   ✅ Removed herdr sounds symlink"
 
     echo ""
     echo "✅ Uninstall complete!"
