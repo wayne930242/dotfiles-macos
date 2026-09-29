@@ -47,7 +47,8 @@ exec-on-workspace-change = [
 # A: AI/Agents
 # Z: Obsidian (Notes)
 # X: Xcode
-persistent-workspaces = ["1", "2", "3", "C", "G", "S", "Q", "D", "A", "Z", "X"]
+# P: Planner (SessionFlow)
+persistent-workspaces = ["1", "2", "3", "C", "G", "S", "Q", "D", "A", "Z", "X", "P"]
 
 # Workspace-to-monitor assignment
 # Built-in (main): all letter workspaces (T, B, G, S, P, D, A, N)
@@ -64,6 +65,7 @@ D = 'main'
 A = 'main'
 Z = 'main'
 X = 'main'
+P = 'main'
 
 [key-mapping]
     preset = 'qwerty'
@@ -139,6 +141,10 @@ run = 'move-node-to-workspace X'
 if.app-id = 'com.google.android.studio'
 run = 'move-node-to-workspace X'
 
+[[on-window-detected]]
+if.app-id = 'com.kibermaks.SessionFlow'
+run = 'move-node-to-workspace P'
+
 # Main binding mode
 [mode.main.binding]
 
@@ -200,6 +206,7 @@ run = 'move-node-to-workspace X'
     alt-a = 'workspace A'  # AI/Agents
     alt-z = 'workspace Z'  # Obsidian (Notes)
     alt-x = 'workspace X'  # Xcode
+    alt-p = 'workspace P'  # Planner (SessionFlow)
 
     # Move to number workspaces
     alt-shift-1 = ['move-node-to-workspace 1', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
@@ -215,6 +222,7 @@ run = 'move-node-to-workspace X'
     alt-shift-a = ['move-node-to-workspace A', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-z = ['move-node-to-workspace Z', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
     alt-shift-x = ['move-node-to-workspace X', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-p = ['move-node-to-workspace P', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
     # Workspace navigation
     alt-tab = 'workspace-back-and-forth'
