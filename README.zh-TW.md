@@ -7,9 +7,9 @@
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - 平鋪式視窗管理器
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - 自訂選單列
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - 視窗邊框
-- **[Ghostty](https://ghostty.org/)** - 終端機，只當 herdr 的宿主 surface：啟動直接進 herdr，原生 tab/split 快捷鍵全部 unbind、關閉視窗裝飾，macOS 層級只會看到一個視窗
+- **[Ghostty](https://ghostty.org/)** - 終端機，只當 herdr 的宿主 surface：啟動直接進 herdr，原生 tab/split 快捷鍵全部 unbind、關閉視窗裝飾，macOS 層級只會看到一個視窗；`` Ctrl+` `` 可在任何地方開關 quick terminal
 - **[herdr](https://herdr.dev)** - Agent multiplexer，workspace/tab/pane 全部在單一 persistent session 裡管理（預設 `Ctrl+B` prefix）
-- **[Hammerspoon](https://www.hammerspoon.org/)** - 偵測雙擊 CMD 後送出 F19，由 Ghostty 的 global keybind 開關 quick terminal
+- **[Hammerspoon](https://www.hammerspoon.org/)** - 目前沒有啟用中的功能，保留停用的 CMD+1~9 Ghostty 視窗切換器，供日後回到多視窗模式時使用
 - **[tmux](https://github.com/tmux/tmux)** - 選用、需要時才手動開：`bin/tm [名稱]` 接到指定名稱的 session，`bin/zed-tmux` 讓 Zed 各專案有獨立的 persistent session
 - **[LazyVim](https://www.lazyvim.org/)** - Neovim 設定，包含適合 CJK 的折行與拼字檢查、Yazi、Snacks Explorer（顯示 git 與 submodule 狀態）、Claude Code 整合、依目錄自動還原 session，以及 smart-splits 視窗導航
 

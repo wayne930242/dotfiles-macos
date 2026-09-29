@@ -9,9 +9,9 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 - **[AeroSpace](https://github.com/nikitabobko/AeroSpace)** - Tiling window manager
 - **[SketchyBar](https://github.com/FelixKratz/SketchyBar)** - Custom menu bar
 - **[JankyBorders](https://github.com/FelixKratz/JankyBorders)** - Window borders
-- **[Ghostty](https://ghostty.org/)** - Terminal; a thin host surface that launches straight into herdr, with native tabs/splits unbound and window decorations off so macOS only sees one window
+- **[Ghostty](https://ghostty.org/)** - Terminal; a thin host surface that launches straight into herdr, with native tabs/splits unbound and window decorations off so macOS only sees one window; `` Ctrl+` `` toggles its quick terminal globally
 - **[herdr](https://herdr.dev)** - Agent multiplexer that owns all workspaces, tabs, and panes in a single persistent session (default `Ctrl+B` prefix)
-- **[Hammerspoon](https://www.hammerspoon.org/)** - Detects a double-tap of CMD and sends F19, which Ghostty binds globally to toggle its quick terminal
+- **[Hammerspoon](https://www.hammerspoon.org/)** - No active features; keeps a disabled CMD+1~9 Ghostty window switcher for a return to multi-window mode
 - **[tmux](https://github.com/tmux/tmux)** - Optional, on-demand sessions: `bin/tm [name]` attaches to a named session, and `bin/zed-tmux` gives each Zed project its own persistent session
 - **[LazyVim](https://www.lazyvim.org/)** - Neovim configuration with CJK-aware wrapping and spell checking, Yazi, Snacks Explorer (with git and submodule state), Claude Code integration, per-directory session restore, and smart-splits window navigation
 

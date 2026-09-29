@@ -57,14 +57,17 @@ cursor-style-blink = true
 shell-integration-features = no-cursor
 
 # ============================================
-# Quick Terminal（雙擊 CMD 召喚，見 hammerspoon/init.lua）
+# Quick Terminal（Ctrl+` 召喚）
 # ============================================
 
-# Ghostty 不支援「modifier 連按兩下」這種 trigger，雙擊 CMD 的偵測交給
-# Hammerspoon 做，偵測到後送出合成按鍵 F19（實體鍵盤通常沒有，不會跟其他
-# 快速鍵衝突），這裡用 global keybind 接住它，即使 Ghostty 不是前景 app 也能動作
+# Ghostty 不支援「modifier 連按兩下」這種 trigger，改用 Ctrl+`：macOS、
+# AeroSpace（alt-*）、Raycast（Cmd+Space）、herdr（Ctrl+B prefix）都沒用到它。
+# Cmd+` 是 macOS 同 App 視窗切換，不能用。global: 需要 Ghostty 有「輔助使用」
+# 權限，Ghostty 更新後權限可能失效（開關看似開著），要 tccutil reset 重新授權
 quick-terminal-position = top
-keybind = global:f19=toggle_quick_terminal
+# 寬度 = 螢幕 1800 - sketchybar 左右 margin 10×2，跟 bar 邊緣對齊，bar 當面板頂蓋
+quick-terminal-size = 40%,1780px
+keybind = global:ctrl+grave_accent=toggle_quick_terminal
 
 # Ghostty 內建的原生 split/tab 快速鍵（CMD+D 系列、CMD+[ ]、CMD+OPT+方向鍵、
 # CMD+CTRL+方向鍵）預設是活的，沒被覆蓋掉的話會在 Ghostty 這層再切一個
