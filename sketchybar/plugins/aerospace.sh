@@ -21,7 +21,7 @@ while IFS= read -r item; do
         args+=(--set "$item" icon.color="$SPACE_ACTIVE" icon.highlight=on
                background.drawing=on background.color="$SPACE_BACKGROUND_ACTIVE")
     elif [[ "$occupied" == *" $sid "* ]]; then
-        args+=(--set "$item" icon.color=0xaa00fff7 icon.highlight=off background.drawing=off)
+        args+=(--set "$item" icon.color="$SPACE_OCCUPIED" icon.highlight=off background.drawing=off)
     else
         args+=(--set "$item" icon.color="$SPACE_INACTIVE" icon.highlight=off background.drawing=off)
     fi

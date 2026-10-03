@@ -22,6 +22,7 @@ for sid in "${WORKSPACES[@]}"; do
                      icon="$sid" \
                      icon.font="Hack Nerd Font Mono:Bold:14.0" \
                      icon.color="$SPACE_INACTIVE" \
+                     icon.highlight_color="$SPACE_ACTIVE" \
                      icon.padding_left=8 \
                      icon.padding_right=8 \
                      background.color="$SPACE_BACKGROUND" \

@@ -12,7 +12,7 @@ sketchybar --add item media right \
                  label.padding_left=0 \
                  label.padding_right=8 \
                  label.max_chars=40 \
-                 background.color=0x33ffff00 \
+                 background.color="$YELLOW_BG" \
                  background.corner_radius=8 \
                  background.height=28 \
                  background.border_width=1 \

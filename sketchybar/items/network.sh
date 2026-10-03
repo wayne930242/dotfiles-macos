@@ -10,7 +10,7 @@ sketchybar --add item network right \
                  icon.padding_right=6 \
                  label.padding_left=0 \
                  label.padding_right=8 \
-                 background.color=0x330099ff \
+                 background.color="$BLUE_BG" \
                  background.corner_radius=8 \
                  background.height=28 \
                  background.border_width=1 \

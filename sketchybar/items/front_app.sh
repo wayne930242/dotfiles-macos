@@ -9,7 +9,7 @@ sketchybar --add item front_app left \
                  label.font="Hack Nerd Font Mono:Bold:13.0" \
                  label.padding_left=12 \
                  label.padding_right=12 \
-                 background.color=0x33ff00ff \
+                 background.color="$MAGENTA_BG" \
                  background.corner_radius=8 \
                  background.height=28 \
                  background.border_width=1 \

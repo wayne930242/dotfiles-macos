@@ -1,6 +1,6 @@
-# macOS Dotfiles - 電馭叛客風格
+# macOS Dotfiles - Catppuccin Mocha
 
-個人 macOS 設定檔，打造電馭叛客風格的桌面環境。
+個人 macOS 設定檔，全部元件統一使用 Catppuccin Mocha 配色。
 
 ## 元件
 
@@ -15,7 +15,7 @@
 
 ## 截圖
 
-![電馭叛客桌面](screenshot.png)
+![桌面](screenshot.png)
 
 ## 快速安裝
 
@@ -132,13 +132,9 @@ brew services start borders
 
 ## 主題配色
 
-SketchyBar 與 JankyBorders 使用電馭叛客色票：
-- 主色：`#00fff7` (霓虹青)
-- 副色：`#ff00ff` (洋紅)
-- 強調色：`#ff6600` (橘色)
-- 背景：`#0a0a0f` (深色)
+所有元件都使用 [Catppuccin Mocha](https://catppuccin.com/palette)：Ghostty（`Catppuccin Mocha`）、herdr（`catppuccin`）、LazyVim（`catppuccin-mocha`）、SketchyBar 與 JankyBorders。
 
-Ghostty 使用 `Dracula` 主題，背景不透明；herdr 使用 `vesper`。
+SketchyBar 與 JankyBorders 的顏色來自 `themes/<名稱>.sh`，切換時改 `sketchybar/colors.sh` 與 `borders/bordersrc` 裡的 `THEME`。原本的電馭叛客配色封存在兩個目錄下的 `themes/cyberpunk.sh`。
 
 ## 測試
 

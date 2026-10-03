@@ -1,8 +1,8 @@
-# macOS Dotfiles - Cyberpunk Edition
+# macOS Dotfiles - Catppuccin Mocha
 
 [繁體中文](README.zh-TW.md)
 
-My personal macOS configuration files for a cyberpunk-themed desktop environment.
+My personal macOS configuration files, themed with Catppuccin Mocha throughout.
 
 ## Components
 
@@ -17,7 +17,7 @@ My personal macOS configuration files for a cyberpunk-themed desktop environment
 
 ## Screenshots
 
-![Cyberpunk Desktop](screenshot.png)
+![Desktop](screenshot.png)
 
 ## Quick Install
 
@@ -134,13 +134,9 @@ Workspaces 1–3 go to the secondary monitor when one is connected; letter works
 
 ## Theme
 
-Cyberpunk color palette for SketchyBar and JankyBorders:
-- Primary: `#00fff7` (Neon Cyan)
-- Secondary: `#ff00ff` (Magenta)
-- Accent: `#ff6600` (Orange)
-- Background: `#0a0a0f` (Dark)
+Every component uses [Catppuccin Mocha](https://catppuccin.com/palette): Ghostty (`Catppuccin Mocha`), herdr (`catppuccin`), LazyVim (`catppuccin-mocha`), SketchyBar, and JankyBorders.
 
-Ghostty uses the `Dracula` theme with an opaque background, and herdr uses `vesper`.
+SketchyBar and JankyBorders load their colors from `themes/<name>.sh`; set `THEME` in `sketchybar/colors.sh` and `borders/bordersrc` to switch. The previous cyberpunk palette is archived as `themes/cyberpunk.sh` in both directories.
 
 ## Tests
 

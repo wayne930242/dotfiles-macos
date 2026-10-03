@@ -12,7 +12,7 @@ sketchybar --add event aerospace_mode_change \
                  label="SERVICE" \
                  label.color=$RED \
                  label.padding_right=8 \
-                 background.color=0x33ff0055 \
+                 background.color="$RED_BG" \
                  background.corner_radius=8 \
                  background.height=28 \
                  background.border_width=1 \

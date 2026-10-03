@@ -1,15 +1,21 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
+set -euo pipefail
 
 # JankyBorders configuration
-# Match sketchybar cyberpunk theme
+# Active color theme; themes live in themes/ (cyberpunk is archived there)
+THEME="catppuccin-mocha"
+
+# shellcheck disable=SC1090
+source "$(dirname "${BASH_SOURCE[0]}")/themes/$THEME.sh"
 
 options=(
     style=round
     width=2.0
     hidpi=off
     order=above
-    active_color=0xff00fff7   # Neon cyan (same as sketchybar border)
-    inactive_color=0x66ff00ff # Dim magenta for unfocused (cyberpunk)
+    active_color="$BORDER_ACTIVE_COLOR"
+    inactive_color="$BORDER_INACTIVE_COLOR"
 )
 
 borders "${options[@]}"
