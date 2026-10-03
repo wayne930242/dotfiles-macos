@@ -1,16 +1,16 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+set -euo pipefail
+
+# shellcheck disable=SC1091
 source "$CONFIG_DIR/colors.sh"
 
-# Get volume
-VOLUME=$(osascript -e 'output volume of (get volume settings)')
-MUTED=$(osascript -e 'output muted of (get volume settings)')
+# One osascript call returns "output volume, input volume, output muted"
+IFS=',' read -r VOLUME MIC_VOLUME MUTED < <(osascript -e \
+    'set s to (get volume settings)
+     return ((output volume of s) as text) & "," & ((input volume of s) as text) & "," & ((output muted of s) as text)')
 
-# Get mic
-MIC_VOLUME=$(osascript -e 'input volume of (get volume settings)')
-
-# Mic icon
-if [ "$MIC_VOLUME" -eq 0 ]; then
+if [[ "$MIC_VOLUME" == "0" ]]; then
     MIC_ICON="󰍭"
     MIC_COLOR="$RED"
 else
@@ -18,17 +18,16 @@ else
     MIC_COLOR="$CYAN"
 fi
 
-# Volume icon and label
-if [ "$VOLUME" = "missing value" ] || [ -z "$VOLUME" ]; then
+if [[ "$VOLUME" == "missing value" || -z "$VOLUME" ]]; then
     VOL_ICON="󰖁"
     VOL_LABEL=""
-elif [ "$MUTED" = "true" ] || [ "$VOLUME" -eq 0 ]; then
+elif [[ "$MUTED" == "true" || "$VOLUME" -eq 0 ]]; then
     VOL_ICON="󰖁"
     VOL_LABEL=""
-elif [ "$VOLUME" -lt 33 ]; then
+elif [[ "$VOLUME" -lt 33 ]]; then
     VOL_ICON="󰕿"
     VOL_LABEL="${VOLUME}%"
-elif [ "$VOLUME" -lt 66 ]; then
+elif [[ "$VOLUME" -lt 66 ]]; then
     VOL_ICON="󰖀"
     VOL_LABEL="${VOLUME}%"
 else

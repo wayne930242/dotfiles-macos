@@ -27,7 +27,7 @@ cd ~/dotfiles-macos
 
 安裝腳本會自動：
 1. 安裝 Homebrew（如未安裝）
-2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、nowplaying-cli、Neovim 與 Yazi
+2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
 5. 啟動所有服務並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
@@ -55,7 +55,7 @@ brew install --cask hammerspoon
 brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
-brew install nowplaying-cli  # 媒體小工具需要
+brew install media-control  # 媒體小工具需要
 brew install --cask ghostty
 brew install herdr
 brew install tmux            # 選用，bin/tm 與 bin/zed-tmux 需要

@@ -16,5 +16,6 @@ sketchybar --add item network right \
                  background.border_width=1 \
                  background.border_color=$BLUE \
                  background.drawing=on \
-                 update_freq=30 \
-                 script="$PLUGIN_DIR/network.sh"
+                 update_freq=120 \
+                 script="$PLUGIN_DIR/network.sh" \
+           --subscribe network wifi_change system_woke

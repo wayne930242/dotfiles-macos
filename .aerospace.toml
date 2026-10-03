@@ -33,8 +33,11 @@ exec-on-workspace-change = [
     'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE',
 ]
 
-# Note: on-mode-changed not yet implemented in aerospace
-# Workaround: trigger sketchybar manually in each mode keybinding
+# SketchyBar integration - refresh the mode indicator; the plugin reads the current mode
+on-mode-changed = ['exec-and-forget sketchybar --trigger aerospace_mode_change']
+
+# SketchyBar integration - window moves and closes change focus without a workspace change
+on-focus-changed = ['exec-and-forget sketchybar --trigger aerospace_workspace_change']
 
 # Persistent workspaces
 # 1: Terminal (Ghostty)
@@ -51,7 +54,7 @@ exec-on-workspace-change = [
 persistent-workspaces = ["1", "2", "3", "C", "G", "S", "Q", "D", "A", "Z", "X", "P"]
 
 # Workspace-to-monitor assignment
-# Built-in (main): all letter workspaces (T, B, G, S, P, D, A, N)
+# Built-in (main): all letter workspaces
 # Extended (secondary): 1-3 when available, fallback to main
 [workspace-to-monitor-force-assignment]
 1 = ['secondary', 'main']
@@ -158,22 +161,32 @@ run = 'move-node-to-workspace P'
     # Fullscreen toggle
     alt-f = 'fullscreen'
 
-    # Maximize floating window (dynamic, reserve space for SketchyBar)
-    alt-m = '''exec-and-forget osascript -e '
-        set barHeight to 55
-        set margin to 10
-        tell application "Finder"
-            set screenBounds to bounds of window of desktop
-            set screenWidth to item 3 of screenBounds
-            set screenHeight to item 4 of screenBounds
-        end tell
-        tell application "System Events"
-            set frontApp to first process whose frontmost is true
-            tell frontApp
-                set position of window 1 to {margin, barHeight}
-                set size of window 1 to {screenWidth - (margin * 2), screenHeight - barHeight - margin}
-            end tell
-        end tell'
+    # Maximize floating window on the screen that holds it, using the same gaps as tiling
+    # (outer 10, top 10 on built-in and 50 on external for SketchyBar)
+    alt-m = '''exec-and-forget osascript -l JavaScript -e '
+        ObjC.import("AppKit");
+        ObjC.import("CoreGraphics");
+        const outer = 10;
+        const win = Application("System Events").processes.whose({frontmost: true})[0].windows[0];
+        const [wx, wy] = win.position();
+        const [ww, wh] = win.size();
+        const cx = wx + ww / 2;
+        const cy = wy + wh / 2;
+        const screens = $.NSScreen.screens;
+        const primaryHeight = screens.objectAtIndex(0).frame.size.height;
+        for (let i = 0; i < screens.count; i++) {
+            const screen = screens.objectAtIndex(i);
+            const f = screen.frame;
+            const top = primaryHeight - f.origin.y - f.size.height;
+            if (cx < f.origin.x || cx >= f.origin.x + f.size.width || cy < top || cy >= top + f.size.height) continue;
+            const v = screen.visibleFrame;
+            const vTop = primaryHeight - v.origin.y - v.size.height;
+            const id = screen.deviceDescription.objectForKey("NSScreenNumber").js;
+            const topGap = $.CGDisplayIsBuiltin(id) ? 10 : 50;
+            win.position = [v.origin.x + outer, vTop + topGap];
+            win.size = [v.size.width - outer * 2, v.size.height - topGap - outer];
+            break;
+        }'
     '''
 
     # Focus (Vim-style)
@@ -209,40 +222,40 @@ run = 'move-node-to-workspace P'
     alt-p = 'workspace P'  # Planner (SessionFlow)
 
     # Move to number workspaces
-    alt-shift-1 = ['move-node-to-workspace 1', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-2 = ['move-node-to-workspace 2', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-3 = ['move-node-to-workspace 3', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-1 = 'move-node-to-workspace 1'
+    alt-shift-2 = 'move-node-to-workspace 2'
+    alt-shift-3 = 'move-node-to-workspace 3'
 
     # Move to letter workspaces
-    alt-shift-c = ['move-node-to-workspace C', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-g = ['move-node-to-workspace G', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-s = ['move-node-to-workspace S', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-q = ['move-node-to-workspace Q', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-d = ['move-node-to-workspace D', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-a = ['move-node-to-workspace A', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-z = ['move-node-to-workspace Z', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-x = ['move-node-to-workspace X', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
-    alt-shift-p = ['move-node-to-workspace P', 'exec-and-forget sketchybar --trigger aerospace_workspace_change']
+    alt-shift-c = 'move-node-to-workspace C'
+    alt-shift-g = 'move-node-to-workspace G'
+    alt-shift-s = 'move-node-to-workspace S'
+    alt-shift-q = 'move-node-to-workspace Q'
+    alt-shift-d = 'move-node-to-workspace D'
+    alt-shift-a = 'move-node-to-workspace A'
+    alt-shift-z = 'move-node-to-workspace Z'
+    alt-shift-x = 'move-node-to-workspace X'
+    alt-shift-p = 'move-node-to-workspace P'
 
     # Workspace navigation
     alt-tab = 'workspace-back-and-forth'
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
     # Enter service mode
-    alt-shift-semicolon = ['mode service', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=service']
+    alt-shift-semicolon = 'mode service'
 
 # Service mode for advanced operations
 [mode.service.binding]
-    esc = ['reload-config', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
-    r = ['flatten-workspace-tree', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']  # Reset layout
-    f = ['layout floating tiling', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']  # Toggle floating/tiling
-    backspace = ['close-all-windows-but-current', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    esc = ['reload-config', 'mode main']
+    r = ['flatten-workspace-tree', 'mode main']  # Reset layout
+    f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
+    backspace = ['close-all-windows-but-current', 'mode main']
 
     # Summon all windows to current workspace (rescue lost windows) + re-tile + reload sketchybar
     # Excludes Social apps (Discord, Slack, Telegram)
-    s = ['exec-and-forget aerospace list-windows --all --format "%{app-name}|%{window-id}" | grep -v -E "^(Discord|Slack|Telegram)\\|" | cut -d"|" -f2 | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree && sketchybar --trigger aerospace_mode_change MODE=main && sketchybar --reload', 'mode main']
+    s = ['exec-and-forget aerospace list-windows --all --format "%{app-name}|%{window-id}" | grep -v -E "^(Discord|Slack|Telegram)\\|" | cut -d"|" -f2 | xargs -I{} aerospace move-node-to-workspace --window-id {} $(aerospace list-workspaces --focused) && aerospace flatten-workspace-tree && sketchybar --reload', 'mode main']
 
-    alt-shift-h = ['join-with left', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
-    alt-shift-j = ['join-with down', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
-    alt-shift-k = ['join-with up', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
-    alt-shift-l = ['join-with right', 'mode main', 'exec-and-forget sketchybar --trigger aerospace_mode_change MODE=main']
+    alt-shift-h = ['join-with left', 'mode main']
+    alt-shift-j = ['join-with down', 'mode main']
+    alt-shift-k = ['join-with up', 'mode main']
+    alt-shift-l = ['join-with right', 'mode main']

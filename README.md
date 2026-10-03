@@ -29,7 +29,7 @@ cd ~/dotfiles-macos
 
 The install script will:
 1. Install Homebrew (if not present)
-2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, nowplaying-cli, Neovim, and Yazi
+2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, Neovim, and Yazi
 3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks for SketchyBar, JankyBorders, Neovim, Ghostty, AeroSpace, tmux, Hammerspoon, and herdr
 5. Start all services and restart AeroSpace so the CLI and app server use the same version
@@ -57,7 +57,7 @@ brew install --cask hammerspoon
 brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
-brew install nowplaying-cli  # For media widget
+brew install media-control  # For media widget
 brew install --cask ghostty
 brew install herdr
 brew install tmux            # Optional, for bin/tm and bin/zed-tmux

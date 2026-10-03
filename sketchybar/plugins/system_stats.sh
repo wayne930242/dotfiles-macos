@@ -1,31 +1,31 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+set -euo pipefail
+
+# shellcheck disable=SC1091
 source "$CONFIG_DIR/colors.sh"
 
-# Get CPU usage
-CPU=$(top -l 1 | grep -E "^CPU" | grep -Eo '[0-9]+\.[0-9]+%' | head -1 | cut -d'%' -f1)
-if [ -z "$CPU" ]; then
-    CPU=$(ps -A -o %cpu | awk '{s+=$1} END {print s}' | cut -d'.' -f1)
-fi
-CPU_INT=${CPU%.*}
+# CPU: iostat's second sample covers the last second; the first sample (like
+# top -l 1) is an average since boot. iostat skips the process scan that makes
+# top cost about 0.5s of kernel time per run.
+CPU_IDLE="$(iostat -n 0 -c 2 -w 1 | tail -1 | awk '{print $3}')"
+CPU_INT=$((100 - CPU_IDLE))
 
-# Get memory usage
-PAGES_ACTIVE=$(vm_stat | grep 'Pages active' | awk '{print $3}' | tr -d '.')
-PAGES_WIRED=$(vm_stat | grep 'Pages wired' | awk '{print $4}' | tr -d '.')
-PAGES_COMPRESSED=$(vm_stat | grep 'Pages occupied by compressor' | awk '{print $5}' | tr -d '.')
-USED=$((PAGES_ACTIVE + PAGES_WIRED + PAGES_COMPRESSED))
+# Memory: one vm_stat run; used = active + wired + compressed
+read -r PAGE_SIZE USED < <(vm_stat | awk '
+    /page size of/                 { size = $8 }
+    /^Pages active/                { gsub(/\./, "", $3); used += $3 }
+    /^Pages wired/                 { gsub(/\./, "", $4); used += $4 }
+    /^Pages occupied by compressor/ { gsub(/\./, "", $5); used += $5 }
+    END { print size, used }')
+USED_GB="$(awk -v u="$USED" -v s="$PAGE_SIZE" 'BEGIN { printf "%.1f", u * s / 1073741824 }')"
 
-# Convert to GB (page size = 16384 on Apple Silicon)
-PAGE_SIZE=16384
-USED_GB=$(echo "scale=1; $USED * $PAGE_SIZE / 1073741824" | bc)
-
-# Color based on CPU usage
-if [ "$CPU_INT" -gt 80 ]; then
-    COLOR=$RED
-elif [ "$CPU_INT" -gt 50 ]; then
-    COLOR=$ORANGE
+if [[ "$CPU_INT" -gt 80 ]]; then
+    COLOR="$RED"
+elif [[ "$CPU_INT" -gt 50 ]]; then
+    COLOR="$ORANGE"
 else
-    COLOR=$CYAN
+    COLOR="$CYAN"
 fi
 
-sketchybar --set "$NAME" label="${CPU_INT}% ${USED_GB}G" icon.color=$COLOR
+sketchybar --set "$NAME" label="${CPU_INT}% ${USED_GB}G" icon.color="$COLOR"

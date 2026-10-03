@@ -1,37 +1,36 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# shellcheck disable=SC1091
-source "$CONFIG_DIR/colors.sh"
+set -euo pipefail
 
-# Get media info from Now Playing (works with Spotify, Music, browsers, etc.)
-TITLE=$(nowplaying-cli get title 2>/dev/null)
-ARTIST=$(nowplaying-cli get artist 2>/dev/null)
-STATE=$(nowplaying-cli get playbackRate 2>/dev/null)
+# media-control reads Now Playing through a workaround that still works on
+# macOS 15.4+, where nowplaying-cli only returns null. It prints "null" when
+# nothing is playing.
+INFO="$(media-control get 2>/dev/null || echo null)"
 
-# Check if media is actually playing
-if [ -n "$TITLE" ] && [ "$TITLE" != "null" ] && [ "$TITLE" != "" ]; then
-    if [ -n "$ARTIST" ] && [ "$ARTIST" != "null" ] && [ "$ARTIST" != "" ]; then
-        LABEL="$ARTIST - $TITLE"
-    else
-        LABEL="$TITLE"
-    fi
+TITLE="$(jq -r '.title // empty' <<<"$INFO" 2>/dev/null || true)"
 
-    # Truncate if too long
-    if [ ${#LABEL} -gt 40 ]; then
-        LABEL="${LABEL:0:37}..."
-    fi
-
-    # Check if playing or paused
-    if [ "$STATE" = "1" ]; then
-        ICON="󰎆"
-    else
-        ICON="󰏤"
-    fi
-    DRAWING="on"
-else
-    LABEL=""
-    ICON=""
-    DRAWING="off"
+if [[ -z "$TITLE" ]]; then
+    sketchybar --set "$NAME" label="" icon="" drawing=off
+    exit 0
 fi
 
-sketchybar --set "$NAME" label="$LABEL" icon="$ICON" drawing="$DRAWING"
+ARTIST="$(jq -r '.artist // empty' <<<"$INFO")"
+PLAYING="$(jq -r '.playing // false' <<<"$INFO")"
+
+if [[ -n "$ARTIST" ]]; then
+    LABEL="$ARTIST - $TITLE"
+else
+    LABEL="$TITLE"
+fi
+
+if [[ ${#LABEL} -gt 40 ]]; then
+    LABEL="${LABEL:0:37}..."
+fi
+
+if [[ "$PLAYING" == "true" ]]; then
+    ICON="󰎆"
+else
+    ICON="󰏤"
+fi
+
+sketchybar --set "$NAME" label="$LABEL" icon="$ICON" drawing=on

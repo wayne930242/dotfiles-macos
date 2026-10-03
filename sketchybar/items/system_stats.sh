@@ -16,6 +16,6 @@ sketchybar --add item system_stats right \
                  background.border_width=1 \
                  background.border_color=$CYAN \
                  background.drawing=on \
-                 update_freq=3 \
+                 update_freq=5 \
                  script="$PLUGIN_DIR/system_stats.sh" \
                  click_script="open -a 'Activity Monitor'"

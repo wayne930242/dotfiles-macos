@@ -20,6 +20,5 @@ sketchybar --add item media right \
                  background.drawing=on \
                  scroll_texts=on \
                  drawing=off \
-                 update_freq=3 \
-                 script="$PLUGIN_DIR/media.sh" \
-           --subscribe media media_change
+                 update_freq=5 \
+                 script="$PLUGIN_DIR/media.sh"

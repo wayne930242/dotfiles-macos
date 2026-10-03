@@ -35,7 +35,7 @@ install_deps() {
     brew install --cask hammerspoon 2>/dev/null || echo "   Hammerspoon already installed or skipped"
     brew install sketchybar 2>/dev/null || echo "   SketchyBar already installed or skipped"
     brew install borders 2>/dev/null || echo "   Borders already installed or skipped"
-    brew install nowplaying-cli 2>/dev/null || echo "   nowplaying-cli already installed or skipped"
+    brew install media-control 2>/dev/null || echo "   media-control already installed or skipped"
     brew install neovim 2>/dev/null || echo "   Neovim already installed or skipped"
     brew install yazi 2>/dev/null || echo "   Yazi already installed or skipped"
 }

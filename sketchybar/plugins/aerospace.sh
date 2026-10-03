@@ -1,33 +1,32 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
+set -euo pipefail
+
+# shellcheck disable=SC1091
 source "$CONFIG_DIR/colors.sh"
 
-# Official AeroSpace + Sketchybar integration pattern
-# $1 = workspace ID this item represents
-# $FOCUSED_WORKSPACE = passed from aerospace via trigger
+# FOCUSED_WORKSPACE comes from exec-on-workspace-change; other triggers
+# (focus changes, window moves, front_app_switched) omit it, so ask AeroSpace
+focused="${FOCUSED_WORKSPACE:-}"
+if [[ -z "$focused" ]]; then
+    focused="$(aerospace list-workspaces --focused)"
+fi
 
-if [ "$1" = "$FOCUSED_WORKSPACE" ]; then
-    # Currently focused workspace
-    sketchybar --set "$NAME" \
-               icon.color=$SPACE_ACTIVE \
-               icon.highlight=on \
-               background.drawing=on \
-               background.color=$SPACE_BACKGROUND_ACTIVE
-else
-    # Check if this workspace has any windows
-    WINDOW_COUNT=$(timeout 3 aerospace list-windows --workspace "$1" 2>/dev/null | wc -l | tr -d ' ')
+occupied=" $(aerospace list-windows --all --format '%{workspace}' | sort -u | tr '\n' ' ') "
 
-    if [ "$WINDOW_COUNT" -gt 0 ]; then
-        # Has windows but not focused
-        sketchybar --set "$NAME" \
-                   icon.color=0xaa00fff7 \
-                   icon.highlight=off \
-                   background.drawing=off
+args=()
+while IFS= read -r item; do
+    sid="${item#space.}"
+    if [[ "$sid" == "$focused" ]]; then
+        args+=(--set "$item" icon.color="$SPACE_ACTIVE" icon.highlight=on
+               background.drawing=on background.color="$SPACE_BACKGROUND_ACTIVE")
+    elif [[ "$occupied" == *" $sid "* ]]; then
+        args+=(--set "$item" icon.color=0xaa00fff7 icon.highlight=off background.drawing=off)
     else
-        # Empty and not focused
-        sketchybar --set "$NAME" \
-                   icon.color=$SPACE_INACTIVE \
-                   icon.highlight=off \
-                   background.drawing=off
+        args+=(--set "$item" icon.color="$SPACE_INACTIVE" icon.highlight=off background.drawing=off)
     fi
+done < <(sketchybar --query bar | jq -r '.items[] | select(startswith("space."))')
+
+if [[ ${#args[@]} -gt 0 ]]; then
+    sketchybar "${args[@]}"
 fi
