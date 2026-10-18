@@ -3,8 +3,27 @@ onboarding = false
 name = "catppuccin"
 
 [ui]
+sidebar_collapsed_mode = "compact"
 show_agent_labels_on_pane_borders = true
 agent_panel_sort = "spaces"
+
+# Straw Boss 的塔台所在的 tab 名稱是 Nerd Font 訊號塔圖示（U+F043B）。Agents 列把這個圖示放在最前面，
+# 其他 agent 的這個位置用空字串 contains 規則隱藏，後面的 tab 名稱就不再重複顯示。
+# $sb_mark 是 Straw Boss 寫的角色圖示（main 星號、member 人形），一律在第一列；main 和 member 的 tab 名稱在第二列，各用 $sb_main_tab／$sb_tab（pi-straw-boss 0.13.4 起；member 沿用舊的 $sb_tab，沒 reload 的 session 也有第二行，Herdr 規則只能看自己的 token，所以分兩個 token 才能分別上色），其他 agent 沒有這兩個 token，整列隱藏後只剩一行；subagent 的 [sub] 隱藏。
+# Herdr 的 token 顏色只接受 hex，不能引用主題色票，所以下面的值是照 Catppuccin Mocha 抄的；換主題時要一起改：
+#   #f9e2af = yellow（塔台）、#89b4fa = blue（main）、#a6e3a1 = green（member）、
+#   #9399b2 = overlay2（其他標記）、#6c7086 = overlay0（subagent 與縮排的 └）
+# $sb_name 是 subagent 自己的名字（Straw Boss 從開它的人的紀錄寫上去的）：Herdr 換新 server 後 pane 標籤會掉，只剩 workspace 名稱，所以狀態圖示後面改顯示這個 token；非 subagent 沒有這個 token，什麼都不顯示。
+# 第一列最前面的 $sb_indent 只有 subagent 有（├─／└─，跟 Spaces 列的 worktree 樹一樣），Herdr 一定會在後面接「 · 」。
+[ui.sidebar.agents]
+rows = [
+  [{ token = "$sb_indent", fg = "#6c7086" }, "state_icon",
+   { token = "$sb_name" },
+   { token = "$sb_mark", fg = "#9399b2", rules = [ { starts_with = "", fg = "#89b4fa", bold = true }, { starts_with = "", fg = "#a6e3a1", bold = true }, { starts_with = "[sub]", hide = true } ] },
+   { token = "tab", rules = [ { equals = "󰐻", fg = "#f9e2af", bold = true }, { contains = "", hide = true } ] },
+   "machine", "workspace"],
+  [{ token = "$sb_main_tab", fg = "#89b4fa", bold = true }, { token = "$sb_tab", fg = "#a6e3a1", bold = true }],
+]
 
 # system 會用 osascript 發 macOS 通知，多一個不受 herdr 控制的系統提示音；改成只在 herdr 裡顯示
 [ui.toast]
@@ -17,3 +36,10 @@ delivery = "herdr"
 [ui.sound]
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
+
+# Straw Boss 的 herdr plugin：切換側邊欄 Agents 列的 net 檢視（tower → main → member，subagent 排在開它的人底下）。
+[[keys.command]]
+key = "prefix+alt+n"
+type = "plugin_action"
+command = "wayne930242.straw-boss.net"
+description = "toggle the straw net view"
