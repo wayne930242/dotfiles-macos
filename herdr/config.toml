@@ -53,9 +53,9 @@ command = "wayne930242.straw-boss.net"
 description = "toggle the straw net view"
 
 # Straw Boss Reaper 的 herdr plugin：釘選／取消釘選目前的 workspace。取消釘選會把名稱改回釘選前的那個。
-# prefix+p 是 Herdr 預設的上一個 tab、prefix+shift+p 是預設的 rename_pane，所以跟 net 檢視一樣用 alt。
+# prefix+p 是 Herdr 預設的上一個 tab、prefix+shift+p 是預設的 rename_pane，alt-p 被 AeroSpace 全域攔走，所以用沒被佔的 prefix+i。
 [[keys.command]]
-key = "prefix+alt+p"
+key = "prefix+i"
 type = "plugin_action"
 command = "wayne930242.straw-boss-reaper.pin"
 description = "pin or unpin the workspace"
