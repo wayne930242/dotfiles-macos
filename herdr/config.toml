@@ -25,6 +25,14 @@ rows = [
   [{ token = "$sb_main_tab", fg = "#89b4fa", bold = true }, { token = "$sb_tab", fg = "#a6e3a1", bold = true }],
 ]
 
+# Spaces 列照 Herdr 預設，只在 workspace 名稱後面加上 $pin：Straw Boss Reaper 的釘選圖示（Nerd Font 󰐃，U+F0403）。
+# 釘選的 workspace 不會被 reaper 清掉；沒釘選的 workspace 沒有這個 token，什麼都不顯示。
+[ui.sidebar.spaces]
+rows = [
+  ["state_icon", "workspace", { token = "$pin", fg = "#f9e2af" }],
+  ["branch", "git_status"],
+]
+
 # system 會用 osascript 發 macOS 通知，多一個不受 herdr 控制的系統提示音；改成只在 herdr 裡顯示
 [ui.toast]
 delivery = "herdr"
@@ -43,3 +51,11 @@ key = "prefix+alt+n"
 type = "plugin_action"
 command = "wayne930242.straw-boss.net"
 description = "toggle the straw net view"
+
+# Straw Boss Reaper 的 herdr plugin：釘選／取消釘選目前的 workspace。取消釘選會把名稱改回釘選前的那個。
+# prefix+p（小寫）是 Herdr 預設的上一個 tab，所以用 shift+p。
+[[keys.command]]
+key = "prefix+shift+p"
+type = "plugin_action"
+command = "wayne930242.straw-boss-reaper.pin"
+description = "pin or unpin the workspace"
