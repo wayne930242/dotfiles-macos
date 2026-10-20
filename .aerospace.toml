@@ -130,7 +130,7 @@ run = 'move-node-to-workspace Q'
 
 [[on-window-detected]]
 if.app-id = 'net.pixiv.vroid.macosx'
-run = 'move-node-to-workspace 2'
+run = ['layout tiling', 'move-node-to-workspace 2']
 
 [[on-window-detected]]
 if.app-id = 'com.electron.dockerdesktop'
