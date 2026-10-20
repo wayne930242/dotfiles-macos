@@ -116,7 +116,7 @@ brew services start borders
 | `alt-g` | G | 遊戲 / 休閒 |
 | `alt-s` | S | 社交 (Discord, Telegram) |
 | `alt-q` | Q | 專案 (Linear + Slack) |
-| `alt-d` | D | Docker |
+| `alt-d` | D | OrbStack |
 | `alt-a` | A | AI / Agents |
 | `alt-z` | Z | Obsidian (筆記) |
 | `alt-x` | X | Xcode（含 Simulator 與 Android Studio） |

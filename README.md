@@ -118,7 +118,7 @@ Add to `~/.config/zed/settings.json`:
 | `alt-g` | G | Game / Chill |
 | `alt-s` | S | Social (Discord, Telegram) |
 | `alt-q` | Q | Project (Linear + Slack) |
-| `alt-d` | D | Docker |
+| `alt-d` | D | OrbStack |
 | `alt-a` | A | AI / Agents |
 | `alt-z` | Z | Obsidian (Notes) |
 | `alt-x` | X | Xcode (plus Simulator and Android Studio) |
