@@ -110,7 +110,7 @@ run = 'move-node-to-workspace C'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
-run = 'move-node-to-workspace C'
+run = ['move-node-to-workspace C', 'exec-and-forget ~/dotfiles-macos/bin/aerospace-chrome-extra']
 
 [[on-window-detected]]
 if.app-id = 'com.hnc.Discord'

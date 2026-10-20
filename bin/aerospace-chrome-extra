@@ -1,0 +1,12 @@
+#!/bin/bash
+# Keeps the oldest Chrome window in workspace C and moves every later one to G,
+# so a second window (e.g. one opened for recording) never tiles over the main browser.
+# Called from AeroSpace's on-window-detected rule for com.google.Chrome.
+set -euo pipefail
+
+ids=$(aerospace list-windows --monitor all --app-bundle-id com.google.Chrome --format '%{window-id}' | sort -n)
+oldest=$(head -1 <<<"$ids")
+for id in $ids; do
+    [[ "$id" == "$oldest" ]] && continue
+    aerospace move-node-to-workspace --window-id "$id" G
+done
