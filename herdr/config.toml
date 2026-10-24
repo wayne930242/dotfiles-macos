@@ -59,3 +59,10 @@ key = "prefix+i"
 type = "plugin_action"
 command = "wayne930242.straw-boss-reaper.pin"
 description = "pin or unpin the workspace"
+
+# ccswitch 的 herdr plugin（cc-account-switcher/herdr-plugin）：用 overlay 開 ccswitch --dashboard，看各帳號用量並切換；q 或 Esc 關閉。
+[[keys.command]]
+key = "prefix+u"
+type = "plugin_action"
+command = "wayne930242.ccswitch.dashboard"
+description = "open the ccswitch dashboard"
