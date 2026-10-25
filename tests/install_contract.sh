@@ -118,4 +118,20 @@ expected_stop_calls=(
 )
 [ "${calls[*]}" = "${expected_stop_calls[*]}" ]
 
+# Restore brings back the restored configs' services, not this checkout's agents
+calls=()
+pgrep_calls=0
+start_services --without-agents >/dev/null
+expected_restore_calls=(
+    "brew services restart sketchybar"
+    "brew services restart borders"
+    "pgrep -x AeroSpace"
+    "osascript -e tell application \"AeroSpace\" to quit"
+    "pgrep -x AeroSpace"
+    "open -a AeroSpace"
+    "aerospace list-modes"
+)
+[ "${calls[*]}" = "${expected_restore_calls[*]}" ]
+grep -q 'start_services --without-agents' "$PROJECT_DIR/install.sh"
+
 echo "PASS: install service contract"

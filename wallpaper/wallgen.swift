@@ -34,6 +34,8 @@ let edge: CGFloat = 10
 
 let fm = FileManager.default
 let home = fm.homeDirectoryForCurrentUser
+// wallpaper/bin/wallgen, wherever it was started from
+let executable = (Bundle.main.executableURL ?? URL(fileURLWithPath: CommandLine.arguments[0])).resolvingSymlinksInPath()
 
 func run(_ tool: String, _ args: [String]) -> String? {
     let p = Process()
@@ -43,8 +45,12 @@ func run(_ tool: String, _ args: [String]) -> String? {
     p.standardOutput = out
     p.standardError = FileHandle.nullDevice
     do { try p.run() } catch { return nil }
+    // A hung repository would keep launchd from starting the next hourly run
+    let timeout = DispatchWorkItem { if p.isRunning { p.terminate() } }
+    DispatchQueue.global().asyncAfter(deadline: .now() + 20, execute: timeout)
     let data = out.fileHandleForReading.readDataToEndOfFile()
     p.waitUntilExit()
+    timeout.cancel()
     return p.terminationStatus == 0 ? String(decoding: data, as: UTF8.self) : nil
 }
 
@@ -121,8 +127,7 @@ func repositories() -> [URL] {
             out.append(dir)
         }
     }
-    let dotfiles = URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
-        .deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
+    let dotfiles = executable.deletingLastPathComponent().deletingLastPathComponent().deletingLastPathComponent()
     if fm.fileExists(atPath: dotfiles.appendingPathComponent(".git").path), !out.contains(dotfiles) {
         out.append(dotfiles)
     }
@@ -144,7 +149,8 @@ struct Commits {
         let lock = NSLock()
         var perDay: [String: Int] = [:], week: [String: Int] = [:]
         DispatchQueue.concurrentPerform(iterations: repos.count) { i in
-            var args = ["-C", repos[i].path, "log", "--all", "--since=\(weeks * 7).days",
+            // Stash commits are work in progress, not commits
+            var args = ["-C", repos[i].path, "log", "--exclude=refs/stash", "--all", "--since=\(weeks * 7).days",
                         "--format=%ad", "--date=short"]
             if !email.isEmpty { args.append("--author=\(email)") }
             guard let out = run(git, args) else { return }
@@ -155,8 +161,12 @@ struct Commits {
             if recent > 0 { week[repos[i].lastPathComponent] = recent }
             lock.unlock()
         }
-        self.perDay = perDay
-        self.total = perDay.values.reduce(0, +)
+        // --since filters on the committer date but %ad is the author date; keep only the days the grid shows
+        let today = calendar.startOfDay(for: Date())
+        let weekday = (calendar.component(.weekday, from: today) + 5) % 7  // Monday 0
+        let first = day.string(from: calendar.date(byAdding: .day, value: -weekday - (weeks - 1) * 7, to: today)!)
+        self.perDay = perDay.filter { $0.key >= first }
+        self.total = self.perDay.values.reduce(0, +)
         self.week = week.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }
             .map { ($0.key, $0.value) }
     }
@@ -454,8 +464,10 @@ func styleTerminal(_ c: Canvas, _ facts: Facts, _ commits: Commits, _ boss: Boss
     y += drawFacts(c, facts, CGPoint(x: indent, y: y), k).height + k.line
     prompt("git heat --weeks \(heatWeeks)")
     y += drawHeat(c, commits, weeks: heatWeeks, CGPoint(x: indent, y: y), k).height + k.line * 0.6
-    c.spans([(numbered(commits.total), green), (" commits · \(commits.repos) repos · last 7 days", overlay0)], CGPoint(x: indent, y: y), k.f)
+    c.spans([(numbered(commits.total), green), (" commits in \(heatWeeks) weeks · \(commits.repos) repos", overlay0)], CGPoint(x: indent, y: y), k.f)
     y += k.line * 1.3
+    c.text("last 7 days", CGPoint(x: indent, y: y), k.small, overlay0)
+    y += k.line * 1.1
     y += drawBars(c, commits.week, color: green, limit: 5, CGPoint(x: indent, y: y), k).height + k.line
     prompt("boss today")
     c.spans([("\(boss.active)", peach), (" sessions · ", overlay0), ("\(boss.started)", peach), (" started   ", overlay0)] + nowSpans(boss),
@@ -572,7 +584,7 @@ while args.count >= 2, args[0].hasPrefix("--") { options[String(args.removeFirst
 if !args.isEmpty { fail("usage: wallgen apply [--style S] [--image FILE|none] | render [--style S] [--image FILE|none] --out FILE [--size WxH] [--scale N]") }
 let style = options["style"] ?? "terminal"
 // wallpaper/background.png beside the source, unless --image names another or "none"
-let imagePath = options["image"] ?? URL(fileURLWithPath: CommandLine.arguments[0]).resolvingSymlinksInPath()
+let imagePath = options["image"] ?? executable
     .deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("background.png").path
 let image = imagePath == "none" ? nil : NSImage(contentsOfFile: imagePath)
 if imagePath != "none", options["image"] != nil, image == nil { fail("cannot read \(imagePath)") }
@@ -599,8 +611,9 @@ case "apply":
     // A new file name each run: macOS keeps showing a cached image for a path it already set
     let dir = home.appendingPathComponent("Library/Application Support/wallgen")
     do { try fm.createDirectory(at: dir, withIntermediateDirectories: true) } catch { fail("create \(dir.path): \(error.localizedDescription)") }
+    // At login launchd can run this before the displays attach; leave the current images alone then
+    if NSScreen.screens.isEmpty { fail("no screens attached") }
     let stamp = Int(Date().timeIntervalSince1970)
-    var keep: Set<String> = []
     for (i, screen) in NSScreen.screens.enumerated() {
         guard let png = render(style: style, size: screen.frame.size, scale: screen.backingScaleFactor, image: image,
                                facts: facts, commits: commits, boss: boss) else { fail("render failed") }
@@ -611,9 +624,12 @@ case "apply":
                 .imageScaling: NSImageScaling.scaleProportionallyUpOrDown.rawValue, .allowClipping: true,
             ])
         } catch { fail("set wallpaper: \(error.localizedDescription)") }
-        keep.insert(file.lastPathComponent)
     }
-    for old in (try? fm.contentsOfDirectory(atPath: dir.path)) ?? [] where old.hasSuffix(".png") && !keep.contains(old) {
+    // A detached display or another Space can still show an older image, so only images a day
+    // old go; the name's stamp says when it was drawn
+    let dayAgo = stamp - 86_400
+    for old in (try? fm.contentsOfDirectory(atPath: dir.path)) ?? [] where old.hasPrefix("screen") && old.hasSuffix(".png") {
+        guard let dash = old.lastIndex(of: "-"), let drawn = Int(old[old.index(after: dash)...].dropLast(4)), drawn < dayAgo else { continue }
         try? fm.removeItem(at: dir.appendingPathComponent(old))
     }
 default:

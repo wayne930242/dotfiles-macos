@@ -328,15 +328,32 @@ restart_aerospace() {
     echo "   ⚠️  AeroSpace started but its server is not responding"
 }
 
+# --without-agents leaves the net feed and the wallpaper stopped, for restore
 start_services() {
     echo ""
     echo "🚀 Starting services..."
 
     brew services restart sketchybar 2>/dev/null && echo "   ✅ SketchyBar started" || echo "   ⚠️  SketchyBar failed to start"
     brew services restart borders 2>/dev/null && echo "   ✅ Borders started" || echo "   ⚠️  Borders failed to start"
-    start_net_feed
-    start_wallpaper
+    if [ "${1:-}" != "--without-agents" ]; then
+        start_net_feed
+        start_wallpaper
+    fi
     restart_aerospace
+}
+
+# Desktop widgets cover the wallpaper wherever it shows through a translucent window.
+# WindowManager reads this at launch, so it applies after the next login
+apply_macos_defaults() {
+    echo ""
+    echo "⚙️  Applying macOS settings..."
+    defaults write com.apple.WindowManager StandardHideWidgets -bool true \
+        && echo "   ✅ Desktop widgets hidden (from the next login)"
+}
+
+revert_macos_defaults() {
+    defaults delete com.apple.WindowManager StandardHideWidgets 2>/dev/null \
+        && echo "   ✅ Desktop widgets setting restored" || true
 }
 
 stop_services() {
@@ -357,6 +374,7 @@ do_install() {
     backup_configs
     create_symlinks
     set_permissions
+    apply_macos_defaults
     build_helpers
     start_services
 
@@ -396,6 +414,7 @@ do_uninstall() {
     [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds" && echo "   ✅ Removed herdr sounds symlink"
     [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
     [ -f "$WALL_AGENT_PLIST" ] && rm "$WALL_AGENT_PLIST" && echo "   ✅ Removed wallpaper launch agent"
+    revert_macos_defaults
 
     echo ""
     echo "✅ Uninstall complete!"
@@ -469,7 +488,8 @@ do_restore() {
     [ -f "$RESTORE_DIR/.tmux.conf" ] && cp "$RESTORE_DIR/.tmux.conf" "$HOME/" && echo "   ✅ Restored .tmux.conf"
     [ -f "$RESTORE_DIR/herdr/config.toml" ] && mkdir -p "$HOME/.config/herdr" && cp "$RESTORE_DIR/herdr/config.toml" "$HOME/.config/herdr/" && echo "   ✅ Restored herdr config.toml"
 
-    start_services
+    revert_macos_defaults
+    start_services --without-agents
 
     echo ""
     echo "✅ Restore complete!"
