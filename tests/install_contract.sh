@@ -68,8 +68,12 @@ trap 'rm -rf "$scratch"' EXIT
 NET_BIN="$scratch/net"
 NET_AGENT_PLIST="$scratch/LaunchAgents/$NET_AGENT_LABEL.plist"
 NET_LOG="$scratch/Logs/sketchybar-net.log"
+WALL_BIN="$scratch/wallgen"
+WALL_AGENT_PLIST="$scratch/LaunchAgents/$WALL_AGENT_LABEL.plist"
+WALL_LOG="$scratch/Logs/wallgen.log"
 printf '#!/bin/sh\n' >"$NET_BIN"
-chmod +x "$NET_BIN"
+printf '#!/bin/sh\n' >"$WALL_BIN"
+chmod +x "$NET_BIN" "$WALL_BIN"
 uid="$(id -u)"
 
 start_services >/dev/null
@@ -80,6 +84,9 @@ expected_service_calls=(
     "launchctl bootout gui/$uid/$NET_AGENT_LABEL"
     "launchctl bootstrap gui/$uid $NET_AGENT_PLIST"
     "launchctl kickstart gui/$uid/$NET_AGENT_LABEL"
+    "launchctl bootout gui/$uid/$WALL_AGENT_LABEL"
+    "launchctl bootstrap gui/$uid $WALL_AGENT_PLIST"
+    "launchctl kickstart gui/$uid/$WALL_AGENT_LABEL"
     "pgrep -x AeroSpace"
     "osascript -e tell application \"AeroSpace\" to quit"
     "pgrep -x AeroSpace"
@@ -94,12 +101,20 @@ plutil -lint "$NET_AGENT_PLIST" >/dev/null
 [ "$(plutil -extract ProgramArguments.0 raw "$NET_AGENT_PLIST")" = "$NET_BIN" ]
 [ "$(plutil -extract ProgramArguments.1 raw "$NET_AGENT_PLIST")" = "feed" ]
 
+# The wallpaper agent runs `wallgen apply` hourly, in the background
+plutil -lint "$WALL_AGENT_PLIST" >/dev/null
+[ "$(plutil -extract ProgramArguments.0 raw "$WALL_AGENT_PLIST")" = "$WALL_BIN" ]
+[ "$(plutil -extract ProgramArguments.1 raw "$WALL_AGENT_PLIST")" = "apply" ]
+[ "$(plutil -extract StartInterval raw "$WALL_AGENT_PLIST")" = "3600" ]
+[ "$(plutil -extract ProcessType raw "$WALL_AGENT_PLIST")" = "Background" ]
+
 calls=()
 stop_services >/dev/null
 expected_stop_calls=(
     "brew services stop sketchybar"
     "brew services stop borders"
     "launchctl bootout gui/$uid/$NET_AGENT_LABEL"
+    "launchctl bootout gui/$uid/$WALL_AGENT_LABEL"
 )
 [ "${calls[*]}" = "${expected_stop_calls[*]}" ]
 

@@ -3,3 +3,6 @@ openspec/
 
 # Built by install.sh from sketchybar/helpers/net
 sketchybar/helpers/bin/
+
+# Built by install.sh from wallpaper/wallgen.swift
+wallpaper/bin/

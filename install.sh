@@ -15,6 +15,12 @@ NET_AGENT_LABEL="com.wayne930242.sketchybar-net"
 NET_AGENT_PLIST="$HOME/Library/LaunchAgents/$NET_AGENT_LABEL.plist"
 NET_LOG="$HOME/Library/Logs/sketchybar-net.log"
 
+# The wallpaper: wallpaper/wallgen.swift, built with swiftc, redraws it hourly from a launch agent
+WALL_BIN="$DOTFILES_DIR/wallpaper/bin/wallgen"
+WALL_AGENT_LABEL="com.wayne930242.wallgen"
+WALL_AGENT_PLIST="$HOME/Library/LaunchAgents/$WALL_AGENT_LABEL.plist"
+WALL_LOG="$HOME/Library/Logs/wallgen.log"
+
 print_header() {
     echo ""
     echo "╔═══════════════════════════════════════════════════════════════╗"
@@ -171,12 +177,20 @@ build_helpers() {
 
     if ! command -v go &>/dev/null; then
         echo "   ⚠️  Go not found; the net pill stays hidden until ./install.sh runs with Go"
-        return 0
-    fi
-    if (cd "$DOTFILES_DIR/sketchybar/helpers/net" && go build -trimpath -ldflags="-s -w" -o ../bin/net .); then
+    elif (cd "$DOTFILES_DIR/sketchybar/helpers/net" && go build -trimpath -ldflags="-s -w" -o ../bin/net .); then
         echo "   ✅ sketchybar/helpers/bin/net"
     else
         echo "   ⚠️  The net helper failed to build"
+    fi
+
+    # swiftc comes with the Xcode Command Line Tools (xcode-select --install)
+    if ! command -v swiftc &>/dev/null; then
+        echo "   ⚠️  swiftc not found; the wallpaper stays as it is until ./install.sh runs with it"
+    elif mkdir -p "$DOTFILES_DIR/wallpaper/bin" \
+        && swiftc -O -swift-version 5 -o "$WALL_BIN" "$DOTFILES_DIR/wallpaper/wallgen.swift"; then
+        echo "   ✅ wallpaper/bin/wallgen"
+    else
+        echo "   ⚠️  The wallpaper generator failed to build"
     fi
 }
 
@@ -207,26 +221,75 @@ write_net_agent() {
 EOF
 }
 
+# Loads a launch agent from its plist, replacing a running copy
+load_agent() {
+    local label="$1" plist="$2" name="$3" domain
+    domain="gui/$(id -u)"
+    launchctl bootout "$domain/$label" 2>/dev/null || true
+    # bootout returns before the old job is gone, and bootstrap fails until it is
+    for ((attempt = 0; attempt < 10; attempt++)); do
+        if launchctl bootstrap "$domain" "$plist" 2>/dev/null; then
+            # A domain in on-demand-only mode holds RunAtLoad back; kickstart starts it now
+            launchctl kickstart "$domain/$label" 2>/dev/null || true
+            echo "   ✅ $name started"
+            return 0
+        fi
+        sleep 0.5
+    done
+    echo "   ⚠️  $name failed to start"
+}
+
 start_net_feed() {
     if [ ! -x "$NET_BIN" ]; then
         echo "   ⚠️  Net feed not started: sketchybar/helpers/bin/net is not built"
         return 0
     fi
     write_net_agent
-    local domain
-    domain="gui/$(id -u)"
-    launchctl bootout "$domain/$NET_AGENT_LABEL" 2>/dev/null || true
-    # bootout returns before the old job is gone, and bootstrap fails until it is
-    for ((attempt = 0; attempt < 10; attempt++)); do
-        if launchctl bootstrap "$domain" "$NET_AGENT_PLIST" 2>/dev/null; then
-            # A domain in on-demand-only mode holds RunAtLoad back; kickstart starts it now
-            launchctl kickstart "$domain/$NET_AGENT_LABEL" 2>/dev/null || true
-            echo "   ✅ Net feed started"
-            return 0
-        fi
-        sleep 0.5
-    done
-    echo "   ⚠️  Net feed failed to start"
+    load_agent "$NET_AGENT_LABEL" "$NET_AGENT_PLIST" "Net feed"
+}
+
+write_wall_agent() {
+    mkdir -p "$(dirname "$WALL_AGENT_PLIST")" "$(dirname "$WALL_LOG")"
+    cat >"$WALL_AGENT_PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$WALL_AGENT_LABEL</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$WALL_BIN</string>
+        <string>apply</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StartInterval</key>
+    <integer>3600</integer>
+    <key>ProcessType</key>
+    <string>Background</string>
+    <key>LowPriorityIO</key>
+    <true/>
+    <key>Nice</key>
+    <integer>10</integer>
+    <key>StandardErrorPath</key>
+    <string>$WALL_LOG</string>
+</dict>
+</plist>
+EOF
+}
+
+start_wallpaper() {
+    if [ ! -x "$WALL_BIN" ]; then
+        echo "   ⚠️  Wallpaper not started: wallpaper/bin/wallgen is not built"
+        return 0
+    fi
+    write_wall_agent
+    load_agent "$WALL_AGENT_LABEL" "$WALL_AGENT_PLIST" "Wallpaper"
+}
+
+stop_wallpaper() {
+    launchctl bootout "gui/$(id -u)/$WALL_AGENT_LABEL" 2>/dev/null && echo "   ✅ Wallpaper stopped" || true
 }
 
 stop_net_feed() {
@@ -272,6 +335,7 @@ start_services() {
     brew services restart sketchybar 2>/dev/null && echo "   ✅ SketchyBar started" || echo "   ⚠️  SketchyBar failed to start"
     brew services restart borders 2>/dev/null && echo "   ✅ Borders started" || echo "   ⚠️  Borders failed to start"
     start_net_feed
+    start_wallpaper
     restart_aerospace
 }
 
@@ -282,6 +346,7 @@ stop_services() {
     brew services stop sketchybar 2>/dev/null && echo "   ✅ SketchyBar stopped" || true
     brew services stop borders 2>/dev/null && echo "   ✅ Borders stopped" || true
     stop_net_feed
+    stop_wallpaper
 }
 
 do_install() {
@@ -330,6 +395,7 @@ do_uninstall() {
     [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml" && echo "   ✅ Removed herdr config.toml symlink"
     [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds" && echo "   ✅ Removed herdr sounds symlink"
     [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
+    [ -f "$WALL_AGENT_PLIST" ] && rm "$WALL_AGENT_PLIST" && echo "   ✅ Removed wallpaper launch agent"
 
     echo ""
     echo "✅ Uninstall complete!"
@@ -379,8 +445,9 @@ do_restore() {
     echo "🔄 Restoring from: ${BACKUPS[$SELECTION]}"
 
     stop_services
-    # The feed belongs to this checkout's SketchyBar config, not to the restored one
+    # The feed and the wallpaper belong to this checkout, not to the restored configs
     [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
+    [ -f "$WALL_AGENT_PLIST" ] && rm "$WALL_AGENT_PLIST" && echo "   ✅ Removed wallpaper launch agent"
 
     # Remove current symlinks
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"

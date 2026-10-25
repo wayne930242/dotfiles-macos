@@ -30,8 +30,8 @@ cd ~/dotfiles-macos
 2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、jq、Go、sketchybar-app-font、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
-5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`）
-6. 啟動所有服務（包括 net feed 的 launch agent），並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
+5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`）與桌布產生器（`wallpaper/bin/wallgen`，用 Xcode Command Line Tools 的 `swiftc`）
+6. 啟動所有服務（包括 net feed 與桌布的 launch agent），並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
 
 Ghostty、herdr、tmux 與字型不在腳本安裝範圍內，請見[前置需求](#前置需求)。
 
@@ -156,6 +156,20 @@ brew services start borders
 內建螢幕的瀏海會蓋住底下的內容，而 SketchyBar 的左右項目不會避開它。`plugins/notch.sh` 在載入時與每次螢幕變更時量測瀏海（瀏海的點數寬度隨縮放改變：預設 1512 pt 時是 185 pt，1800 pt 時是 220 pt），設定 `notch_width`，並記下瀏海從哪裡開始；左側快碰到瀏海時，`plugins/aerospace.sh` 會減少每個工作區顯示的 app 圖示。
 
 bar 本身是透明的，只畫膠囊。每個項目都是一個疊在 bar 視窗上方的視窗，而在 macOS 27，點 bar 空白處會把 bar 的視窗提到它們上面；SketchyBar 只在項目變動時重排視窗，所以 bar 若有底色，整排項目會被蓋住，直到下次 reload。
+
+## 桌布
+
+桌布由 `wallpaper/wallgen.swift` 產生：底圖是一張克蘇魯潛伏在黑暗裡的畫（`wallpaper/background.png`），左側以終端機輸出的樣子列出系統資訊、`~/projects` 近 26 週的 commit 熱度圖，以及 Straw Boss 今天的 session。launch agent `com.wayne930242.wallgen` 每小時在背景跑一次 `wallgen apply`（每次約 1.5 秒），其餘時間桌布就是一張靜態圖，不佔資源；記錄寫在 `~/Library/Logs/wallgen.log`。鎖定畫面沿用同一張圖。
+
+```bash
+wallpaper/bin/wallgen render --out /tmp/wall.png   # 只預覽，不設成桌布
+wallpaper/bin/wallgen apply --style panels        # 另有 terminal（預設）、minimal
+wallpaper/bin/wallgen apply --image none          # 不用底圖
+```
+
+移除後桌布會停在最後一張，要換回來請到「系統設定 > 桌布」。
+
+Ghostty 在桌布上半透明（opacity 0.88、blur 40）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
 
 ## 主題配色
 

@@ -32,8 +32,8 @@ The install script will:
 2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, jq, Go, sketchybar-app-font, Neovim, and Yazi
 3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks for SketchyBar, JankyBorders, Neovim, Ghostty, AeroSpace, tmux, Hammerspoon, and herdr
-5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`)
-6. Start all services, including the net feed's launch agent, and restart AeroSpace so the CLI and app server use the same version
+5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`) and the wallpaper generator (`wallpaper/bin/wallgen`, with `swiftc` from the Xcode Command Line Tools)
+6. Start all services, including the net feed's and the wallpaper's launch agents, and restart AeroSpace so the CLI and app server use the same version
 
 Ghostty, herdr, tmux, and fonts are not installed by the script; see [Prerequisites](#prerequisites).
 
@@ -158,6 +158,20 @@ For the GUI as its own window in workspace A, open it (`/boss gui` in pi), then 
 The built-in display's notch hides whatever is drawn under it, and SketchyBar's left and right items ignore it. `plugins/notch.sh` measures the notch at load and on every display change (its width in points follows the display scaling: 185 pt at the default 1512 pt, 220 pt at 1800 pt), sets `notch_width`, and records where the notch starts. When the left side would reach it, `plugins/aerospace.sh` shows fewer app icons per workspace.
 
 The bar itself is transparent and only the pills draw. Each item is a window ordered above the bar's window; on macOS 27 a click on the bar's empty space raises the bar's window over them, and SketchyBar reorders its windows only when items change, so a drawn bar would hide every item until the next reload.
+
+## Wallpaper
+
+`wallpaper/wallgen.swift` draws the wallpaper: a painted backdrop (`wallpaper/background.png`, a dark Cthulhu scene) with a terminal-style readout on its left: a system profile, a 26-week commit heatmap over `~/projects`, and today's Straw Boss sessions. The launch agent `com.wayne930242.wallgen` runs `wallgen apply` hourly in the background (about 1.5 s per run), so the wallpaper costs nothing between runs; it logs to `~/Library/Logs/wallgen.log`. The lock screen shows the same image.
+
+```bash
+wallpaper/bin/wallgen render --out /tmp/wall.png                  # preview without setting it
+wallpaper/bin/wallgen apply --style panels                       # also: terminal (default), minimal
+wallpaper/bin/wallgen apply --image none                         # a plain backdrop
+```
+
+Uninstalling leaves the last image as the wallpaper; pick another in System Settings > Wallpaper.
+
+Ghostty is translucent over it (opacity 0.88, blur 40). `background-opacity-cells` makes herdr's sidebar and Neovim, which paint their own background, translucent too.
 
 ## Theme
 
