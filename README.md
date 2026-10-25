@@ -29,10 +29,11 @@ cd ~/dotfiles-macos
 
 The install script will:
 1. Install Homebrew (if not present)
-2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, Neovim, and Yazi
+2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, jq, Go, sketchybar-app-font, Neovim, and Yazi
 3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks for SketchyBar, JankyBorders, Neovim, Ghostty, AeroSpace, tmux, Hammerspoon, and herdr
-5. Start all services and restart AeroSpace so the CLI and app server use the same version
+5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`) and turn off "Click wallpaper to reveal desktop" (see [SketchyBar](#sketchybar))
+6. Start all services, including the net feed's launch agent, and restart AeroSpace so the CLI and app server use the same version
 
 Ghostty, herdr, tmux, and fonts are not installed by the script; see [Prerequisites](#prerequisites).
 
@@ -58,6 +59,8 @@ brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install media-control  # For media widget
+brew install jq go          # SketchyBar plugins; the net helper is built with Go
+brew install --cask font-sketchybar-app-font  # App icons in the workspace pill
 brew install --cask ghostty
 brew install herdr
 brew install tmux            # Optional, for bin/tm and bin/zed-tmux
@@ -119,18 +122,42 @@ Add to `~/.config/zed/settings.json`:
 | `alt-s` | S | Social (Discord, Telegram) |
 | `alt-q` | Q | Project (Linear + Slack) |
 | `alt-d` | D | OrbStack |
-| `alt-a` | A | AI / Agents |
+| `alt-a` | A | AI / Agents (the Straw Net GUI) |
 | `alt-z` | Z | Obsidian (Notes) |
 | `alt-x` | X | Xcode (plus Simulator and Android Studio) |
 
 Workspaces 1–3 go to the secondary monitor when one is connected; letter workspaces stay on the main monitor.
 `alt-enter` opens Ghostty, and `alt-shift-;` enters service mode (`esc` reloads the config).
 
-## SketchyBar Widgets
+| Key | Action |
+|-----|--------|
+| `alt-w` | Jump to the next agent waiting on you (each press goes to the one after) |
+| `alt-shift-w` | Open the Straw Net GUI |
+| service mode `b` | Bring the newest secondary browser window (an agent's page) beside the current workspace; again sends it back to G |
 
-**Left:** Mode Indicator (service mode) | Workspaces | Front App
+## SketchyBar
 
-**Right:** Calendar | Audio (volume + mic) | Battery | Temperature | Input | Network | Media | CPU / Memory
+**Left:** Straw Boss net | Mode Indicator (service mode) | Workspaces, with an icon per app
+
+**Right of the notch:** Media (only while something plays)
+
+**Right:** Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
+
+Every group is one pill with the same background and a neutral border; icons take a color only to report a state (an agent waiting on you, a low battery, a muted mic).
+
+### Straw Boss net
+
+The pill counts the [Straw Boss](https://github.com/wayne930242/pi-straw-boss) agents that wait on you, fail, work, or are done, and hides while no Straw Boss GUI server runs. Click it for the whole net as a tree: click a row to focus that agent's herdr pane, or shift-click to open its comms in the GUI. While an agent waits on you, the focused window's border turns orange.
+
+`sketchybar/helpers/net` is a small Go program. Its `feed` runs as the launch agent `com.wayne930242.sketchybar-net`, follows the event stream of the Straw Boss GUI server (its address is in `~/.pi/agent/straw-boss/gui.json`), and redraws only what changed; it logs to `~/Library/Logs/sketchybar-net.log`. With the herdr sidebar collapsed to zero width (`prefix+b` opens it), the pill is the agent list.
+
+For the GUI as its own window in workspace A, open it (`/boss gui` in pi), then in Chrome choose Cast, save, and share > Install page as app; AeroSpace moves the `Straw Net` app to A.
+
+### The notch
+
+The built-in display's notch hides whatever is drawn under it, and SketchyBar's left and right items ignore it. `plugins/notch.sh` measures the notch at load and on every display change (its width in points follows the display scaling: 185 pt at the default 1512 pt, 220 pt at 1800 pt), sets `notch_width`, and records where the notch starts. When the left side would reach it, `plugins/aerospace.sh` shows fewer app icons per workspace.
+
+SketchyBar's windows fade out whenever the desktop is revealed, and a click on the bar's empty space reaches the wallpaper, so the installer sets "Click wallpaper to reveal desktop" to "Only in Stage Manager" (System Settings > Desktop & Dock). Revert it with `defaults delete com.apple.WindowManager EnableStandardClickToShowDesktop`.
 
 ## Theme
 
@@ -144,6 +171,12 @@ SketchyBar and JankyBorders load their colors from `themes/<name>.sh`; set `THEM
 
 ```bash
 for t in tests/*.sh; do bash "$t"; done
+```
+
+The net helper has Go unit tests:
+
+```bash
+(cd sketchybar/helpers/net && go test ./...)
 ```
 
 ## License

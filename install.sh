@@ -8,6 +8,13 @@ set -e
 DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_BASE="$HOME/.dotfiles-backup"
 
+# The Straw Boss net in SketchyBar: a Go helper built from sketchybar/helpers/net, whose
+# `feed` runs as a launch agent
+NET_BIN="$DOTFILES_DIR/sketchybar/helpers/bin/net"
+NET_AGENT_LABEL="com.wayne930242.sketchybar-net"
+NET_AGENT_PLIST="$HOME/Library/LaunchAgents/$NET_AGENT_LABEL.plist"
+NET_LOG="$HOME/Library/Logs/sketchybar-net.log"
+
 print_header() {
     echo ""
     echo "╔═══════════════════════════════════════════════════════════════╗"
@@ -36,6 +43,9 @@ install_deps() {
     brew install sketchybar 2>/dev/null || echo "   SketchyBar already installed or skipped"
     brew install borders 2>/dev/null || echo "   Borders already installed or skipped"
     brew install media-control 2>/dev/null || echo "   media-control already installed or skipped"
+    brew install jq 2>/dev/null || echo "   jq already installed or skipped"
+    brew install go 2>/dev/null || echo "   Go already installed or skipped"
+    brew install --cask font-sketchybar-app-font 2>/dev/null || echo "   sketchybar-app-font already installed or skipped"
     brew install neovim 2>/dev/null || echo "   Neovim already installed or skipped"
     brew install yazi 2>/dev/null || echo "   Yazi already installed or skipped"
 }
@@ -155,6 +165,85 @@ set_permissions() {
     echo "   ✅ Permissions set"
 }
 
+build_helpers() {
+    echo ""
+    echo "🔨 Building SketchyBar helpers..."
+
+    if ! command -v go &>/dev/null; then
+        echo "   ⚠️  Go not found; the net pill stays hidden until ./install.sh runs with Go"
+        return 0
+    fi
+    if (cd "$DOTFILES_DIR/sketchybar/helpers/net" && go build -trimpath -ldflags="-s -w" -o ../bin/net .); then
+        echo "   ✅ sketchybar/helpers/bin/net"
+    else
+        echo "   ⚠️  The net helper failed to build"
+    fi
+}
+
+set_macos_defaults() {
+    echo ""
+    echo "⚙️  Setting macOS defaults..."
+
+    # SketchyBar's windows fade out when the desktop is revealed, and a click on the bar's
+    # empty space reaches the wallpaper: reveal the desktop on a wallpaper click only in
+    # Stage Manager (System Settings > Desktop & Dock)
+    defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
+    echo "   ✅ Click wallpaper to reveal desktop: only in Stage Manager"
+}
+
+write_net_agent() {
+    mkdir -p "$(dirname "$NET_AGENT_PLIST")" "$(dirname "$NET_LOG")"
+    cat >"$NET_AGENT_PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$NET_AGENT_LABEL</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$NET_BIN</string>
+        <string>feed</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardErrorPath</key>
+    <string>$NET_LOG</string>
+</dict>
+</plist>
+EOF
+}
+
+start_net_feed() {
+    if [ ! -x "$NET_BIN" ]; then
+        echo "   ⚠️  Net feed not started: sketchybar/helpers/bin/net is not built"
+        return 0
+    fi
+    write_net_agent
+    local domain
+    domain="gui/$(id -u)"
+    launchctl bootout "$domain/$NET_AGENT_LABEL" 2>/dev/null || true
+    # bootout returns before the old job is gone, and bootstrap fails until it is
+    for ((attempt = 0; attempt < 10; attempt++)); do
+        if launchctl bootstrap "$domain" "$NET_AGENT_PLIST" 2>/dev/null; then
+            # A domain in on-demand-only mode holds RunAtLoad back; kickstart starts it now
+            launchctl kickstart "$domain/$NET_AGENT_LABEL" 2>/dev/null || true
+            echo "   ✅ Net feed started"
+            return 0
+        fi
+        sleep 0.5
+    done
+    echo "   ⚠️  Net feed failed to start"
+}
+
+stop_net_feed() {
+    launchctl bootout "gui/$(id -u)/$NET_AGENT_LABEL" 2>/dev/null && echo "   ✅ Net feed stopped" || true
+}
+
 restart_aerospace() {
     echo ""
     echo "🚀 Restarting AeroSpace..."
@@ -193,6 +282,7 @@ start_services() {
 
     brew services restart sketchybar 2>/dev/null && echo "   ✅ SketchyBar started" || echo "   ⚠️  SketchyBar failed to start"
     brew services restart borders 2>/dev/null && echo "   ✅ Borders started" || echo "   ⚠️  Borders failed to start"
+    start_net_feed
     restart_aerospace
 }
 
@@ -202,6 +292,7 @@ stop_services() {
 
     brew services stop sketchybar 2>/dev/null && echo "   ✅ SketchyBar stopped" || true
     brew services stop borders 2>/dev/null && echo "   ✅ Borders stopped" || true
+    stop_net_feed
 }
 
 do_install() {
@@ -212,6 +303,8 @@ do_install() {
     backup_configs
     create_symlinks
     set_permissions
+    build_helpers
+    set_macos_defaults
     start_services
 
     echo ""
@@ -223,6 +316,8 @@ do_install() {
     echo "║  2. Press alt+shift+; then esc to reload AeroSpace config     ║"
     echo "║  3. Open Hammerspoon once, grant Accessibility permission,    ║"
     echo "║     then enable 'Launch at Login' from its menu bar icon      ║"
+    echo "║  4. Open the Straw Boss GUI (/boss gui in pi), then in Chrome ║"
+    echo "║     choose Cast, save, and share > Install page as app        ║"
     echo "╚═══════════════════════════════════════════════════════════════╝"
     echo ""
     echo "🎨 Enjoy your Cyberpunk desktop!"
@@ -246,6 +341,7 @@ do_uninstall() {
     [ -L "$HOME/.hammerspoon" ] && rm "$HOME/.hammerspoon" && echo "   ✅ Removed hammerspoon symlink"
     [ -L "$HOME/.config/herdr/config.toml" ] && rm "$HOME/.config/herdr/config.toml" && echo "   ✅ Removed herdr config.toml symlink"
     [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds" && echo "   ✅ Removed herdr sounds symlink"
+    [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
 
     echo ""
     echo "✅ Uninstall complete!"

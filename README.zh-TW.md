@@ -27,10 +27,11 @@ cd ~/dotfiles-macos
 
 安裝腳本會自動：
 1. 安裝 Homebrew（如未安裝）
-2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、Neovim 與 Yazi
+2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、jq、Go、sketchybar-app-font、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
-5. 啟動所有服務並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
+5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`），並關掉「按一下桌布以顯示桌面」（見 [SketchyBar](#sketchybar)）
+6. 啟動所有服務（包括 net feed 的 launch agent），並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
 
 Ghostty、herdr、tmux 與字型不在腳本安裝範圍內，請見[前置需求](#前置需求)。
 
@@ -56,6 +57,8 @@ brew tap FelixKratz/formulae
 brew install sketchybar
 brew install borders
 brew install media-control  # 媒體小工具需要
+brew install jq go          # SketchyBar 外掛需要 jq；net 輔助程式用 Go 編譯
+brew install --cask font-sketchybar-app-font  # 工作區膠囊裡的 app 圖示
 brew install --cask ghostty
 brew install herdr
 brew install tmux            # 選用，bin/tm 與 bin/zed-tmux 需要
@@ -117,18 +120,42 @@ brew services start borders
 | `alt-s` | S | 社交 (Discord, Telegram) |
 | `alt-q` | Q | 專案 (Linear + Slack) |
 | `alt-d` | D | OrbStack |
-| `alt-a` | A | AI / Agents |
+| `alt-a` | A | AI / Agents（Straw Net GUI） |
 | `alt-z` | Z | Obsidian (筆記) |
 | `alt-x` | X | Xcode（含 Simulator 與 Android Studio） |
 
 有外接螢幕時，工作區 1–3 放在副螢幕；字母工作區固定在主螢幕。
 `alt-enter` 開啟 Ghostty，`alt-shift-;` 進入 service mode（按 `esc` 重新載入設定）。
 
-## SketchyBar 小工具
+| 快捷鍵 | 動作 |
+|--------|------|
+| `alt-w` | 跳到下一個等你回覆的 agent（每按一次換下一個） |
+| `alt-shift-w` | 開啟 Straw Net GUI |
+| service mode 的 `b` | 把最新的副瀏覽器視窗（例如 agent 開的頁面）拉到目前的工作區並排；再按一次送回 G |
 
-**左側：** 模式指示（service mode）| 工作區 | 前景 App
+## SketchyBar
 
-**右側：** 日曆 | 音訊（音量 + 麥克風）| 電池 | 溫度 | 輸入法 | 網路 | 媒體 | CPU / 記憶體
+**左側：** Straw Boss net | 模式指示（service mode）| 工作區（每個 app 一個圖示）
+
+**瀏海右側：** 媒體（只在播放時出現）
+
+**右側：** 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
+
+每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。
+
+### Straw Boss net
+
+這顆膠囊顯示 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) 網裡等你回覆、出錯、執行中與已完成的 agent 數量；沒有 Straw Boss GUI 伺服器在跑時就隱藏。點開是整張網的樹狀選單：點一列會切到那個 agent 的 herdr pane，按住 shift 點則在 GUI 開它的通訊頁。有 agent 等你時，焦點視窗的邊框會變成橘色。
+
+`sketchybar/helpers/net` 是一支小型 Go 程式。它的 `feed` 以 launch agent `com.wayne930242.sketchybar-net` 常駐，訂閱 Straw Boss GUI 伺服器的事件串流（位址寫在 `~/.pi/agent/straw-boss/gui.json`），只重畫有變動的部分，記錄寫在 `~/Library/Logs/sketchybar-net.log`。herdr 的側欄預設收成零寬（`prefix+b` 可以打開），agent 清單就改看這顆膠囊。
+
+想讓 GUI 成為 workspace A 裡的獨立視窗：先開啟 GUI（在 pi 裡輸入 `/boss gui`），再到 Chrome 選「投放、儲存及分享」>「將網頁安裝為應用程式」；AeroSpace 會把 `Straw Net` 這個 app 移到 A。
+
+### 瀏海
+
+內建螢幕的瀏海會蓋住底下的內容，而 SketchyBar 的左右項目不會避開它。`plugins/notch.sh` 在載入時與每次螢幕變更時量測瀏海（瀏海的點數寬度隨縮放改變：預設 1512 pt 時是 185 pt，1800 pt 時是 220 pt），設定 `notch_width`，並記下瀏海從哪裡開始；左側快碰到瀏海時，`plugins/aerospace.sh` 會減少每個工作區顯示的 app 圖示。
+
+SketchyBar 的視窗在「顯示桌面」時會淡出，而點在 bar 空白處的點擊會落到桌布上，所以安裝腳本把「按一下桌布以顯示桌面」設成「僅限幕前調度」（系統設定 > 桌面與 Dock）。要改回來，執行 `defaults delete com.apple.WindowManager EnableStandardClickToShowDesktop`。
 
 ## 主題配色
 
@@ -142,6 +169,12 @@ SketchyBar 與 JankyBorders 的顏色來自 `themes/<名稱>.sh`，切換時改 
 
 ```bash
 for t in tests/*.sh; do bash "$t"; done
+```
+
+net 輔助程式有 Go 單元測試：
+
+```bash
+(cd sketchybar/helpers/net && go test ./...)
 ```
 
 ## 授權
