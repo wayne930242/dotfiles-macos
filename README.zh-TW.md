@@ -173,7 +173,7 @@ wallpaper/bin/wallgen apply --image none          # 不用底圖
 
 安裝時也會關掉桌面小工具（`StandardHideWidgets`），不然隔著半透明視窗看到桌布時，小工具會浮在上面。下次登入後生效；uninstall 與 restore 會還原這個設定。
 
-Ghostty 在桌布上半透明（opacity 0.75、blur 40；macOS 上改了要完全結束 Ghostty 再開才生效）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
+Ghostty 在桌布上半透明（opacity 0.6、blur 25；macOS 上改了要完全結束 Ghostty 再開才生效）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
 
 ## 主題配色
 
