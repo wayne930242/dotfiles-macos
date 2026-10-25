@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+# Brings the newest secondary browser window (an agent's page, a recording) beside the
+# current workspace's windows, or sends it back to G when it is already here. The oldest
+# Chrome window stays in C as the main browser (see aerospace-chrome-extra).
+# Bound to `b` in AeroSpace's service mode.
+set -euo pipefail
+
+focused="$(aerospace list-workspaces --focused)"
+main="$(aerospace list-windows --monitor all --app-bundle-id com.google.Chrome --format '%{window-id}' | sort -n | head -1)"
+
+# Chrome for Testing is what agent-browser drives when it runs headed
+target=""
+target_ws=""
+for bundle in com.google.Chrome com.google.chrome.for.testing; do
+    while IFS='|' read -r id ws; do
+        [[ -n "$id" && "$id" != "$main" ]] || continue
+        if [[ -z "$target" || "$id" -gt "$target" ]]; then
+            target="$id" target_ws="$ws"
+        fi
+    done < <(aerospace list-windows --monitor all --app-bundle-id "$bundle" --format '%{window-id}|%{workspace}')
+done
+
+if [[ -z "$target" ]]; then
+    exit 0
+fi
+
+if [[ "$target_ws" == "$focused" ]]; then
+    aerospace move-node-to-workspace --window-id "$target" G
+else
+    aerospace move-node-to-workspace --window-id "$target" "$focused"
+    aerospace focus --window-id "$target"
+fi

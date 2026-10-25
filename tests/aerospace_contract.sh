@@ -52,3 +52,24 @@ if ! grep -Fqx "on-mode-changed = ['exec-and-forget sketchybar --trigger aerospa
 fi
 
 echo "PASS: AeroSpace mode callback contract"
+
+# The Straw Boss net: alt-w and alt-shift-w run the helper install.sh builds, and the GUI
+# installed as a Chrome app is a separate app that goes to workspace A
+NET_HELPER='~/.config/sketchybar/helpers/bin/net'
+for line in "alt-w = 'exec-and-forget $NET_HELPER next'" "alt-shift-w = 'exec-and-forget $NET_HELPER gui'"; do
+    if ! grep -Fq "$line" "$CONFIG_FILE"; then
+        echo "FAIL: missing net binding: $line" >&2
+        exit 1
+    fi
+done
+if ! grep -A1 -F "if.app-name-regex-substring = '^Straw Net\$'" "$CONFIG_FILE" | grep -Fq "run = 'move-node-to-workspace A'"; then
+    echo "FAIL: the Straw Net app is not sent to workspace A" >&2
+    exit 1
+fi
+if ! grep -Fq 'icon_map.sh' "$PROJECT_DIR/sketchybar/plugins/aerospace.sh" \
+    || ! grep -Fq '.cache/sketchybar/notch' "$PROJECT_DIR/sketchybar/plugins/aerospace.sh"; then
+    echo "FAIL: workspace app icons must stay clear of the notch" >&2
+    exit 1
+fi
+
+echo "PASS: AeroSpace Straw Boss net contract"

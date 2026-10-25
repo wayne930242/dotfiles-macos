@@ -47,7 +47,7 @@ on-focus-changed = ['exec-and-forget sketchybar --trigger aerospace_workspace_ch
 # S: Social (Discord, Slack, Telegram)
 # Q: Linear + Slack (Project management)
 # D: Containers (OrbStack)
-# A: AI/Agents
+# A: AI/Agents (the Straw Net GUI, installed from Chrome as an app)
 # Z: Obsidian (Notes)
 # X: Xcode
 # P: Planner (SessionFlow)
@@ -107,6 +107,11 @@ run = ['layout tiling', 'move-node-to-workspace 1']
 [[on-window-detected]]
 if.app-id = 'ai.perplexity.comet'
 run = 'move-node-to-workspace C'
+
+# The Straw Boss GUI installed as a Chrome app has its own app, named after the page title
+[[on-window-detected]]
+if.app-name-regex-substring = '^Straw Net$'
+run = 'move-node-to-workspace A'
 
 [[on-window-detected]]
 if.app-id = 'com.google.Chrome'
@@ -245,6 +250,11 @@ run = 'move-node-to-workspace P'
     alt-shift-x = 'move-node-to-workspace X'
     alt-shift-p = 'move-node-to-workspace P'
 
+    # Straw Boss net (sketchybar/helpers/bin/net): the next agent waiting on you, each press
+    # the one after; with shift, the Straw Net GUI in workspace A
+    alt-w = 'exec-and-forget ~/.config/sketchybar/helpers/bin/net next'
+    alt-shift-w = 'exec-and-forget ~/.config/sketchybar/helpers/bin/net gui'
+
     # Workspace navigation
     alt-tab = 'workspace-back-and-forth'
     alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
@@ -258,6 +268,8 @@ run = 'move-node-to-workspace P'
     r = ['flatten-workspace-tree', 'mode main']  # Reset layout
     f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
+    # Bring the newest secondary browser window (an agent's page) beside this workspace; again sends it back to G
+    b = ['exec-and-forget ~/dotfiles-macos/bin/aerospace-chrome-beside', 'mode main']
 
     # Summon all windows to current workspace (rescue lost windows) + re-tile + reload sketchybar
     # Excludes Social apps (Discord, Slack, Telegram)

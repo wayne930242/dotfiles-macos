@@ -3,7 +3,10 @@ onboarding = false
 name = "catppuccin"
 
 [ui]
-sidebar_collapsed_mode = "compact"
+# The agent list lives in SketchyBar (the net pill and its popup), so the sidebar starts
+# collapsed to zero width; prefix+b still opens it
+sidebar_collapsed_mode = "hidden"
+sidebar_start_collapsed = true
 show_agent_labels_on_pane_borders = true
 agent_panel_sort = "spaces"
 
