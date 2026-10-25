@@ -169,7 +169,7 @@ wallpaper/bin/wallgen apply --image none          # 不用底圖
 
 移除後桌布會停在最後一張，要換回來請到「系統設定 > 桌布」。
 
-Ghostty 在桌布上半透明（opacity 0.88、blur 40）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
+Ghostty 在桌布上半透明（opacity 0.75、blur 40；macOS 上改了要完全結束 Ghostty 再開才生效）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
 
 ## 主題配色
 

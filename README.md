@@ -171,7 +171,7 @@ wallpaper/bin/wallgen apply --image none                         # a plain backd
 
 Uninstalling leaves the last image as the wallpaper; pick another in System Settings > Wallpaper.
 
-Ghostty is translucent over it (opacity 0.88, blur 40). `background-opacity-cells` makes herdr's sidebar and Neovim, which paint their own background, translucent too.
+Ghostty is translucent over it (opacity 0.75, blur 40; macOS applies a change only after Ghostty is quit and reopened). `background-opacity-cells` makes herdr's sidebar and Neovim, which paint their own background, translucent too.
 
 ## Theme
 

@@ -34,7 +34,7 @@ theme = "Catppuccin Mocha"
 # 半透明讓桌布透出來；blur 由 WindowServer 合成，只在畫面變動時重算。
 # blur 20 會透出桌布左側資訊的色塊，40 只剩柔光。herdr 的側欄、tab 列與 nvim
 # 會自己畫背景色，預設不透明，cells 設 true 讓整個視窗一致
-background-opacity = 0.88
+background-opacity = 0.75
 background-blur = 40
 background-opacity-cells = true
 
