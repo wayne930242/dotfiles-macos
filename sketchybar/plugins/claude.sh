@@ -17,6 +17,8 @@ source "$CONFIG_DIR/colors.sh"
 # SketchyBar runs from launchd with a bare PATH: ccswitch needs Homebrew's bash 4+ and jq
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.local/bin:$HOME/bin:$PATH"
 
+# SketchyBar passes CONFIG_DIR but not sketchybarrc's PLUGIN_DIR to click scripts
+SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
 CACHE="$HOME/.cache/sketchybar/claude.json"
 WARN=60
 HOT=85
@@ -115,7 +117,7 @@ open_popup() {
                      icon.padding_left=10 icon.padding_right=8
                      label="$label" label.color="$color" label.padding_right=12
                      background.drawing=off
-                     click_script="$PLUGIN_DIR/claude.sh switch $num")
+                     click_script="$SELF switch $num")
         i=$((i + 1))
     done < <(jq -r '.[] | [.num, .email, .active,
                            (.usage.five_hour.utilization // 0 | floor), (.usage.seven_day.utilization // 0 | floor),
@@ -126,7 +128,7 @@ open_popup() {
                  icon="󰕮" icon.color="$ICON_COLOR" icon.padding_left=10 icon.padding_right=8
                  label="Open ccswitch dashboard" label.color="$SPACE_INACTIVE" label.padding_right=12
                  background.drawing=off
-                 click_script="$PLUGIN_DIR/claude.sh dashboard")
+                 click_script="$SELF dashboard")
     sketchybar "${args[@]}" --set claude popup.drawing=on
 }
 
