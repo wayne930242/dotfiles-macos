@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Brings the newest secondary browser window (an agent's page, a recording) beside the
 # current workspace's windows, or sends it back to G when it is already here. The oldest
-# Chrome window stays in C as the main browser (see aerospace-chrome-extra).
+# Chrome window stays in C as the main browser (see aerospace-chrome-extra); with no
+# secondary window, the main one comes instead and goes back to C.
 # Bound to `b` in AeroSpace's service mode.
 set -euo pipefail
 
@@ -20,12 +21,15 @@ for bundle in com.google.Chrome com.google.chrome.for.testing; do
     done < <(aerospace list-windows --monitor all --app-bundle-id "$bundle" --format '%{window-id}|%{workspace}')
 done
 
+home=G
 if [[ -z "$target" ]]; then
-    exit 0
+    [[ -n "$main" ]] || exit 0
+    target="$main" home=C
+    target_ws="$(aerospace list-windows --monitor all --app-bundle-id com.google.Chrome --format '%{window-id}|%{workspace}' | awk -F'|' -v id="$main" '$1 == id {print $2}')"
 fi
 
 if [[ "$target_ws" == "$focused" ]]; then
-    aerospace move-node-to-workspace --window-id "$target" G
+    aerospace move-node-to-workspace --window-id "$target" "$home"
 else
     aerospace move-node-to-workspace --window-id "$target" "$focused"
     aerospace focus --window-id "$target"

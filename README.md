@@ -133,7 +133,7 @@ Workspaces 1–3 go to the secondary monitor when one is connected; letter works
 |-----|--------|
 | `alt-w` | Jump to the next agent waiting on you (each press goes to the one after) |
 | `alt-shift-w` | Open the Straw Net GUI |
-| service mode `b` | Bring the newest secondary browser window (an agent's page) beside the current workspace; again sends it back to G |
+| service mode `b` | Bring the newest secondary browser window (an agent's page) beside the current workspace; again sends it back to G. With no secondary window, the main Chrome comes and goes back to C |
 
 ## SketchyBar
 
