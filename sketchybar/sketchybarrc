@@ -31,10 +31,17 @@ bar=(
     margin=10
     corner_radius=12
     blur_radius=30
-    notch_width=188
 )
 
 sketchybar --bar "${bar[@]}"
+
+# The built-in display's notch hides whatever is drawn under it, and left and right items
+# ignore it. plugins/notch.sh measures it (its size in points follows the display scaling)
+# for notch_width, which places e items right of the notch, and records where the notch
+# starts, so plugins/aerospace.sh drops workspace app icons before the left side reaches it.
+sketchybar --add item notch left \
+           --set notch drawing=off updates=on script="$PLUGIN_DIR/notch.sh" \
+           --subscribe notch display_change system_woke
 
 # ══════════════════════════════════════════════════════════════════════════════
 # DEFAULT VALUES
@@ -45,7 +52,9 @@ defaults=(
     icon.color=$ICON_COLOR
     icon.padding_left=8
     icon.padding_right=4
-    label.font="$FONT:Semibold:13.0"
+    # Hack Nerd Font comes in Regular and Bold only: a missing weight falls back to the
+    # system font, which has no Nerd Font glyphs
+    label.font="$FONT:Bold:13.0"
     label.color=$LABEL_COLOR
     label.padding_left=4
     label.padding_right=8
@@ -70,31 +79,27 @@ sketchybar --default "${defaults[@]}"
 # LEFT SIDE - WORKSPACES
 # ══════════════════════════════════════════════════════════════════════════════
 
+# Hidden while no Straw Boss GUI server runs
+source "$ITEM_DIR/net.sh"
 source "$ITEM_DIR/mode_indicator.sh"
 source "$ITEM_DIR/spaces.sh"
-
-# Spacer after workspaces
-sketchybar --add item spacer_left left \
-           --set spacer_left width=10 background.drawing=off
-
-source "$ITEM_DIR/front_app.sh"
-
-# Spacer after front_app
-sketchybar --add item spacer_left2 left \
-           --set spacer_left2 width=10 background.drawing=off
 
 # ══════════════════════════════════════════════════════════════════════════════
 # RIGHT SIDE - SYSTEM INFO
 # ══════════════════════════════════════════════════════════════════════════════
 
+# Right-side items are added right to left
 source "$ITEM_DIR/calendar.sh"
 source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/battery.sh"
-source "$ITEM_DIR/temperature.sh"
 source "$ITEM_DIR/input.sh"
-source "$ITEM_DIR/network.sh"
-source "$ITEM_DIR/media.sh"
+source "$ITEM_DIR/status.sh"
+# In the status pill's popup
 source "$ITEM_DIR/system_stats.sh"
+source "$ITEM_DIR/temperature.sh"
+source "$ITEM_DIR/network.sh"
+# Right of the notch, growing away from it; shown only while something plays
+source "$ITEM_DIR/media.sh"
 
 # ══════════════════════════════════════════════════════════════════════════════
 # FINALIZE

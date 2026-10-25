@@ -1,2 +1,5 @@
 # 本地 agent 工具目錄，不進版控
 openspec/
+
+# Built by install.sh from sketchybar/helpers/net
+sketchybar/helpers/bin/

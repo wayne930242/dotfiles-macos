@@ -15,7 +15,7 @@ if [[ "$MIC_VOLUME" == "0" ]]; then
     MIC_COLOR="$RED"
 else
     MIC_ICON="󰍬"
-    MIC_COLOR="$CYAN"
+    MIC_COLOR="$ICON_COLOR"
 fi
 
 if [[ "$VOLUME" == "missing value" || -z "$VOLUME" ]]; then

@@ -36,6 +36,10 @@ export RED_BG=0x33ff0055
 export BLUE_BG=0x330099ff
 export PURPLE_BG=0x33aa00ff
 
+# Pills: one background and border for every group in the bar
+export PILL_BACKGROUND=0x330a0a0f
+export PILL_BORDER=0x6600fff7
+
 # Workspaces
 export SPACE_ACTIVE=0xff00fff7
 export SPACE_OCCUPIED=0xaa00fff7

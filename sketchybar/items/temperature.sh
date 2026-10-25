@@ -2,7 +2,10 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-sketchybar --add item temperature right \
+# Shown in the status pill's popup: it updates only while shown (updates=when_shown, the default),
+# and status_popup refreshes it as the popup opens
+
+sketchybar --add item temperature popup.status \
            --set temperature \
                  icon="󰔏" \
                  icon.color=$CYAN \
@@ -10,11 +13,7 @@ sketchybar --add item temperature right \
                  icon.padding_right=6 \
                  label.padding_left=0 \
                  label.padding_right=8 \
-                 background.color="$CYAN_BG" \
-                 background.corner_radius=8 \
-                 background.height=28 \
-                 background.border_width=1 \
-                 background.border_color=$CYAN \
-                 background.drawing=on \
+                 background.drawing=off \
                  update_freq=10 \
-                 script="$PLUGIN_DIR/temperature.sh"
+                 script="$PLUGIN_DIR/temperature.sh" \
+           --subscribe temperature status_popup

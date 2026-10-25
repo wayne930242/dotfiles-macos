@@ -26,13 +26,13 @@ if [[ "$CHARGING" != "" ]]; then
     ICON="󰂄"
 fi
 
-# Change color based on battery level
+# Color only reports a low battery; otherwise the icon matches the rest of the bar
 if [ "$PERCENTAGE" -lt 20 ]; then
     COLOR=$RED
 elif [ "$PERCENTAGE" -lt 40 ]; then
     COLOR=$ORANGE
 else
-    COLOR=$GREEN
+    COLOR=$ICON_COLOR
 fi
 
 sketchybar --set "$NAME" icon="$ICON" label="${PERCENTAGE}%" icon.color=$COLOR

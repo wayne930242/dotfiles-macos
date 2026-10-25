@@ -56,6 +56,12 @@ export RED_BG=0xcc$MOCHA_SURFACE0
 export BLUE_BG=0xcc$MOCHA_SURFACE0
 export PURPLE_BG=0xcc$MOCHA_SURFACE0
 
+# Pills: every group in the bar (workspaces, net, status, calendar, media) shares one
+# background and a neutral border, so the two sides read alike; color is kept for icons
+# that report a state (a waiting agent, a low battery, a muted mic)
+export PILL_BACKGROUND=0xcc$MOCHA_SURFACE0
+export PILL_BORDER=0xff$MOCHA_SURFACE1
+
 # Workspaces
 export SPACE_ACTIVE=0xff$MOCHA_BASE
 export SPACE_OCCUPIED=0xff$MOCHA_SUBTEXT0

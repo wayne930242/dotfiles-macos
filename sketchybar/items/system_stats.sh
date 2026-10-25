@@ -2,7 +2,10 @@
 
 source "$CONFIG_DIR/colors.sh"
 
-sketchybar --add item system_stats right \
+# Shown in the status pill's popup: it updates only while shown (updates=when_shown, the default),
+# and status_popup refreshes it as the popup opens
+
+sketchybar --add item system_stats popup.status \
            --set system_stats \
                  icon="󰻠" \
                  icon.color=$CYAN \
@@ -10,12 +13,8 @@ sketchybar --add item system_stats right \
                  icon.padding_right=6 \
                  label.padding_left=0 \
                  label.padding_right=8 \
-                 background.color="$CYAN_BG" \
-                 background.corner_radius=8 \
-                 background.height=28 \
-                 background.border_width=1 \
-                 background.border_color=$CYAN \
-                 background.drawing=on \
+                 background.drawing=off \
                  update_freq=5 \
                  script="$PLUGIN_DIR/system_stats.sh" \
-                 click_script="open -a 'Activity Monitor'"
+                 click_script="open -a 'Activity Monitor'" \
+           --subscribe system_stats status_popup
