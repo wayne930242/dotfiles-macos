@@ -55,9 +55,13 @@ func run(args []string) error {
 	case cmd == "event":
 		switch os.Getenv("SENDER") {
 		case "mouse.exited.global":
-			closePopup()
+			if popupOpen() {
+				closePopup()
+			}
 		case "forced":
-			// A reload resets the pill to its hidden default, and the feed redraws only on change
+			// A reload resets the pill to its hidden default with its popup closed, and the feed
+			// redraws only on change
+			closePopup()
 			drawPill(readState())
 		}
 		return nil

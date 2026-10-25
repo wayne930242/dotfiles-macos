@@ -379,6 +379,8 @@ do_restore() {
     echo "🔄 Restoring from: ${BACKUPS[$SELECTION]}"
 
     stop_services
+    # The feed belongs to this checkout's SketchyBar config, not to the restored one
+    [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
 
     # Remove current symlinks
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"

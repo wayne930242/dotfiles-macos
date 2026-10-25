@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -67,6 +68,16 @@ func guiURL() (string, error) {
 		return "", errors.New("gui.json names no server")
 	}
 	return fmt.Sprintf("http://127.0.0.1:%d/%s/", g.Port, g.Token), nil
+}
+
+// withoutURL drops the request URL from an HTTP client error: the URL carries the GUI token,
+// and these errors reach the popup, SketchyBar's world-readable log, and the feed's log.
+func withoutURL(err error) error {
+	var ue *url.Error
+	if errors.As(err, &ue) {
+		return fmt.Errorf("%s: %w", ue.Op, ue.Err)
+	}
+	return err
 }
 
 // guiCSRF is the secret the GUI server takes on writes from its local page.

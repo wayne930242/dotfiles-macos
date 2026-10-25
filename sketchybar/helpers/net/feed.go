@@ -107,7 +107,7 @@ func (f *feeder) follow() error {
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("connect: %w", err)
+		return fmt.Errorf("connect: %w", withoutURL(err))
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {

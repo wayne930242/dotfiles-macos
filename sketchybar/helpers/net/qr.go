@@ -56,7 +56,7 @@ func remotePair() (pairing, error) {
 		req.Header.Set("X-SB-CSRF", csrf)
 		resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
 		if err != nil {
-			return 0, nil, err
+			return 0, nil, withoutURL(err)
 		}
 		defer resp.Body.Close()
 		body, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
@@ -118,6 +118,11 @@ func showQR() error {
 		}
 	}
 	p, err := remotePair()
+	// The request can take seconds: a popup closed meanwhile gets no QR, and no pairing code
+	// stays on disk
+	if !popupOpen() {
+		return err
+	}
 	if err != nil {
 		sketchybar("--remove", qrItem, "--add", "item", qrItem, "popup.net", "--set", qrItem,
 			"background.drawing=off", "padding_left=6", "padding_right=6", "icon.drawing=off", fontLabel,

@@ -94,9 +94,13 @@ func drawPopup(s State, self string) {
 		if r.Depth > 0 {
 			text = c["SPACE_OCCUPIED"]
 		}
-		add(name, "icon="+glyphOf(r.Mark), "icon.drawing=on", "icon.color="+markColor(c, r.Mark),
-			fmt.Sprintf("label.padding_left=%d", RowIndent(r)),
-			"label="+RowLabel(r), "label.color="+text, "click_script="+self+" click "+r.Key)
+		props := []string{"icon=" + glyphOf(r.Mark), "icon.drawing=on", "icon.color=" + markColor(c, r.Mark),
+			fmt.Sprintf("label.padding_left=%d", RowIndent(r)), "label=" + RowLabel(r), "label.color=" + text}
+		// click_script runs through sh -c: only a key that needs no quoting goes into it
+		if SafeKey(r.Key) {
+			props = append(props, "click_script="+self+" click "+r.Key)
+		}
+		add(name, props...)
 	}
 	add("net.row.qr", "icon="+glyphQR, "icon.drawing=on", "icon.color="+c["ICON_COLOR"],
 		"label=Remote QR", "click_script="+self+" qr")
@@ -122,6 +126,9 @@ func toggle() error {
 		closePopup()
 		return nil
 	}
+	// A QR from an earlier opening may be used up or expired
+	sketchybar("--remove", qrItem)
+	_ = os.Remove(qrFile)
 	s := readState()
 	if s.Colors == nil {
 		c, err := theme()

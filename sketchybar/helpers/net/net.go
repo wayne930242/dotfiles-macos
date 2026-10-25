@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // The net as the Straw Boss GUI server streams it; only the fields the bar shows.
 type Net struct {
@@ -185,4 +188,19 @@ func RowLabel(r Row) string {
 		name = append(name[:nameWidth-1], '…')
 	}
 	return branch + lead + string(name)
+}
+
+// SafeKey reports whether a unit key can go into a shell command unquoted. Keys are session
+// ids and file names today; anything else gets no click action rather than shell parsing.
+func SafeKey(key string) bool {
+	if key == "" {
+		return false
+	}
+	for _, c := range key {
+		ok := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || strings.ContainsRune("._/-", c)
+		if !ok {
+			return false
+		}
+	}
+	return true
 }

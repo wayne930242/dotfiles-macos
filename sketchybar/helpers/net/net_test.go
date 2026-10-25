@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io"
+	"net/http"
 	"reflect"
 	"strings"
 	"testing"
@@ -162,5 +163,31 @@ func TestQRImage(t *testing.T) {
 	}
 	if img.GrayAt(0, 0).Y != 0xff {
 		t.Fatal("quiet border is not light")
+	}
+}
+
+func TestSafeKey(t *testing.T) {
+	for key, want := range map[string]bool{
+		"0b9f3c1e-6f0a-4a57-9b52-2f1d3c4e5a6b":   true,
+		"2026-10-25T08-19-24-135Z_ab2272d4.jsonl": true,
+		"launcher/worker-1":                      true,
+		"":                                       false,
+		"x; rm -rf ~":                            false,
+		"a$(id)":                                 false,
+		"name with space":                        false,
+	} {
+		if got := SafeKey(key); got != want {
+			t.Errorf("SafeKey(%q) = %v, want %v", key, got, want)
+		}
+	}
+}
+
+func TestWithoutURLDropsToken(t *testing.T) {
+	_, err := http.Get("http://127.0.0.1:1/SECRETTOKEN/events")
+	if err == nil {
+		t.Skip("port 1 answered")
+	}
+	if msg := withoutURL(err).Error(); strings.Contains(msg, "SECRETTOKEN") {
+		t.Fatalf("token kept: %s", msg)
 	}
 }
