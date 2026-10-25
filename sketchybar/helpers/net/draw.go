@@ -98,6 +98,8 @@ func drawPopup(s State, self string) {
 			fmt.Sprintf("label.padding_left=%d", RowIndent(r)),
 			"label="+RowLabel(r), "label.color="+text, "click_script="+self+" click "+r.Key)
 	}
+	add("net.row.qr", "icon="+glyphQR, "icon.drawing=on", "icon.color="+c["ICON_COLOR"],
+		"label=Remote QR", "click_script="+self+" qr")
 	add("net.row.gui", "icon="+glyphOpen, "icon.drawing=on", "icon.color="+c["ICON_COLOR"],
 		"label=Open Straw Net", "click_script="+self+" gui")
 	sketchybar(args...)
@@ -109,8 +111,10 @@ func popupOpen() bool {
 }
 
 func closePopup() {
-	sketchybar("--set", "net", "popup.drawing=off")
+	// The QR's pairing code stays valid for ten minutes, so it leaves with the popup
+	sketchybar("--set", "net", "popup.drawing=off", "--remove", qrItem)
 	_ = os.Remove(popupFlag)
+	_ = os.Remove(qrFile)
 }
 
 func toggle() error {

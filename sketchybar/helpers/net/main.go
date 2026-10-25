@@ -10,6 +10,7 @@
 //	jump KEY   focuses the unit's Herdr pane in its Ghostty window
 //	next       jumps to the next unit waiting on the user (alt-w)
 //	gui [KEY]  opens the GUI, at KEY's comms when given (alt-shift-w)
+//	qr         shows a one-time remote pairing QR in the popup, turning remote access on if off
 package main
 
 import (
@@ -72,6 +73,8 @@ func run(args []string) error {
 		return nextWaiting()
 	case cmd == "gui":
 		return openGUI(arg)
+	case cmd == "qr":
+		return showQR()
 	}
-	return fmt.Errorf("usage: net feed | toggle | event | click KEY | jump KEY | next | gui [KEY]")
+	return fmt.Errorf("usage: net feed | toggle | event | click KEY | jump KEY | next | gui [KEY] | qr")
 }

@@ -145,7 +145,7 @@ brew services start borders
 
 ### Straw Boss net
 
-這顆膠囊顯示 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) 網裡等你回覆、出錯、執行中與已完成的 agent 數量；沒有 Straw Boss GUI 伺服器在跑時就隱藏。點開是整張網的樹狀選單：點一列會切到那個 agent 的 herdr pane，按住 shift 點則在 GUI 開它的通訊頁。有 agent 等你時，焦點視窗的邊框會變成橘色。
+這顆膠囊顯示 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) 網裡等你回覆、出錯、執行中與已完成的 agent 數量；沒有 Straw Boss GUI 伺服器在跑時就隱藏。點開是整張網的樹狀選單：點一列會切到那個 agent 的 herdr pane，按住 shift 點則在 GUI 開它的通訊頁。點「Remote QR」會顯示一次性的配對 QR code（十分鐘內有效），用手機掃描就能透過 Tailscale 開啟 GUI；remote access 沒開的話會先打開。有 agent 等你時，焦點視窗的邊框會變成橘色。
 
 `sketchybar/helpers/net` 是一支小型 Go 程式。它的 `feed` 以 launch agent `com.wayne930242.sketchybar-net` 常駐，訂閱 Straw Boss GUI 伺服器的事件串流（位址寫在 `~/.pi/agent/straw-boss/gui.json`），只重畫有變動的部分，記錄寫在 `~/Library/Logs/sketchybar-net.log`。herdr 的側欄預設收成零寬（`prefix+b` 可以打開），agent 清單就改看這顆膠囊。
 

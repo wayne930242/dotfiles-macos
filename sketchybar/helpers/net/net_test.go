@@ -149,3 +149,18 @@ func TestReadEvents(t *testing.T) {
 		t.Fatalf("readEvents = %+v, %v; want %+v, EOF", got, err, want)
 	}
 }
+
+func TestQRImage(t *testing.T) {
+	img := QRImage([]string{"10", "01"})
+	side := (2 + 2*qrQuiet) * qrModule
+	if b := img.Bounds(); b.Dx() != side || b.Dy() != side {
+		t.Fatalf("size %v, want %d", b, side)
+	}
+	at := func(mx, my int) uint8 { return img.GrayAt((mx+qrQuiet)*qrModule+1, (my+qrQuiet)*qrModule+1).Y }
+	if at(0, 0) != 0 || at(1, 1) != 0 || at(1, 0) != 0xff || at(0, 1) != 0xff {
+		t.Fatal("modules drawn in the wrong place")
+	}
+	if img.GrayAt(0, 0).Y != 0xff {
+		t.Fatal("quiet border is not light")
+	}
+}

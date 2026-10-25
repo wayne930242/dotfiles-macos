@@ -69,6 +69,24 @@ func guiURL() (string, error) {
 	return fmt.Sprintf("http://127.0.0.1:%d/%s/", g.Port, g.Token), nil
 }
 
+// guiCSRF is the secret the GUI server takes on writes from its local page.
+func guiCSRF() (string, error) {
+	b, err := os.ReadFile(guiState)
+	if err != nil {
+		return "", fmt.Errorf("read gui.json: %w", err)
+	}
+	var g struct {
+		CSRF string `json:"csrf"`
+	}
+	if err := json.Unmarshal(b, &g); err != nil {
+		return "", fmt.Errorf("parse gui.json: %w", err)
+	}
+	if g.CSRF == "" {
+		return "", errors.New("gui.json names no csrf secret")
+	}
+	return g.CSRF, nil
+}
+
 // configDir is the SketchyBar config directory: this binary lives in <config>/helpers/bin.
 func configDir() (string, error) {
 	exe, err := os.Executable()

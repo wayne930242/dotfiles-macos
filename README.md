@@ -147,7 +147,7 @@ Every group is one pill with the same background and a neutral border; icons tak
 
 ### Straw Boss net
 
-The pill counts the [Straw Boss](https://github.com/wayne930242/pi-straw-boss) agents that wait on you, fail, work, or are done, and hides while no Straw Boss GUI server runs. Click it for the whole net as a tree: click a row to focus that agent's herdr pane, or shift-click to open its comms in the GUI. While an agent waits on you, the focused window's border turns orange.
+The pill counts the [Straw Boss](https://github.com/wayne930242/pi-straw-boss) agents that wait on you, fail, work, or are done, and hides while no Straw Boss GUI server runs. Click it for the whole net as a tree: click a row to focus that agent's herdr pane, or shift-click to open its comms in the GUI. "Remote QR" shows a one-time pairing QR (valid ten minutes) for opening the GUI on a phone over Tailscale, and turns remote access on first if it is off. While an agent waits on you, the focused window's border turns orange.
 
 `sketchybar/helpers/net` is a small Go program. Its `feed` runs as the launch agent `com.wayne930242.sketchybar-net`, follows the event stream of the Straw Boss GUI server (its address is in `~/.pi/agent/straw-boss/gui.json`), and redraws only what changed; it logs to `~/Library/Logs/sketchybar-net.log`. With the herdr sidebar collapsed to zero width (`prefix+b` opens it), the pill is the agent list.
 

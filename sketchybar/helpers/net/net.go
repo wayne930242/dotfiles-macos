@@ -111,6 +111,7 @@ const (
 	glyphTower = "\U000f043b"
 	glyphStar  = "\uf005"
 	glyphOpen  = "\U000f03cc"
+	glyphQR    = "\U000f0432"
 )
 
 var markGlyph = map[string]string{
