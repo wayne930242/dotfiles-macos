@@ -8,7 +8,7 @@ source "$CONFIG_DIR/colors.sh"
 # colors; a click opens the net as a popup.
 NET="$CONFIG_DIR/helpers/bin/net"
 
-sketchybar --add item net left \
+sketchybar --add item net right \
            --set net \
                  icon="󰚩" \
                  icon.color="$SPACE_INACTIVE" \
@@ -24,7 +24,7 @@ sketchybar --add item net left \
                  background.border_width=1 \
                  background.border_color="$PILL_BORDER" \
                  background.drawing=on \
-                 popup.align=left \
+                 popup.align=right \
                  popup.y_offset=4 \
                  popup.height=24 \
                  script="$NET event" \

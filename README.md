@@ -137,11 +137,11 @@ Workspaces 1–3 go to the secondary monitor when one is connected; letter works
 
 ## SketchyBar
 
-**Left:** Straw Boss net | Mode Indicator (service mode) | Workspaces, with an icon per app
+**Left:** Mode Indicator (service mode) | Workspaces, with an icon per app
 
 **Right of the notch:** Media (only while something plays)
 
-**Right:** Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
+**Right:** Straw Boss net | Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
 
 Every group is one pill with the same background and a neutral border; icons take a color only to report a state (an agent waiting on you, a low battery, a muted mic).
 

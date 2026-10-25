@@ -28,7 +28,7 @@ bar=(
     sticky=on
     show_in_fullscreen=on
     padding_right=0
-    padding_left=0
+    padding_left=4
     y_offset=5
     margin=6
     corner_radius=12
@@ -81,8 +81,6 @@ sketchybar --default "${defaults[@]}"
 # LEFT SIDE - WORKSPACES
 # ══════════════════════════════════════════════════════════════════════════════
 
-# Hidden while no Straw Boss GUI server runs
-source "$ITEM_DIR/net.sh"
 source "$ITEM_DIR/mode_indicator.sh"
 source "$ITEM_DIR/spaces.sh"
 
@@ -96,6 +94,8 @@ source "$ITEM_DIR/volume.sh"
 source "$ITEM_DIR/battery.sh"
 source "$ITEM_DIR/input.sh"
 source "$ITEM_DIR/status.sh"
+# Left of the status pill; hidden while no Straw Boss GUI server runs
+source "$ITEM_DIR/net.sh"
 # In the status pill's popup
 source "$ITEM_DIR/system_stats.sh"
 source "$ITEM_DIR/temperature.sh"
