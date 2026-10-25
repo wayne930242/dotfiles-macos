@@ -14,7 +14,7 @@ sketchybar --add event aerospace_mode_change \
                  label.padding_right=8 \
                  background.color="$RED_BG" \
                  background.corner_radius=8 \
-                 background.height=28 \
+                 background.height=32 \
                  background.border_width=1 \
                  background.border_color=$RED \
                  background.drawing=on \

@@ -30,7 +30,7 @@ cd ~/dotfiles-macos
 2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、jq、Go、sketchybar-app-font、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
-5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`），並關掉「按一下桌布以顯示桌面」（見 [SketchyBar](#sketchybar)）
+5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`）
 6. 啟動所有服務（包括 net feed 的 launch agent），並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
 
 Ghostty、herdr、tmux 與字型不在腳本安裝範圍內，請見[前置需求](#前置需求)。
@@ -155,7 +155,7 @@ brew services start borders
 
 內建螢幕的瀏海會蓋住底下的內容，而 SketchyBar 的左右項目不會避開它。`plugins/notch.sh` 在載入時與每次螢幕變更時量測瀏海（瀏海的點數寬度隨縮放改變：預設 1512 pt 時是 185 pt，1800 pt 時是 220 pt），設定 `notch_width`，並記下瀏海從哪裡開始；左側快碰到瀏海時，`plugins/aerospace.sh` 會減少每個工作區顯示的 app 圖示。
 
-SketchyBar 的視窗在「顯示桌面」時會淡出，而點在 bar 空白處的點擊會落到桌布上，所以安裝腳本把「按一下桌布以顯示桌面」設成「僅限幕前調度」（系統設定 > 桌面與 Dock）。要改回來，執行 `defaults delete com.apple.WindowManager EnableStandardClickToShowDesktop`。
+bar 本身是透明的，只畫膠囊。每個項目都是一個疊在 bar 視窗上方的視窗，而在 macOS 27，點 bar 空白處會把 bar 的視窗提到它們上面；SketchyBar 只在項目變動時重排視窗，所以 bar 若有底色，整排項目會被蓋住，直到下次 reload。
 
 ## 主題配色
 

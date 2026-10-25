@@ -23,7 +23,7 @@ for sid in "${WORKSPACES[@]}"; do
     sketchybar --add item "space.$sid" left \
                --set "space.$sid" \
                      icon="$sid" \
-                     icon.font="Hack Nerd Font Mono:Bold:14.0" \
+                     icon.font="Hack Nerd Font Mono:Bold:15.0" \
                      icon.color="$SPACE_INACTIVE" \
                      icon.highlight_color="$SPACE_ACTIVE" \
                      icon.padding_left=7 \
@@ -32,9 +32,9 @@ for sid in "${WORKSPACES[@]}"; do
                      padding_right=1 \
                      background.color="$SPACE_BACKGROUND" \
                      background.corner_radius=6 \
-                     background.height=22 \
+                     background.height=26 \
                      background.drawing=off \
-                     label.font="sketchybar-app-font:Regular:14.0" \
+                     label.font="sketchybar-app-font:Regular:16.0" \
                      label.padding_left=0 \
                      label.padding_right=7 \
                      label.y_offset=-1 \
@@ -47,7 +47,7 @@ sketchybar --add item spaces_pad_right left --set spaces_pad_right width=3 backg
            --set spaces_group \
                  background.color="$PILL_BACKGROUND" \
                  background.corner_radius=8 \
-                 background.height=28 \
+                 background.height=32 \
                  background.border_width=1 \
                  background.border_color="$PILL_BORDER" \
                  background.drawing=on

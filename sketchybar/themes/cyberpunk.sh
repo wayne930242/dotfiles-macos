@@ -8,7 +8,8 @@
 export TRANSPARENT=0x00000000
 
 # Bar and popup
-export BAR_COLOR=0xcc0a0a0f
+# The bar stays transparent: only the pills draw (see the note on the bar in sketchybarrc)
+export BAR_COLOR=0x00000000
 export BORDER_COLOR=0xff00fff7
 export POPUP_BACKGROUND_COLOR=0xcc0a0a0f
 export POPUP_BORDER_COLOR=0xffff00ff

@@ -20,7 +20,7 @@ sketchybar --add item net left \
                  label.padding_right=10 \
                  background.color="$PILL_BACKGROUND" \
                  background.corner_radius=8 \
-                 background.height=28 \
+                 background.height=32 \
                  background.border_width=1 \
                  background.border_color="$PILL_BORDER" \
                  background.drawing=on \

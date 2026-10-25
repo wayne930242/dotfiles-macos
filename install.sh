@@ -180,17 +180,6 @@ build_helpers() {
     fi
 }
 
-set_macos_defaults() {
-    echo ""
-    echo "⚙️  Setting macOS defaults..."
-
-    # SketchyBar's windows fade out when the desktop is revealed, and a click on the bar's
-    # empty space reaches the wallpaper: reveal the desktop on a wallpaper click only in
-    # Stage Manager (System Settings > Desktop & Dock)
-    defaults write com.apple.WindowManager EnableStandardClickToShowDesktop -bool false
-    echo "   ✅ Click wallpaper to reveal desktop: only in Stage Manager"
-}
-
 write_net_agent() {
     mkdir -p "$(dirname "$NET_AGENT_PLIST")" "$(dirname "$NET_LOG")"
     cat >"$NET_AGENT_PLIST" <<EOF
@@ -304,7 +293,6 @@ do_install() {
     create_symlinks
     set_permissions
     build_helpers
-    set_macos_defaults
     start_services
 
     echo ""

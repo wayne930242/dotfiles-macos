@@ -26,7 +26,8 @@ MOCHA_MANTLE=181825
 export TRANSPARENT=0x00000000
 
 # Bar and popup
-export BAR_COLOR=0xe6$MOCHA_BASE
+# The bar stays transparent: only the pills draw (see the note on the bar in sketchybarrc)
+export BAR_COLOR=0x00000000
 export BORDER_COLOR=0xff$MOCHA_SURFACE1
 export POPUP_BACKGROUND_COLOR=0xf0$MOCHA_MANTLE
 export POPUP_BORDER_COLOR=0xff$MOCHA_MAUVE

@@ -9,9 +9,7 @@ source "$CONFIG_DIR/colors.sh"
 MODE="$(aerospace list-modes --current)"
 
 if [[ "$MODE" == "service" ]]; then
-    sketchybar --bar border_color="$RED" \
-               --set "$NAME" drawing=on label="SERVICE" icon.color="$RED" label.color="$RED"
+    sketchybar --set "$NAME" drawing=on label="SERVICE" icon.color="$RED" label.color="$RED"
 else
-    sketchybar --bar border_color="$BORDER_COLOR" \
-               --set "$NAME" drawing=off
+    sketchybar --set "$NAME" drawing=off
 fi

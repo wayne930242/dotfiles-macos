@@ -32,7 +32,7 @@ The install script will:
 2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, jq, Go, sketchybar-app-font, Neovim, and Yazi
 3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks for SketchyBar, JankyBorders, Neovim, Ghostty, AeroSpace, tmux, Hammerspoon, and herdr
-5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`) and turn off "Click wallpaper to reveal desktop" (see [SketchyBar](#sketchybar))
+5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`)
 6. Start all services, including the net feed's launch agent, and restart AeroSpace so the CLI and app server use the same version
 
 Ghostty, herdr, tmux, and fonts are not installed by the script; see [Prerequisites](#prerequisites).
@@ -157,7 +157,7 @@ For the GUI as its own window in workspace A, open it (`/boss gui` in pi), then 
 
 The built-in display's notch hides whatever is drawn under it, and SketchyBar's left and right items ignore it. `plugins/notch.sh` measures the notch at load and on every display change (its width in points follows the display scaling: 185 pt at the default 1512 pt, 220 pt at 1800 pt), sets `notch_width`, and records where the notch starts. When the left side would reach it, `plugins/aerospace.sh` shows fewer app icons per workspace.
 
-SketchyBar's windows fade out whenever the desktop is revealed, and a click on the bar's empty space reaches the wallpaper, so the installer sets "Click wallpaper to reveal desktop" to "Only in Stage Manager" (System Settings > Desktop & Dock). Revert it with `defaults delete com.apple.WindowManager EnableStandardClickToShowDesktop`.
+The bar itself is transparent and only the pills draw. Each item is a window ordered above the bar's window; on macOS 27 a click on the bar's empty space raises the bar's window over them, and SketchyBar reorders its windows only when items change, so a drawn bar would hide every item until the next reload.
 
 ## Theme
 

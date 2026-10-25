@@ -18,19 +18,21 @@ PADDINGS=3
 
 bar=(
     height=40
+    # The bar itself stays invisible and only the pills draw. Items are windows ordered above
+    # the bar's window, and on macOS 27 a click on the bar's empty space raises that window
+    # over them; SketchyBar reorders only when items change, so a drawn bar hid every item.
     color=$BAR_COLOR
-    border_width=2
-    border_color=$BORDER_COLOR
-    shadow=on
+    border_width=0
+    shadow=off
     position=top
     sticky=on
     show_in_fullscreen=on
-    padding_right=10
-    padding_left=10
+    padding_right=0
+    padding_left=0
     y_offset=5
-    margin=10
+    margin=6
     corner_radius=12
-    blur_radius=30
+    blur_radius=0
 )
 
 sketchybar --bar "${bar[@]}"
@@ -48,19 +50,19 @@ sketchybar --add item notch left \
 # ══════════════════════════════════════════════════════════════════════════════
 
 defaults=(
-    icon.font="$FONT:Bold:14.0"
+    icon.font="$FONT:Bold:15.0"
     icon.color=$ICON_COLOR
     icon.padding_left=8
     icon.padding_right=4
     # Hack Nerd Font comes in Regular and Bold only: a missing weight falls back to the
     # system font, which has no Nerd Font glyphs
-    label.font="$FONT:Bold:13.0"
+    label.font="$FONT:Bold:14.0"
     label.color=$LABEL_COLOR
     label.padding_left=4
     label.padding_right=8
     padding_right=4
     padding_left=4
-    background.height=28
+    background.height=32
     background.corner_radius=8
     background.border_width=1
     background.padding_left=4
