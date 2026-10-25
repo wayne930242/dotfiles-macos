@@ -96,6 +96,8 @@ source "$ITEM_DIR/input.sh"
 source "$ITEM_DIR/status.sh"
 # Left of the status pill; hidden while no Straw Boss GUI server runs
 source "$ITEM_DIR/net.sh"
+# Left of the net pill; hidden while no ccswitch with --json is installed
+source "$ITEM_DIR/claude.sh"
 # In the status pill's popup
 source "$ITEM_DIR/system_stats.sh"
 source "$ITEM_DIR/temperature.sh"

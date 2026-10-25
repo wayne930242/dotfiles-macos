@@ -139,9 +139,11 @@ brew services start borders
 
 **瀏海右側：** 媒體（只在播放時出現）
 
-**右側：** Straw Boss net | 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
+**右側：** Claude 帳號 | Straw Boss net | 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
 
 每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。狀態膠囊的齒輪依 CPU 使用率變色：30% 起黃色、60% 起橘色、85% 起紅色。
+
+Claude 膠囊顯示目前的 Claude Code 帳號與它的 5 小時用量，資料來自 [ccswitch](https://github.com/wayne930242/cc-account-switcher) 的 `--json`（1.3.0 起才有，沒有就不顯示），每 5 分鐘更新一次：60% 起黃色，85% 起或這週快用完時紅色。點開會列出每個帳號的 5 小時與 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。
 
 ### Straw Boss net
 
