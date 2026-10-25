@@ -32,7 +32,7 @@ The install script will:
 2. Install AeroSpace, Hammerspoon, SketchyBar, JankyBorders, media-control, jq, Go, sketchybar-app-font, Neovim, and Yazi
 3. Backup your existing configs to `~/.dotfiles-backup/`
 4. Create symlinks for SketchyBar, JankyBorders, Neovim, Ghostty, AeroSpace, tmux, Hammerspoon, and herdr
-5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`) and the wallpaper generator (`wallpaper/bin/wallgen`, with `swiftc` from the Xcode Command Line Tools)
+5. Build the SketchyBar net helper (`sketchybar/helpers/bin/net`) and the wallpaper programs (`wallpaper/bin/wallgen` and `wallanim`, with `swiftc` from the Xcode Command Line Tools)
 6. Start all services, including the net feed's and the wallpaper's launch agents, and restart AeroSpace so the CLI and app server use the same version
 
 Ghostty, herdr, tmux, and fonts are not installed by the script; see [Prerequisites](#prerequisites).
@@ -143,7 +143,7 @@ Workspaces 1–3 go to the secondary monitor when one is connected; letter works
 
 **Right:** Straw Boss net | Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
 
-Every group is one pill with the same background and a neutral border; icons take a color only to report a state (an agent waiting on you, a low battery, a muted mic).
+Every group is one pill with the same background and a neutral border; icons take a color only to report a state (an agent waiting on you, a low battery, a muted mic). The status gear follows CPU use: yellow from 30%, peach from 60%, red from 85%.
 
 ### Straw Boss net
 
@@ -170,6 +170,10 @@ wallpaper/bin/wallgen apply --image none                         # a plain backd
 ```
 
 Uninstalling leaves the last image as the wallpaper; pick another in System Settings > Wallpaper.
+
+`wallpaper/wallanim.swift` animates a few things over it from a second launch agent, `com.wayne930242.wallanim`: the eyes glow, light runs down the painted streams, a scanline sweeps the text column, the cursor blinks, and the live Straw Boss counts replace the hour-old ones, with "working" breathing while agents run. Core Animation runs these in the window server, so the process sits at 0% CPU; it pauses on battery, while the displays sleep, and while windows cover the desktop. The eyes and streams sit at the marks in `wallpaper/background.json`; redo them when the image changes. `wallgen apply` writes `layout.json` beside the image for it.
+
+Install also hides desktop widgets (`StandardHideWidgets`), which otherwise float over the wallpaper wherever a translucent window shows it. It applies from the next login; uninstall and restore put the setting back.
 
 Ghostty is translucent over it (opacity 0.75, blur 40; macOS applies a change only after Ghostty is quit and reopened). `background-opacity-cells` makes herdr's sidebar and Neovim, which paint their own background, translucent too.
 

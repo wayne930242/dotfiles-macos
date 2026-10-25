@@ -30,7 +30,7 @@ cd ~/dotfiles-macos
 2. 安裝 AeroSpace、Hammerspoon、SketchyBar、JankyBorders、media-control、jq、Go、sketchybar-app-font、Neovim 與 Yazi
 3. 備份現有設定至 `~/.dotfiles-backup/`
 4. 建立 SketchyBar、JankyBorders、Neovim、Ghostty、AeroSpace、tmux、Hammerspoon 與 herdr 的 symlinks
-5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`）與桌布產生器（`wallpaper/bin/wallgen`，用 Xcode Command Line Tools 的 `swiftc`）
+5. 編譯 SketchyBar 的 net 輔助程式（`sketchybar/helpers/bin/net`）與桌布程式（`wallpaper/bin/wallgen`、`wallanim`，用 Xcode Command Line Tools 的 `swiftc`）
 6. 啟動所有服務（包括 net feed 與桌布的 launch agent），並重新啟動 AeroSpace，確保 CLI 與 app server 使用相同版本
 
 Ghostty、herdr、tmux 與字型不在腳本安裝範圍內，請見[前置需求](#前置需求)。
@@ -141,7 +141,7 @@ brew services start borders
 
 **右側：** Straw Boss net | 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
 
-每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。
+每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。狀態膠囊的齒輪依 CPU 使用率變色：30% 起黃色、60% 起橘色、85% 起紅色。
 
 ### Straw Boss net
 
@@ -168,6 +168,10 @@ wallpaper/bin/wallgen apply --image none          # 不用底圖
 ```
 
 移除後桌布會停在最後一張，要換回來請到「系統設定 > 桌布」。
+
+另一個 launch agent `com.wayne930242.wallanim` 執行 `wallpaper/wallanim.swift`，在桌布上做幾個慢動畫：克蘇魯的眼睛呼吸發光、光點沿著圖上的資料流線往下流、掃描線滑過左側文字、游標閃爍，以及 Straw Boss 的即時數字（取代整點畫上去的舊數字，有 agent 在跑時「working」會呼吸）。動畫由 Core Animation 交給 WindowServer 合成，程式本身 CPU 是 0%；用電池、螢幕休眠，或桌面被視窗完全蓋住時會暫停。眼睛和資料流的位置記在 `wallpaper/background.json`，換底圖時要一起改；`wallgen apply` 會在桌布旁寫出 `layout.json` 給它用。
+
+安裝時也會關掉桌面小工具（`StandardHideWidgets`），不然隔著半透明視窗看到桌布時，小工具會浮在上面。下次登入後生效；uninstall 與 restore 會還原這個設定。
 
 Ghostty 在桌布上半透明（opacity 0.75、blur 40；macOS 上改了要完全結束 Ghostty 再開才生效）。herdr 的側欄與 Neovim 會自己畫背景色，`background-opacity-cells` 讓它們也一起透。
 

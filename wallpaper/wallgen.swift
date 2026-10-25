@@ -271,6 +271,7 @@ final class Canvas {
         let s = image.size
         let k = max(size.width / s.width, size.height / s.height)
         let r = CGRect(x: (size.width - s.width * k) / 2, y: (size.height - s.height * k) / 2, width: s.width * k, height: s.height * k)
+        imageRect = r
         image.draw(in: r, from: .zero, operation: .copy, fraction: 1, respectFlipped: true, hints: [.interpolation: NSImageInterpolation.high.rawValue])
         let space = CGColorSpace(name: CGColorSpace.sRGB)!
         // Solid under the bar, then a long fade that also hides a painted top edge
@@ -313,6 +314,15 @@ final class Canvas {
     }
 
     var painted = false
+
+    // Where things landed, for wallanim's layout: the backdrop's rect, the bare backdrop before
+    // anything was drawn over it, and the terminal style's cursor, live counts, and text column
+    var imageRect: CGRect?
+    var clean: CGImage?
+    var cursor: CGRect?
+    var now: CGRect?
+    var nowFont: CGFloat = 0
+    var column: CGRect?
 
     // The hostname, large and faint, in the lower right; a painted backdrop has its own subject
     func watermark(_ s: String) {
@@ -368,8 +378,9 @@ func drawHeat(_ c: Canvas, _ commits: Commits, weeks: Int, _ at: CGPoint, _ k: L
     let labelW = c.text("Mon ", .zero, k.small, .clear)
     let monthH = k.line
     let peak = thresholds(Array(commits.perDay.values))
-    let shades = [surface0, green.withAlphaComponent(0.3), green.withAlphaComponent(0.5),
-                  green.withAlphaComponent(0.75), green]
+    // Muted: the blocks show through a translucent terminal and must not compete with its text
+    let shades = [surface0.withAlphaComponent(0.5), green.withAlphaComponent(0.14), green.withAlphaComponent(0.24),
+                  green.withAlphaComponent(0.36), green.withAlphaComponent(0.5)]
     for (r, name) in ["Mon", "", "Wed", "", "Fri", "", ""].enumerated() where !name.isEmpty {
         c.text(name, CGPoint(x: at.x, y: at.y + monthH + CGFloat(r) * (k.cell + k.gap) - k.gap / 2), k.small, overlay0)
     }
@@ -416,7 +427,7 @@ func drawBars(_ c: Canvas, _ rows: [(String, Int)], color: NSColor, limit: Int, 
         let label = name.count > 17 ? String(name.prefix(16)) + "…" : name
         c.text(label, CGPoint(x: at.x, y: y), k.f, subtext0)
         let len = max(k.gap, barMax * CGFloat(n) / CGFloat(peak))
-        c.rect(CGRect(x: at.x + nameW, y: y + k.line * 0.22, width: len, height: k.line * 0.5), color.withAlphaComponent(0.85), radius: 2)
+        c.rect(CGRect(x: at.x + nameW, y: y + k.line * 0.22, width: len, height: k.line * 0.5), color.withAlphaComponent(0.4), radius: 2)
         let nw = c.text("\(n)", CGPoint(x: at.x + nameW + len + k.gap * 2, y: y), k.b, textColor)
         w = max(w, nameW + len + k.gap * 2 + nw)
         y += k.line
@@ -455,6 +466,7 @@ func styleTerminal(_ c: Canvas, _ facts: Facts, _ commits: Commits, _ boss: Boss
     let k = Look(scale: c.size.width >= 1400 ? 1 : 0.85)
     let x = edge + 46
     var y = barBand + max(40, (c.size.height - barBand) * 0.08)
+    let top = y
     let prompt: (String) -> Void = { cmd in
         c.spans([("\(facts.user)@\(facts.host)", mauve), (" ~ ", blue), ("❯ ", green), (cmd, textColor)], CGPoint(x: x, y: y), k.b)
         y += k.line * 1.4
@@ -470,12 +482,19 @@ func styleTerminal(_ c: Canvas, _ facts: Facts, _ commits: Commits, _ boss: Boss
     y += k.line * 1.1
     y += drawBars(c, commits.week, color: green, limit: 5, CGPoint(x: indent, y: y), k).height + k.line
     prompt("boss today")
-    c.spans([("\(boss.active)", peach), (" sessions · ", overlay0), ("\(boss.started)", peach), (" started   ", overlay0)] + nowSpans(boss),
-            CGPoint(x: indent, y: y), k.f)
+    let lead = c.spans([("\(boss.active)", peach), (" sessions · ", overlay0), ("\(boss.started)", peach), (" started   ", overlay0)],
+                       CGPoint(x: indent, y: y), k.f)
+    let nowWidth = c.spans(nowSpans(boss), CGPoint(x: indent + lead, y: y), k.f)
+    // wallanim redraws the live counts here; the slack covers longer counts than these
+    c.now = CGRect(x: indent + lead - 2, y: y - 1, width: nowWidth + k.cell * 4, height: k.line + 2)
+    c.nowFont = k.f.pointSize
     y += k.line * 1.3
     y += drawBars(c, boss.projects, color: peach, limit: 5, CGPoint(x: indent, y: y), k).height + k.line
     let w = c.spans([("\(facts.user)@\(facts.host)", mauve), (" ~ ", blue), ("❯ ", green)], CGPoint(x: x, y: y), k.b)
-    c.rect(CGRect(x: x + w, y: y + k.line * 0.1, width: k.cell * 0.65, height: k.line * 0.8), textColor.withAlphaComponent(0.85))
+    let cursor = CGRect(x: x + w, y: y + k.line * 0.1, width: k.cell * 0.65, height: k.line * 0.8)
+    c.rect(cursor, textColor.withAlphaComponent(0.85))
+    c.cursor = cursor.insetBy(dx: -1, dy: -1)
+    c.column = CGRect(x: edge, y: top - k.line, width: min(c.size.width * 0.4, k.cell * 48), height: y + k.line * 2 - top)
     c.text("updated \(updated())", CGPoint(x: x + w + k.cell * 2, y: y), k.small, overlay0)
     c.watermark(facts.host)
 }
@@ -546,7 +565,7 @@ let styles: [String: (Canvas, Facts, Commits, Boss) -> Void] = [
     "terminal": styleTerminal, "panels": stylePanels, "minimal": styleMinimal,
 ]
 
-func render(style: String, size: CGSize, scale: CGFloat, image: NSImage?, facts: Facts, commits: Commits, boss: Boss) -> Data? {
+func render(style: String, size: CGSize, scale: CGFloat, image: NSImage?, facts: Facts, commits: Commits, boss: Boss) -> (png: Data, canvas: Canvas)? {
     guard let draw = styles[style],
           let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(size.width * scale), pixelsHigh: Int(size.height * scale),
                                      bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
@@ -565,9 +584,72 @@ func render(style: String, size: CGSize, scale: CGFloat, image: NSImage?, facts:
     } else {
         canvas.background()
     }
+    canvas.clean = cg.makeImage()
     draw(canvas, facts, commits, boss)
     NSGraphicsContext.restoreGraphicsState()
-    return rep.representation(using: .png, properties: [:])
+    guard let png = rep.representation(using: .png, properties: [:]) else { return nil }
+    return (png, canvas)
+}
+
+// MARK: - Layout for wallanim (wallpaper/wallanim.swift decodes the same shape)
+
+struct Patch: Codable {
+    var rect: [Double]  // x, y, width, height in points, origin top-left
+    var file: String    // the bare backdrop under rect, at the screen's scale
+}
+
+struct NowMark: Codable {
+    var patch: Patch
+    var font: Double
+}
+
+struct ScreenLayout: Codable {
+    var display: UInt32
+    var width: Double, height: Double
+    var eyes: [[Double]] = []     // x, y, radius
+    var streams: [[Double]] = []  // x, top, bottom
+    var cursor: Patch?
+    var now: NowMark?
+    var column: [Double]?         // the text column the scanline sweeps
+}
+
+struct Layout: Codable {
+    var stamp: Int
+    var screens: [ScreenLayout]
+}
+
+// background.json beside the image: marks as fractions of it
+struct Marks: Decodable {
+    var eyes: [[Double]] = []
+    var eyeRadius: Double = 0.005
+    var streams: [[Double]] = []
+}
+
+func rectArray(_ r: CGRect) -> [Double] { [r.minX, r.minY, r.width, r.height].map(Double.init) }
+
+// Cuts r out of the bare backdrop and writes it beside the wallpaper
+func writePatch(_ c: Canvas, _ r: CGRect, scale: CGFloat, to file: URL) -> Patch? {
+    let px = CGRect(x: r.minX * scale, y: r.minY * scale, width: r.width * scale, height: r.height * scale).integral
+    guard let clean = c.clean, let cut = clean.cropping(to: px),
+          let png = NSBitmapImageRep(cgImage: cut).representation(using: .png, properties: [:]),
+          (try? png.write(to: file)) != nil else { return nil }
+    return Patch(rect: rectArray(r), file: file.lastPathComponent)
+}
+
+func screenLayout(_ c: Canvas, display: UInt32, scale: CGFloat, marks: Marks?, dir: URL, screen: Int, stamp: Int) -> ScreenLayout {
+    var s = ScreenLayout(display: display, width: Double(c.size.width), height: Double(c.size.height))
+    if let marks, let r = c.imageRect {
+        let px = { (fx: Double) in Double(r.minX) + fx * Double(r.width) }
+        let py = { (fy: Double) in Double(r.minY) + fy * Double(r.height) }
+        s.eyes = marks.eyes.filter { $0.count == 2 }.map { [px($0[0]), py($0[1]), marks.eyeRadius * Double(r.width)] }
+        s.streams = marks.streams.filter { $0.count == 3 }.map { [px($0[0]), py($0[1]), py($0[2])] }
+    }
+    if let r = c.cursor { s.cursor = writePatch(c, r, scale: scale, to: dir.appendingPathComponent("screen\(screen)-cursor-\(stamp).png")) }
+    if let r = c.now, let p = writePatch(c, r, scale: scale, to: dir.appendingPathComponent("screen\(screen)-now-\(stamp).png")) {
+        s.now = NowMark(patch: p, font: Double(c.nowFont))
+    }
+    if let r = c.column { s.column = rectArray(r) }
+    return s
 }
 
 // MARK: - Main
@@ -605,7 +687,7 @@ case "render":
         size = CGSize(width: p[0], height: p[1])
     }
     let scale = CGFloat(Double(options["scale"] ?? "") ?? Double(NSScreen.main?.backingScaleFactor ?? 2))
-    guard let png = render(style: style, size: size, scale: scale, image: image, facts: facts, commits: commits, boss: boss) else { fail("render failed") }
+    guard let png = render(style: style, size: size, scale: scale, image: image, facts: facts, commits: commits, boss: boss)?.png else { fail("render failed") }
     do { try png.write(to: URL(fileURLWithPath: out)) } catch { fail("write \(out): \(error.localizedDescription)") }
 case "apply":
     // A new file name each run: macOS keeps showing a cached image for a path it already set
@@ -614,9 +696,12 @@ case "apply":
     // At login launchd can run this before the displays attach; leave the current images alone then
     if NSScreen.screens.isEmpty { fail("no screens attached") }
     let stamp = Int(Date().timeIntervalSince1970)
+    let marksURL = URL(fileURLWithPath: imagePath).deletingPathExtension().appendingPathExtension("json")
+    let marks = image == nil ? nil : (try? Data(contentsOf: marksURL)).flatMap { try? JSONDecoder().decode(Marks.self, from: $0) }
+    var layout = Layout(stamp: stamp, screens: [])
     for (i, screen) in NSScreen.screens.enumerated() {
-        guard let png = render(style: style, size: screen.frame.size, scale: screen.backingScaleFactor, image: image,
-                               facts: facts, commits: commits, boss: boss) else { fail("render failed") }
+        guard let (png, canvas) = render(style: style, size: screen.frame.size, scale: screen.backingScaleFactor, image: image,
+                                         facts: facts, commits: commits, boss: boss) else { fail("render failed") }
         let file = dir.appendingPathComponent("screen\(i)-\(stamp).png")
         do {
             try png.write(to: file)
@@ -624,7 +709,14 @@ case "apply":
                 .imageScaling: NSImageScaling.scaleProportionallyUpOrDown.rawValue, .allowClipping: true,
             ])
         } catch { fail("set wallpaper: \(error.localizedDescription)") }
+        let display = (screen.deviceDescription[NSDeviceDescriptionKey("NSScreenNumber")] as? NSNumber)?.uint32Value ?? 0
+        // Patch names end in the stamp too, so the cleanup below treats them like the images
+        layout.screens.append(screenLayout(canvas, display: display, scale: screen.backingScaleFactor, marks: marks,
+                                           dir: dir, screen: i, stamp: stamp))
     }
+    do {
+        try JSONEncoder().encode(layout).write(to: dir.appendingPathComponent("layout.json"), options: .atomic)
+    } catch { fail("write layout: \(error.localizedDescription)") }
     // A detached display or another Space can still show an older image, so only images a day
     // old go; the name's stamp says when it was drawn
     let dayAgo = stamp - 86_400

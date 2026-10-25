@@ -71,6 +71,11 @@ NET_LOG="$scratch/Logs/sketchybar-net.log"
 WALL_BIN="$scratch/wallgen"
 WALL_AGENT_PLIST="$scratch/LaunchAgents/$WALL_AGENT_LABEL.plist"
 WALL_LOG="$scratch/Logs/wallgen.log"
+ANIM_BIN="$scratch/wallanim"
+ANIM_AGENT_PLIST="$scratch/LaunchAgents/$ANIM_AGENT_LABEL.plist"
+ANIM_LOG="$scratch/Logs/wallanim.log"
+printf '#!/bin/sh\n' >"$ANIM_BIN"
+chmod +x "$ANIM_BIN"
 printf '#!/bin/sh\n' >"$NET_BIN"
 printf '#!/bin/sh\n' >"$WALL_BIN"
 chmod +x "$NET_BIN" "$WALL_BIN"
@@ -87,6 +92,9 @@ expected_service_calls=(
     "launchctl bootout gui/$uid/$WALL_AGENT_LABEL"
     "launchctl bootstrap gui/$uid $WALL_AGENT_PLIST"
     "launchctl kickstart gui/$uid/$WALL_AGENT_LABEL"
+    "launchctl bootout gui/$uid/$ANIM_AGENT_LABEL"
+    "launchctl bootstrap gui/$uid $ANIM_AGENT_PLIST"
+    "launchctl kickstart gui/$uid/$ANIM_AGENT_LABEL"
     "pgrep -x AeroSpace"
     "osascript -e tell application \"AeroSpace\" to quit"
     "pgrep -x AeroSpace"
@@ -108,6 +116,11 @@ plutil -lint "$WALL_AGENT_PLIST" >/dev/null
 [ "$(plutil -extract StartInterval raw "$WALL_AGENT_PLIST")" = "3600" ]
 [ "$(plutil -extract ProcessType raw "$WALL_AGENT_PLIST")" = "Background" ]
 
+# The animation stays up, and launchd restarts it if it exits
+plutil -lint "$ANIM_AGENT_PLIST" >/dev/null
+[ "$(plutil -extract ProgramArguments.0 raw "$ANIM_AGENT_PLIST")" = "$ANIM_BIN" ]
+[ "$(plutil -extract KeepAlive raw "$ANIM_AGENT_PLIST")" = "true" ]
+
 calls=()
 stop_services >/dev/null
 expected_stop_calls=(
@@ -115,6 +128,7 @@ expected_stop_calls=(
     "brew services stop borders"
     "launchctl bootout gui/$uid/$NET_AGENT_LABEL"
     "launchctl bootout gui/$uid/$WALL_AGENT_LABEL"
+    "launchctl bootout gui/$uid/$ANIM_AGENT_LABEL"
 )
 [ "${calls[*]}" = "${expected_stop_calls[*]}" ]
 

@@ -21,6 +21,12 @@ WALL_AGENT_LABEL="com.wayne930242.wallgen"
 WALL_AGENT_PLIST="$HOME/Library/LaunchAgents/$WALL_AGENT_LABEL.plist"
 WALL_LOG="$HOME/Library/Logs/wallgen.log"
 
+# wallpaper/wallanim.swift animates the eyes, streams, cursor, and live counts over it
+ANIM_BIN="$DOTFILES_DIR/wallpaper/bin/wallanim"
+ANIM_AGENT_LABEL="com.wayne930242.wallanim"
+ANIM_AGENT_PLIST="$HOME/Library/LaunchAgents/$ANIM_AGENT_LABEL.plist"
+ANIM_LOG="$HOME/Library/Logs/wallanim.log"
+
 print_header() {
     echo ""
     echo "╔═══════════════════════════════════════════════════════════════╗"
@@ -187,10 +193,11 @@ build_helpers() {
     if ! command -v swiftc &>/dev/null; then
         echo "   ⚠️  swiftc not found; the wallpaper stays as it is until ./install.sh runs with it"
     elif mkdir -p "$DOTFILES_DIR/wallpaper/bin" \
-        && swiftc -O -swift-version 5 -o "$WALL_BIN" "$DOTFILES_DIR/wallpaper/wallgen.swift"; then
-        echo "   ✅ wallpaper/bin/wallgen"
+        && swiftc -O -swift-version 5 -o "$WALL_BIN" "$DOTFILES_DIR/wallpaper/wallgen.swift" \
+        && swiftc -O -swift-version 5 -o "$ANIM_BIN" "$DOTFILES_DIR/wallpaper/wallanim.swift"; then
+        echo "   ✅ wallpaper/bin/wallgen, wallpaper/bin/wallanim"
     else
-        echo "   ⚠️  The wallpaper generator failed to build"
+        echo "   ⚠️  The wallpaper programs failed to build"
     fi
 }
 
@@ -286,10 +293,41 @@ start_wallpaper() {
     fi
     write_wall_agent
     load_agent "$WALL_AGENT_LABEL" "$WALL_AGENT_PLIST" "Wallpaper"
+    if [ -x "$ANIM_BIN" ]; then
+        write_anim_agent
+        load_agent "$ANIM_AGENT_LABEL" "$ANIM_AGENT_PLIST" "Wallpaper animation"
+    fi
+}
+
+write_anim_agent() {
+    mkdir -p "$(dirname "$ANIM_AGENT_PLIST")" "$(dirname "$ANIM_LOG")"
+    cat >"$ANIM_AGENT_PLIST" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>$ANIM_AGENT_LABEL</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$ANIM_BIN</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>30</integer>
+    <key>StandardErrorPath</key>
+    <string>$ANIM_LOG</string>
+</dict>
+</plist>
+EOF
 }
 
 stop_wallpaper() {
     launchctl bootout "gui/$(id -u)/$WALL_AGENT_LABEL" 2>/dev/null && echo "   ✅ Wallpaper stopped" || true
+    launchctl bootout "gui/$(id -u)/$ANIM_AGENT_LABEL" 2>/dev/null && echo "   ✅ Wallpaper animation stopped" || true
 }
 
 stop_net_feed() {
@@ -414,6 +452,7 @@ do_uninstall() {
     [ -L "$HOME/.config/herdr/sounds" ] && rm "$HOME/.config/herdr/sounds" && echo "   ✅ Removed herdr sounds symlink"
     [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
     [ -f "$WALL_AGENT_PLIST" ] && rm "$WALL_AGENT_PLIST" && echo "   ✅ Removed wallpaper launch agent"
+    [ -f "$ANIM_AGENT_PLIST" ] && rm "$ANIM_AGENT_PLIST" && echo "   ✅ Removed wallpaper animation launch agent"
     revert_macos_defaults
 
     echo ""
@@ -467,6 +506,7 @@ do_restore() {
     # The feed and the wallpaper belong to this checkout, not to the restored configs
     [ -f "$NET_AGENT_PLIST" ] && rm "$NET_AGENT_PLIST" && echo "   ✅ Removed net feed launch agent"
     [ -f "$WALL_AGENT_PLIST" ] && rm "$WALL_AGENT_PLIST" && echo "   ✅ Removed wallpaper launch agent"
+    [ -f "$ANIM_AGENT_PLIST" ] && rm "$ANIM_AGENT_PLIST" && echo "   ✅ Removed wallpaper animation launch agent"
 
     # Remove current symlinks
     [ -L "$HOME/.config/sketchybar" ] && rm "$HOME/.config/sketchybar"
