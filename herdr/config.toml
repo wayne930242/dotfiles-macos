@@ -69,3 +69,6 @@ key = "prefix+u"
 type = "plugin_action"
 command = "wayne930242.ccswitch.dashboard"
 description = "open the ccswitch dashboard"
+
+[experimental]
+kitty_graphics = true
