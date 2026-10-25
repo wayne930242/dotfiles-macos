@@ -131,7 +131,7 @@ brew services start borders
 |--------|------|
 | `alt-w` | 跳到下一個等你回覆的 agent（每按一次換下一個） |
 | `alt-shift-w` | 開啟 Straw Net GUI |
-| service mode 的 `b` | 把最新的副瀏覽器視窗（例如 agent 開的頁面）拉到目前的工作區並排；再按一次送回 G。沒有副視窗時改拉主 Chrome，再按一次送回 C |
+| `alt-shift-b` | 把最新的副瀏覽器視窗（例如 agent 開的頁面）拉到目前的工作區並排；再按一次送回 G。沒有副視窗時改拉主 Chrome，再按一次送回 C |
 
 ## SketchyBar
 

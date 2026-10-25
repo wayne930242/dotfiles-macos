@@ -262,14 +262,15 @@ run = 'move-node-to-workspace P'
     # Enter service mode
     alt-shift-semicolon = 'mode service'
 
+    # Bring the newest secondary browser window (an agent's page) beside this workspace; again sends it back
+    alt-shift-b = 'exec-and-forget ~/dotfiles-macos/bin/aerospace-chrome-beside'
+
 # Service mode for advanced operations
 [mode.service.binding]
     esc = ['reload-config', 'mode main']
     r = ['flatten-workspace-tree', 'mode main']  # Reset layout
     f = ['layout floating tiling', 'mode main']  # Toggle floating/tiling
     backspace = ['close-all-windows-but-current', 'mode main']
-    # Bring the newest secondary browser window (an agent's page) beside this workspace; again sends it back to G
-    b = ['exec-and-forget ~/dotfiles-macos/bin/aerospace-chrome-beside', 'mode main']
 
     # Summon all windows to current workspace (rescue lost windows) + re-tile + reload sketchybar
     # Excludes Social apps (Discord, Slack, Telegram)

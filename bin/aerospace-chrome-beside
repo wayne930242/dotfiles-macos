@@ -3,7 +3,7 @@
 # current workspace's windows, or sends it back to G when it is already here. The oldest
 # Chrome window stays in C as the main browser (see aerospace-chrome-extra); with no
 # secondary window, the main one comes instead and goes back to C.
-# Bound to `b` in AeroSpace's service mode.
+# Bound to alt-shift-b in AeroSpace.
 set -euo pipefail
 
 focused="$(aerospace list-workspaces --focused)"
