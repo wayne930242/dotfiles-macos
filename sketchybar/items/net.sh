@@ -8,8 +8,11 @@ source "$CONFIG_DIR/colors.sh"
 # colors; a click opens the net as a popup.
 NET="$CONFIG_DIR/helpers/bin/net"
 
+# padding_left=0: two items' paddings put 8 pt between them, while the status bracket ends
+# 4 pt from its neighbours; dropping this side keeps the gap to the Claude pill the same.
 sketchybar --add item net right \
            --set net \
+                 padding_left=0 \
                  icon="󰚩" \
                  icon.color="$SPACE_INACTIVE" \
                  icon.padding_left=10 \
