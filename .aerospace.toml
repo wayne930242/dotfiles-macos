@@ -142,6 +142,10 @@ if.app-id = 'org.blenderfoundation.blender'
 run = ['layout tiling', 'move-node-to-workspace 3']
 
 [[on-window-detected]]
+if.app-id = 'com.utmapp.UTM'
+run = 'move-node-to-workspace 3'
+
+[[on-window-detected]]
 if.app-id = 'dev.kdrag0n.MacVirt'  # OrbStack
 run = 'move-node-to-workspace D'
 
