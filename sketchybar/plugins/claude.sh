@@ -51,22 +51,19 @@ refresh() {
 }
 
 draw_pill() {
-    local num five seven bad color label
+    local num seven bad
     [ -f "$CACHE" ] || { sketchybar --set claude drawing=off; return; }
-    read -r num five seven bad < <(jq -r '
+    # Anthropic dropped the 5-hour window (2026-11): the week is the only limit left
+    read -r num seven bad < <(jq -r '
         (map(select(.active)) | .[0]) as $a
-        | if $a == null then "- 0 0 1"
-          else "\($a.num) \($a.usage.five_hour.utilization // 0 | floor) \($a.usage.seven_day.utilization // 0 | floor) \(if $a.error != null or ($a.token_state | test("dead|unknown|missing")) then 1 else 0 end)"
+        | if $a == null then "- 0 1"
+          else "\($a.num) \($a.usage.seven_day.utilization // 0 | floor) \(if $a.error != null or ($a.token_state | test("dead|unknown|missing")) then 1 else 0 end)"
           end' "$CACHE")
     if [ "$bad" = 1 ]; then
         sketchybar --set claude drawing=on icon.color="$RED" label="$num · !" label.color="$RED"
         return
     fi
-    color="$(tone "$five")"
-    label="$num · ${five}%"
-    # A nearly spent week blocks as surely as a spent 5 hours
-    [ "$seven" -ge "$HOT" ] && label="$label · 7d ${seven}%" && color="$RED"
-    sketchybar --set claude drawing=on icon.color="$color" label="$label" label.color="$LABEL_COLOR"
+    sketchybar --set claude drawing=on icon.color="$(tone "$seven")" label="$num · 7d ${seven}%" label.color="$LABEL_COLOR"
 }
 
 close_popup() {
@@ -98,16 +95,16 @@ window() {
 }
 
 open_popup() {
-    local args=() num email active five seven five_at seven_at state err label color i=0
+    local args=() num email active seven seven_at state err label color i=0
     [ -f "$CACHE" ] || return
     close_popup
-    while IFS=$'\t' read -r num email active five seven five_at seven_at state err; do
+    while IFS=$'\t' read -r num email active seven seven_at state err; do
         if [ "$err" != "-" ] || [[ "$state" =~ dead|unknown|missing ]]; then
             label="$(printf '%-22.22s' "$email")  login needs attention"
             color="$RED"
         else
-            label="$(printf '%-22.22s' "$email")  $(window 5h "$five" "$five_at")  $(window 7d "$seven" "$seven_at")"
-            color="$(tone "$(( five > seven ? five : seven ))")"
+            label="$(printf '%-22.22s' "$email")  $(window 7d "$seven" "$seven_at")"
+            color="$(tone "$seven")"
             [ "$color" = "$ICON_COLOR" ] && color="$LABEL_COLOR"
         fi
         args+=(--add item "claude.row.$i" popup.claude
@@ -120,8 +117,7 @@ open_popup() {
                      click_script="$SELF switch $num")
         i=$((i + 1))
     done < <(jq -r '.[] | [.num, .email, .active,
-                           (.usage.five_hour.utilization // 0 | floor), (.usage.seven_day.utilization // 0 | floor),
-                           (.usage.five_hour.resets_at // "null"), (.usage.seven_day.resets_at // "null"),
+                           (.usage.seven_day.utilization // 0 | floor), (.usage.seven_day.resets_at // "null"),
                            .token_state, (.error // "-")] | @tsv' "$CACHE")
     args+=(--add item claude.row.dashboard popup.claude
            --set claude.row.dashboard

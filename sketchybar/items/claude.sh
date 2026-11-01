@@ -4,7 +4,7 @@
 source "$CONFIG_DIR/colors.sh"
 
 # Claude Code accounts from ccswitch (github.com/wayne930242/cc-account-switcher): the active
-# account and its 5-hour usage, refreshed every 5 minutes like ccswitch's own dashboard. A click
+# account and its 7-day usage, refreshed every 5 minutes like ccswitch's own dashboard. A click
 # lists every account's usage; clicking one switches to it. Hidden while no ccswitch with --json
 # is installed.
 sketchybar --add item claude right \
