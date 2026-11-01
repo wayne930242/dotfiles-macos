@@ -46,7 +46,7 @@ GAP=4
 notch="$HOME/.cache/sketchybar/notch"
 state="$HOME/.cache/sketchybar/media_fit"
 if [[ ! -r "$notch" ]]; then
-    sketchybar --set "$NAME" label.max_chars="$MAX_CHARS" label.padding_right="$PAD" label.drawing=on
+    sketchybar --set "$NAME" label.max_chars="$MAX_CHARS" label="$LABEL" label.padding_right="$PAD" label.drawing=on
     rm -f "$state"
     exit 0
 fi
@@ -95,12 +95,13 @@ fi
 # least one character, never more than the overflow's worth at 8 pt a character.
 chars="$MAX_CHARS"
 [[ "$chars" -le ${#LABEL} ]] || chars=${#LABEL}
-sketchybar --set "$NAME" label.max_chars="$MAX_CHARS" label.padding_right="$PAD" label.drawing=on
+# SketchyBar keeps the old width when max_chars grows unless the label is set again with it.
+sketchybar --set "$NAME" label.max_chars="$MAX_CHARS" label="$LABEL" label.padding_right="$PAD" label.drawing=on
 free="$(room)"
 while [[ "$free" -lt 0 && "$chars" -gt 4 ]]; do
     chars=$((chars - (-free + 7) / 8))
     [[ "$chars" -ge 4 ]] || chars=4
-    sketchybar --set "$NAME" label.max_chars="$chars"
+    sketchybar --set "$NAME" label.max_chars="$chars" label="$LABEL"
     free="$(room)"
 done
 if [[ "$free" -lt 0 ]]; then
