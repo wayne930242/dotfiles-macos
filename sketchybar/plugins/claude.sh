@@ -2,10 +2,11 @@
 
 # The Claude pill (items/claude.sh):
 #	claude.sh               refresh: ccswitch --json into the cache, then redraw the pill
-#	claude.sh toggle        open the popup from the cache, or close it
+#	claude.sh toggle        open the popup from the cache, refreshing it if accounts changed, or close it
 #	claude.sh switch N      switch to account N, then refresh
 #	claude.sh dashboard     open ccswitch's dashboard in Herdr
-# Only the refresh touches the network; the popup draws from the cache.
+# Only the refresh touches the network; the popup draws from the cache at once, then refreshes
+# and redraws if ccswitch's local account list no longer matches the cache.
 
 set -uo pipefail
 # ${#s} counts characters, not bytes, only under a UTF-8 locale; launchd gives none
@@ -36,18 +37,49 @@ tone() {
     if [ "$1" -ge "$HOT" ]; then echo "$RED"; elif [ "$1" -ge "$WARN" ]; then echo "$YELLOW"; else echo "$ICON_COLOR"; fi
 }
 
-refresh() {
+# Fetch ccswitch --json into the cache; fails when no usable ccswitch is installed
+fetch() {
     local cc json
     # A ccswitch older than --json (1.3.0) can't feed the pill
     if ! cc="$(find_ccswitch)" || ! "$cc" --help 2>/dev/null | grep -q -- '--json'; then
-        sketchybar --set claude drawing=off
-        return
+        return 1
     fi
     if json="$("$cc" --json 2>/dev/null)" && jq -e 'type == "array"' >/dev/null 2>&1 <<<"$json"; then
         mkdir -p "$(dirname "$CACHE")"
         (umask 077 && printf '%s\n' "$json" >"$CACHE.tmp" && mv "$CACHE.tmp" "$CACHE")
     fi
+}
+
+refresh() {
+    fetch || { sketchybar --set claude drawing=off; return; }
     draw_pill
+}
+
+popup_open() {
+    [ "$(sketchybar --query claude | jq -r '.popup.drawing')" = on ]
+}
+
+# "num email active" per account, from the local --list (no network) and from the cache
+listed_accounts() {
+    local cc
+    cc="$(find_ccswitch)" || return 1
+    "$cc" --list 2>/dev/null | sed -nE 's/^ *([0-9]+): ([^ ]+) \(active\)$/\1 \2 true/p; s/^ *([0-9]+): ([^ ]+)$/\1 \2 false/p'
+}
+
+cached_accounts() {
+    jq -r '.[] | "\(.num) \(.email) \(.active)"' "$CACHE" 2>/dev/null
+}
+
+# Open from the cache at once; when accounts were added, removed, or switched outside the pill
+# since the last refresh, refresh and redraw. Usage alone waits for the 5-minute refresh, so
+# opening the popup does not spend usage API calls (it rate-limits).
+open_and_refresh() {
+    local listed
+    open_popup
+    listed="$(listed_accounts)" || return
+    [ -n "$listed" ] && [ "$listed" != "$(cached_accounts)" ] || return
+    refresh
+    popup_open && open_popup
 }
 
 draw_pill() {
@@ -146,14 +178,14 @@ open_dashboard() {
 
 case "${1:-}" in
     toggle)
-        if [ "$(sketchybar --query claude | jq -r '.popup.drawing')" = on ]; then close_popup; else open_popup; fi
+        if popup_open; then close_popup; else open_and_refresh; fi
         ;;
     switch) switch_to "${2:?account number}" ;;
     dashboard) open_dashboard ;;
     *)
         case "${SENDER:-}" in
             mouse.exited.global)
-                [ "$(sketchybar --query claude | jq -r '.popup.drawing')" = on ] && close_popup
+                popup_open && close_popup
                 ;;
             *) refresh ;;
         esac

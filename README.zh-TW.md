@@ -143,7 +143,7 @@ brew services start borders
 
 每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。狀態膠囊的齒輪依 CPU 使用率變色：30% 起黃色、60% 起橘色、85% 起紅色。
 
-Claude 膠囊顯示目前的 Claude Code 帳號與它的 7 天用量，資料來自 [ccswitch](https://github.com/wayne930242/cc-account-switcher) 的 `--json`（1.3.0 起才有，沒有就不顯示），每 5 分鐘更新一次：60% 起黃色，85% 起紅色。點開會列出每個帳號的 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。
+Claude 膠囊顯示目前的 Claude Code 帳號與它的 7 天用量，資料來自 [ccswitch](https://github.com/wayne930242/cc-account-switcher) 的 `--json`（1.3.0 起才有，沒有就不顯示），每 5 分鐘更新一次：60% 起黃色，85% 起紅色。點開會列出每個帳號的 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。上次更新後若有新增、移除帳號，或在膠囊以外切換了帳號，點開時會先照快取顯示，再立刻更新一次。
 
 ### Straw Boss net
 
