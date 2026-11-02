@@ -37,6 +37,16 @@ tone() {
     if [ "$1" -ge "$HOT" ]; then echo "$RED"; elif [ "$1" -ge "$WARN" ]; then echo "$YELLOW"; else echo "$ICON_COLOR"; fi
 }
 
+# An account's state, from ccswitch's token_state and usage error: ok; login (log in again, red);
+# limited (usage API or token renewal rate limited, yellow); unavailable (usage not fetched for a
+# passing reason such as the network or a token Claude Code renews on use, yellow)
+STATUS='def status:
+    if (.token_state | IN("relogin", "save-failed", "missing", "unknown"))
+       or ((.error // "") | test("unauthorized")) then "login"
+    elif ((.error // "") | test("rate limited")) or .token_state == "refresh-rate-limited" then "limited"
+    elif .error != null or .usage == null then "unavailable"
+    else "ok" end;'
+
 # Fetch ccswitch --json into the cache; fails when no usable ccswitch is installed
 fetch() {
     local cc json
@@ -83,19 +93,19 @@ open_and_refresh() {
 }
 
 draw_pill() {
-    local num seven bad
+    local num seven status
     [ -f "$CACHE" ] || { sketchybar --set claude drawing=off; return; }
     # Anthropic dropped the 5-hour window (2026-11): the week is the only limit left
-    read -r num seven bad < <(jq -r '
+    read -r num seven status < <(jq -r "$STATUS"'
         (map(select(.active)) | .[0]) as $a
-        | if $a == null then "- 0 1"
-          else "\($a.num) \($a.usage.seven_day.utilization // 0 | floor) \(if $a.error != null or ($a.token_state | test("dead|unknown|missing")) then 1 else 0 end)"
-          end' "$CACHE")
-    if [ "$bad" = 1 ]; then
-        sketchybar --set claude drawing=on icon.color="$RED" label="$num · !" label.color="$RED"
-        return
-    fi
-    sketchybar --set claude drawing=on icon.color="$(tone "$seven")" label="$num · 7d ${seven}%" label.color="$LABEL_COLOR"
+        | if $a == null then "- 0 login"
+          else "\($a.num) \($a.usage.seven_day.utilization // 0 | floor) \($a | status)" end' "$CACHE")
+    case "$status" in
+        login) sketchybar --set claude drawing=on icon.color="$RED" label="$num · !" label.color="$RED" ;;
+        limited | unavailable)
+            sketchybar --set claude drawing=on icon.color="$YELLOW" label="$num · 7d ?" label.color="$YELLOW" ;;
+        *) sketchybar --set claude drawing=on icon.color="$(tone "$seven")" label="$num · 7d ${seven}%" label.color="$LABEL_COLOR" ;;
+    esac
 }
 
 close_popup() {
@@ -127,18 +137,21 @@ window() {
 }
 
 open_popup() {
-    local args=() num email active seven seven_at state err label color i=0
+    local args=() num email active seven seven_at status label color i=0
     [ -f "$CACHE" ] || return
     close_popup
-    while IFS=$'\t' read -r num email active seven seven_at state err; do
-        if [ "$err" != "-" ] || [[ "$state" =~ dead|unknown|missing ]]; then
-            label="$(printf '%-22.22s' "$email")  login needs attention"
-            color="$RED"
-        else
-            label="$(printf '%-22.22s' "$email")  $(window 7d "$seven" "$seven_at")"
-            color="$(tone "$seven")"
-            [ "$color" = "$ICON_COLOR" ] && color="$LABEL_COLOR"
-        fi
+    while IFS=$'\t' read -r num email active seven seven_at status; do
+        label="$(printf '%-22.22s' "$email")  "
+        case "$status" in
+            login) label+="login needs attention"; color="$RED" ;;
+            limited) label+="usage rate limited, retry later"; color="$YELLOW" ;;
+            unavailable) label+="usage unavailable for now"; color="$YELLOW" ;;
+            *)
+                label+="$(window 7d "$seven" "$seven_at")"
+                color="$(tone "$seven")"
+                [ "$color" = "$ICON_COLOR" ] && color="$LABEL_COLOR"
+                ;;
+        esac
         args+=(--add item "claude.row.$i" popup.claude
                --set "claude.row.$i"
                      icon="$([ "$active" = true ] && echo "●" || echo "○") $num"
@@ -148,9 +161,9 @@ open_popup() {
                      background.drawing=off
                      click_script="$SELF switch $num")
         i=$((i + 1))
-    done < <(jq -r '.[] | [.num, .email, .active,
+    done < <(jq -r "$STATUS"'.[] | [.num, .email, .active,
                            (.usage.seven_day.utilization // 0 | floor), (.usage.seven_day.resets_at // "null"),
-                           .token_state, (.error // "-")] | @tsv' "$CACHE")
+                           status] | @tsv' "$CACHE")
     args+=(--add item claude.row.dashboard popup.claude
            --set claude.row.dashboard
                  icon="󰕮" icon.color="$ICON_COLOR" icon.padding_left=10 icon.padding_right=8
