@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
-
 // The net as the Straw Boss GUI server streams it; only the fields the bar shows.
 type Net struct {
 	Bases []Base `json:"bases"`
@@ -89,7 +84,7 @@ func Flatten(n Net) []Row {
 	return rows
 }
 
-// Counts are what the pill shows; a unit commanding its subagents counts as working.
+// Counts tally the units by mark; Waiting turns the focus border orange and feeds alt-w.
 type Counts struct {
 	Waiting, Working, Done, Error int
 }
@@ -116,100 +111,13 @@ func Count(rows []Row) Counts {
 
 // Nerd Font glyphs (Hack Nerd Font Mono).
 const (
-	glyphRobot = "\U000f06a9"
-	glyphTower = "\U000f043b"
-	glyphCrown = "\U000f01a5"
-	glyphStar  = "\uf005"
-	glyphOpen  = "\U000f03cc"
-	glyphQR    = "\U000f0432"
+	glyphRobot     = "\U000f06a9"
+	glyphClaude    = "\U000f09d1"
+	glyphCoffee    = "\U000f0176"
+	glyphTimer     = "\U000f0150"
+	glyphSleep     = "\U000f04b2"
+	glyphMessage   = "\U000f0369"
+	glyphOpen      = "\U000f03cc"
+	glyphQR        = "\U000f0432"
+	glyphDashboard = "\U000f056e"
 )
-
-var markGlyph = map[string]string{
-	"waiting":    "\U000f009e",
-	"working":    "\U000f051f",
-	"commanding": "\U000f051f",
-	"done":       "\U000f012c",
-	"error":      "\U000f0159",
-	"idle":       "\U000f04b2",
-	"unknown":    "\U000f0625",
-}
-
-func glyphOf(mark string) string {
-	if g, ok := markGlyph[mark]; ok {
-		return g
-	}
-	return markGlyph["unknown"]
-}
-
-// PillLabel lists the non-zero counts, most urgent first; empty when nothing is active.
-func PillLabel(c Counts) string {
-	label := ""
-	for _, p := range []struct {
-		mark string
-		n    int
-	}{{"waiting", c.Waiting}, {"error", c.Error}, {"working", c.Working}, {"done", c.Done}} {
-		if p.n == 0 {
-			continue
-		}
-		if label != "" {
-			label += "  "
-		}
-		label += fmt.Sprintf("%s %d", markGlyph[p.mark], p.n)
-	}
-	return label
-}
-
-const nameWidth = 28
-
-// RowIndent is a unit row's label.padding_left in points. Indentation is padding, not
-// leading spaces, because SketchyBar leaves leading spaces out of a label's width and then
-// cuts the label's end by as much.
-func RowIndent(r Row) int {
-	if r.Depth < 2 {
-		return 16
-	}
-	return 16 + (r.Depth-1)*16
-}
-
-// RowLabel draws a unit with its tree branch and role mark, its name cut to nameWidth.
-func RowLabel(r Row) string {
-	if r.Kind == "base" {
-		return r.Name
-	}
-	lead := ""
-	switch r.Role {
-	case "head":
-		lead = glyphCrown + " "
-	case "tower":
-		lead = glyphTower + " "
-	case "main":
-		lead = glyphStar + " "
-	}
-	branch := ""
-	if r.Depth > 0 {
-		branch = "├ "
-		if r.Last {
-			branch = "└ "
-		}
-	}
-	name := []rune(r.Name)
-	if len(name) > nameWidth {
-		name = append(name[:nameWidth-1], '…')
-	}
-	return branch + lead + string(name)
-}
-
-// SafeKey reports whether a unit key can go into a shell command unquoted. Keys are session
-// ids and file names today; anything else gets no click action rather than shell parsing.
-func SafeKey(key string) bool {
-	if key == "" {
-		return false
-	}
-	for _, c := range key {
-		ok := c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || strings.ContainsRune("._/-", c)
-		if !ok {
-			return false
-		}
-	}
-	return true
-}

@@ -141,17 +141,23 @@ Workspaces 1–3 go to the secondary monitor when one is connected; letter works
 
 **Right of the notch:** Media (only while something plays)
 
-**Right:** Claude accounts | Straw Boss net | Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
+**Right:** Agent (Claude usage, caffeine, Straw Boss net) | Status (audio, battery, input; its popup holds CPU / memory, temperature, and network) | Calendar
 
 Every group is one pill with the same background and a neutral border; icons take a color only to report a state (an agent waiting on you, a low battery, a muted mic). The status gear follows CPU use: yellow from 30%, peach from 60%, red from 85%.
 
-The Claude pill shows the active Claude Code account and its 7-day usage from [ccswitch](https://github.com/wayne930242/cc-account-switcher) `--json` (1.3.0 or later; the pill stays hidden without it), refreshed every 5 minutes: yellow from 60%, red from 85%. Its popup lists every account's 7-day usage with the time until it resets; click an account to switch to it, or open the ccswitch dashboard in Herdr. When an account was added, removed, or switched outside the pill since the last refresh, opening the popup refreshes it.
+### Agent pill
 
-### Straw Boss net
+One pill for the agents' machine: the active Claude Code account and its 7-day usage from [ccswitch](https://github.com/wayne930242/cc-account-switcher) `--json` (1.3.0 or later; without it the pill shows a robot), yellow from 60% and red from 85%, with a coffee cup in front while `caffeinate` keeps the Mac awake. It redraws every 30 seconds and refreshes the usage every 5 minutes and on wake.
 
-The pill counts the [Straw Boss](https://github.com/wayne930242/pi-straw-boss) agents that wait on you, fail, work, or are done, and hides while no Straw Boss GUI server runs. Click it for the whole net as a tree: click a row to focus that agent's herdr pane, or shift-click to open its comms in the GUI. "Remote QR" shows a one-time pairing QR (valid ten minutes) for opening the GUI on a phone over Tailscale, and turns remote access on first if it is off. While an agent waits on you, the focused window's border turns orange.
+Its popup has three parts:
 
-`sketchybar/helpers/net` is a small Go program. Its `feed` runs as the launch agent `com.wayne930242.sketchybar-net`, follows the event stream of the Straw Boss GUI server (its address is in `~/.pi/agent/straw-boss/gui.json`), and redraws only what changed; it logs to `~/Library/Logs/sketchybar-net.log`. With the herdr sidebar collapsed to zero width (`prefix+b` opens it), the pill is the agent list.
+- **Straw Net**, while a [Straw Boss](https://github.com/wayne930242/pi-straw-boss) GUI server runs: a one-time remote pairing QR (valid ten minutes) for opening the GUI on a phone, made as the popup opens while Tailscale is connected, turning remote access on first if it is off; "Message the head tower…", which asks for the text in a dialog and sends it as the GUI's composer does; and "Open Straw Net".
+- **Caffeine**: whether it is on and how long it has left; click it to turn it on until turned off, or off. Turning it off ends every `caffeinate` of yours, an agent's too. "Keep awake 1 hour", "3 hours", and "until turned off" replace whatever runs with `caffeinate -dims`. Below it, how long until the Mac sleeps on idle on the current power source, and what else keeps it awake (such as `coreaudiod` while audio plays).
+- **Claude**: every account's 7-day usage with the time until it resets; click an account to switch to it, or open the ccswitch dashboard in Herdr. When an account was added, removed, or switched outside the pill since the last refresh, opening the popup refreshes it.
+
+While an agent waits on you, the focused window's border turns orange, and `alt-w` jumps to it.
+
+`sketchybar/helpers/net` is a small Go program that draws the pill. Its `feed` runs as the launch agent `com.wayne930242.sketchybar-net`, follows the event stream of the Straw Boss GUI server (its address is in `~/.pi/agent/straw-boss/gui.json`) for the border, `alt-w`, and the Straw Net rows; it logs to `~/Library/Logs/sketchybar-net.log`.
 
 For the GUI as its own window in workspace A, open it (`/boss gui` in pi), then in Chrome choose Cast, save, and share > Install page as app; AeroSpace moves the `Straw Net` app to A.
 

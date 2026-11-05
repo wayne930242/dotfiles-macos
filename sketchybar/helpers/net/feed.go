@@ -56,35 +56,27 @@ var errMoved = errors.New("gui.json changed")
 
 type feeder struct {
 	colors map[string]string
-	shown  *Counts // what the pill shows; nil while offline
-	drawn  bool
+	shown  *State // what the popup's Straw Net rows were drawn from; nil before the first publish
 	border string
 	rows   []Row
+	head   string
 }
 
-// publish writes the cache and redraws only what changed.
-func (f *feeder) publish(online bool, rows []Row) {
-	s := State{Online: online, Rows: rows, Colors: f.colors}
+// publish writes the cache, redraws an open popup when its Straw Net rows change (the server came
+// or went, or the head tower's key changed), and keeps the focus border in step.
+func (f *feeder) publish(online bool, rows []Row, head string) {
+	s := State{Online: online, Rows: rows, Head: head, Colors: f.colors}
 	if err := writeState(s); err != nil {
 		fmt.Fprintln(os.Stderr, "net:", err)
 	}
-	var view *Counts
-	if online {
-		n := Count(rows)
-		view = &n
-	}
-	if !f.drawn || !reflect.DeepEqual(view, f.shown) {
-		drawPill(s)
-		f.shown, f.drawn = view, true
-	}
-	if popupOpen() {
+	if f.shown != nil && (f.shown.Online != online || f.shown.Head != head) && popupOpen() {
 		if !online {
-			closePopup() // the pill is hidden, so its popup goes too
-		} else if self, err := os.Executable(); err == nil {
-			drawPopup(s, self)
+			clearQR()
 		}
+		drawPopup(s, f.colors)
 	}
-	f.border = setBorder(f.colors, view != nil && view.Waiting > 0, f.border)
+	f.shown = &s
+	f.border = setBorder(f.colors, online && Count(rows).Waiting > 0, f.border)
 }
 
 // follow streams one connection to the GUI server until it fails, goes silent, or gui.json changes.
@@ -125,15 +117,18 @@ func (f *feeder) follow() error {
 		if err := json.Unmarshal([]byte(ev.Data), &n); err != nil {
 			return fmt.Errorf("parse net: %w", err)
 		}
-		rows := Flatten(n)
+		rows, head := Flatten(n), ""
 		if rows == nil {
 			rows = []Row{}
 		}
-		if reflect.DeepEqual(rows, f.rows) {
+		if n.Head != nil {
+			head = n.Head.Key
+		}
+		if reflect.DeepEqual(rows, f.rows) && head == f.head {
 			return nil
 		}
-		f.publish(true, rows)
-		f.rows = rows
+		f.publish(true, rows, head)
+		f.rows, f.head = rows, head
 		return nil
 	})
 }
@@ -144,7 +139,7 @@ func feed() error {
 		return err
 	}
 	f := &feeder{colors: colors, border: colors["BORDER_ACTIVE_COLOR"]}
-	f.publish(false, nil)
+	f.publish(false, nil, "")
 	logged := ""
 	for {
 		err := f.follow()
@@ -154,8 +149,8 @@ func feed() error {
 			logged = err.Error()
 		}
 		if f.rows != nil { // it was online: show it offline once, and the next failure is news
-			f.rows, logged = nil, ""
-			f.publish(false, nil)
+			f.rows, f.head, logged = nil, "", ""
+			f.publish(false, nil, "")
 		}
 		time.Sleep(retryDelay)
 	}

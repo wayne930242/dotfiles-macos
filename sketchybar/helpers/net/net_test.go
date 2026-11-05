@@ -42,62 +42,6 @@ func TestFlatten(t *testing.T) {
 	}
 }
 
-func TestPillLabel(t *testing.T) {
-	tests := []struct {
-		name string
-		in   Counts
-		want string
-	}{
-		{"nothing active", Counts{}, ""},
-		{"working only", Counts{Working: 5}, markGlyph["working"] + " 5"},
-		{"urgent first", Counts{Waiting: 1, Working: 3, Done: 2, Error: 1},
-			markGlyph["waiting"] + " 1  " + markGlyph["error"] + " 1  " + markGlyph["working"] + " 3  " + markGlyph["done"] + " 2"},
-	}
-	for _, tt := range tests {
-		if got := PillLabel(tt.in); got != tt.want {
-			t.Errorf("%s: PillLabel = %q, want %q", tt.name, got, tt.want)
-		}
-	}
-}
-
-func TestRowLabel(t *testing.T) {
-	tests := []struct {
-		name string
-		in   Row
-		want string
-	}{
-		{"base", Row{Kind: "base", Name: "Root"}, "Root"},
-		{"tower", Row{Kind: "unit", Role: "tower", Name: "tower"}, glyphTower + " tower"},
-		{"main", Row{Kind: "unit", Role: "main", Name: "六月調校"}, glyphStar + " 六月調校"},
-		{"middle sub", Row{Kind: "unit", Role: "subagent", Name: "a", Depth: 1}, "├ a"},
-		{"last nested sub", Row{Kind: "unit", Role: "subagent", Name: "b", Depth: 2, Last: true}, "└ b"},
-		{"long name cut by runes", Row{Kind: "unit", Role: "subagent", Name: strings.Repeat("字", 30)},
-			strings.Repeat("字", nameWidth-1) + "…"},
-	}
-	for _, tt := range tests {
-		if got := RowLabel(tt.in); got != tt.want {
-			t.Errorf("%s: RowLabel = %q, want %q", tt.name, got, tt.want)
-		}
-	}
-}
-
-func TestRowIndent(t *testing.T) {
-	tests := []struct {
-		name string
-		in   Row
-		want int
-	}{
-		{"top unit", Row{Kind: "unit"}, 16},
-		{"sub", Row{Kind: "unit", Depth: 1}, 16},
-		{"nested sub", Row{Kind: "unit", Depth: 3}, 48},
-	}
-	for _, tt := range tests {
-		if got := RowIndent(tt.in); got != tt.want {
-			t.Errorf("%s: RowIndent = %d, want %d", tt.name, got, tt.want)
-		}
-	}
-}
-
 func TestNextKey(t *testing.T) {
 	tests := []struct {
 		name string
@@ -166,22 +110,6 @@ func TestQRImage(t *testing.T) {
 	}
 }
 
-func TestSafeKey(t *testing.T) {
-	for key, want := range map[string]bool{
-		"0b9f3c1e-6f0a-4a57-9b52-2f1d3c4e5a6b":    true,
-		"2026-10-25T08-19-24-135Z_ab2272d4.jsonl": true,
-		"launcher/worker-1":                       true,
-		"":                                        false,
-		"x; rm -rf ~":                             false,
-		"a$(id)":                                  false,
-		"name with space":                         false,
-	} {
-		if got := SafeKey(key); got != want {
-			t.Errorf("SafeKey(%q) = %v, want %v", key, got, want)
-		}
-	}
-}
-
 func TestWithoutURLDropsToken(t *testing.T) {
 	_, err := http.Get("http://127.0.0.1:1/SECRETTOKEN/events")
 	if err == nil {
@@ -203,8 +131,5 @@ func TestFlattenHead(t *testing.T) {
 	}
 	if got := Flatten(Net{Head: &Unit{Key: "h", Name: "head", State: "absent"}}); len(got) != 0 {
 		t.Fatalf("absent head drawn: %+v", got)
-	}
-	if got := RowLabel(Row{Kind: "unit", Role: "head", Name: "主塔台"}); got != glyphCrown+" 主塔台" {
-		t.Fatalf("head label %q", got)
 	}
 }

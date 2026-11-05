@@ -139,17 +139,23 @@ brew services start borders
 
 **瀏海右側：** 媒體（只在播放時出現）
 
-**右側：** Claude 帳號 | Straw Boss net | 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
+**右側：** Agent（Claude 用量、咖啡因、Straw Boss net）| 狀態（音訊、電池、輸入法；點開可看 CPU／記憶體、溫度與網路）| 日曆
 
 每一組都是同一種膠囊：同樣的底色、中性的邊框。圖示只有在回報狀態時才換顏色，例如有 agent 等你、電量低、麥克風靜音。狀態膠囊的齒輪依 CPU 使用率變色：30% 起黃色、60% 起橘色、85% 起紅色。
 
-Claude 膠囊顯示目前的 Claude Code 帳號與它的 7 天用量，資料來自 [ccswitch](https://github.com/wayne930242/cc-account-switcher) 的 `--json`（1.3.0 起才有，沒有就不顯示），每 5 分鐘更新一次：60% 起黃色，85% 起紅色。點開會列出每個帳號的 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。上次更新後若有新增、移除帳號，或在膠囊以外切換了帳號，點開時會先照快取顯示，再立刻更新一次。
+### Agent 膠囊
 
-### Straw Boss net
+一顆膠囊管 agent 這台機器：目前的 Claude Code 帳號與它的 7 天用量，資料來自 [ccswitch](https://github.com/wayne930242/cc-account-switcher) 的 `--json`（1.3.0 起才有，沒有的話膠囊只顯示機器人圖示），60% 起黃色，85% 起紅色；`caffeinate` 讓 Mac 保持清醒時，前面會多一個咖啡杯。膠囊每 30 秒重畫，每 5 分鐘與喚醒時更新用量。
 
-這顆膠囊顯示 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) 網裡等你回覆、出錯、執行中與已完成的 agent 數量；沒有 Straw Boss GUI 伺服器在跑時就隱藏。點開是整張網的樹狀選單：點一列會切到那個 agent 的 herdr pane，按住 shift 點則在 GUI 開它的通訊頁。點「Remote QR」會顯示一次性的配對 QR code（十分鐘內有效），用手機掃描就能透過 Tailscale 開啟 GUI；remote access 沒開的話會先打開。有 agent 等你時，焦點視窗的邊框會變成橘色。
+點開分三段：
 
-`sketchybar/helpers/net` 是一支小型 Go 程式。它的 `feed` 以 launch agent `com.wayne930242.sketchybar-net` 常駐，訂閱 Straw Boss GUI 伺服器的事件串流（位址寫在 `~/.pi/agent/straw-boss/gui.json`），只重畫有變動的部分，記錄寫在 `~/Library/Logs/sketchybar-net.log`。herdr 的側欄預設收成零寬（`prefix+b` 可以打開），agent 清單就改看這顆膠囊。
+- **Straw Net**，只在 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) GUI 伺服器在跑時出現：一次性的 remote 配對 QR code（十分鐘內有效），Tailscale 已連線時一點開就產生，用手機掃描就能開 GUI，remote access 沒開的話會先打開；「Message the head tower…」會跳出輸入框，把你打的字照 GUI 輸入框的方式送給 head tower；以及「Open Straw Net」。
+- **Caffeine**：咖啡因有沒有開、還剩多久；點它切換，關著時會開到手動關掉為止，開著時會關掉。關掉會結束你所有的 `caffeinate`，agent 開的也一起關。「Keep awake 1 hour」「3 hours」「until turned off」會把現有的換成一個新的 `caffeinate -dims`。下面兩列是依目前電源還要閒置多久才會睡眠，以及還有什麼讓電腦保持清醒（例如播放聲音時的 `coreaudiod`）。
+- **Claude**：每個帳號的 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。上次更新後若有新增、移除帳號，或在膠囊以外切換了帳號，點開時會先照快取顯示，再立刻更新一次。
+
+有 agent 等你時，焦點視窗的邊框會變成橘色，按 `alt-w` 就會跳過去。
+
+`sketchybar/helpers/net` 是畫這顆膠囊的小型 Go 程式。它的 `feed` 以 launch agent `com.wayne930242.sketchybar-net` 常駐，訂閱 Straw Boss GUI 伺服器的事件串流（位址寫在 `~/.pi/agent/straw-boss/gui.json`），供邊框、`alt-w` 與 Straw Net 那幾列使用，記錄寫在 `~/Library/Logs/sketchybar-net.log`。
 
 想讓 GUI 成為 workspace A 裡的獨立視窗：先開啟 GUI（在 pi 裡輸入 `/boss gui`），再到 Chrome 選「投放、儲存及分享」>「將網頁安裝為應用程式」；AeroSpace 會把 `Straw Net` 這個 app 移到 A。
 

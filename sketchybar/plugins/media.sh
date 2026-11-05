@@ -36,7 +36,7 @@ fi
 sketchybar --set "$NAME" label="$LABEL" icon="$ICON" drawing=on
 
 # On the built-in display the pill grows right from the notch into the right items, which
-# draw under it: the Claude pill at 1512 pt. plugins/notch.sh records the built-in display's
+# draw under it: the agent pill at 1512 pt. plugins/notch.sh records the built-in display's
 # range; label.max_chars is fitted to the room left of the leftmost right pill there, and the
 # label scrolls through the rest. max_chars and the padding are shared by every display's bar.
 MAX_CHARS=32
@@ -59,11 +59,11 @@ edges() {
          | if length == 0 then "" else "\(.[0].origin[0] | floor) \(.[0].origin[0] + .[0].size[0] | ceil)" end'
 }
 
-# The left edge of the leftmost right pill; right items queue claude, net, status_group from
-# left to right.
+# The left edge of the leftmost right pill; right items queue net, status_group from left to
+# right.
 bound() {
     local item left
-    for item in claude net status_group; do
+    for item in net status_group; do
         read -r left _ <<<"$(edges "$item")"
         if [[ -n "$left" ]]; then
             echo "$left"

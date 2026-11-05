@@ -3,8 +3,8 @@ onboarding = false
 name = "catppuccin"
 
 [ui]
-# The agent list lives in SketchyBar (the net pill and its popup), so the sidebar starts
-# collapsed to zero width; prefix+b still opens it
+# The sidebar starts collapsed to zero width; prefix+b opens it, and the Straw Net GUI
+# (alt-shift-w) shows the whole agent net
 sidebar_collapsed_mode = "hidden"
 sidebar_start_collapsed = true
 show_agent_labels_on_pane_borders = true

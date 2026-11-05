@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
+	"time"
 )
 
 const (
-	maxRows = 40
 	// Rows added at runtime name their fonts; Hack Nerd Font has only Regular and Bold, and a
 	// missing weight falls back to the system font, which lacks the Nerd Font glyphs.
 	fontIcon  = "icon.font=Hack Nerd Font Mono:Bold:14.0"
@@ -19,93 +20,153 @@ func sketchybar(args ...string) {
 	_ = exec.Command("sketchybar", args...).Run()
 }
 
-func markColor(c map[string]string, mark string) string {
-	switch mark {
-	case "waiting":
-		return c["ORANGE"]
-	case "working":
-		return c["BLUE"]
-	case "commanding":
-		return c["PURPLE"]
-	case "done":
-		return c["GREEN"]
-	case "error":
-		return c["RED"]
-	}
-	return c["SPACE_INACTIVE"]
+// Pill is what the pill shows: Claude's active account and its 7-day usage, a coffee cup while
+// caffeine is on, and the robot alone when there is neither.
+type Pill struct {
+	Icon, IconColor, Label, LabelColor string
 }
 
-// pillAccent is the pill's color: the most urgent state present.
-func pillAccent(c map[string]string, n Counts) string {
-	switch {
-	case n.Waiting > 0:
-		return c["ORANGE"]
-	case n.Error > 0:
-		return c["RED"]
-	case n.Working > 0:
-		return c["BLUE"]
+func PillOf(c map[string]string, accounts []Account, caf Caffeine) Pill {
+	p := Pill{Icon: glyphRobot, IconColor: c["SPACE_INACTIVE"], LabelColor: c["LABEL_COLOR"]}
+	if accounts != nil {
+		p.Icon = glyphClaude
+		var active *Account
+		for i := range accounts {
+			if accounts[i].Active {
+				active = &accounts[i]
+				break
+			}
+		}
+		switch {
+		case active == nil:
+			p.IconColor, p.Label, p.LabelColor = c["RED"], "- · !", c["RED"]
+		case active.Status() == "login":
+			p.IconColor, p.Label, p.LabelColor = c["RED"], string(active.Num)+" · !", c["RED"]
+		case active.Status() != "ok":
+			p.IconColor, p.Label, p.LabelColor = c["YELLOW"], string(active.Num)+" · 7d ?", c["YELLOW"]
+		default:
+			p.IconColor, p.Label = c["ICON_COLOR"], fmt.Sprintf("%s · 7d %d%%", active.Num, active.Seven())
+			if t := UsageTone(c, active.Seven()); t != "" {
+				p.IconColor = t
+			}
+		}
 	}
-	return c["SPACE_OCCUPIED"]
+	if caf.On {
+		if p.Label == "" {
+			p.Label = glyphCoffee
+		} else {
+			p.Label = glyphCoffee + "  " + p.Label
+		}
+	}
+	return p
 }
 
-// drawPill hides the pill while no GUI server runs; otherwise it colors only the icon and
-// label, and the pill keeps the border every pill in the bar shares.
-func drawPill(s State) {
-	c := s.Colors
-	if !s.Online {
-		sketchybar("--set", "net", "drawing=off")
+func drawPill(c map[string]string) {
+	p := PillOf(c, readAccounts(), readCaffeine())
+	drawing := "on"
+	if p.Label == "" {
+		drawing = "off"
+	}
+	sketchybar("--set", "net", "drawing=on", "icon="+p.Icon, "icon.color="+p.IconColor,
+		"label="+p.Label, "label.drawing="+drawing, "label.color="+p.LabelColor)
+}
+
+// redraw draws the pill, and the popup while it is open.
+func redraw() {
+	c, err := colors()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "net:", err)
 		return
 	}
-	n := Count(s.Rows)
-	label, accent, text := PillLabel(n), pillAccent(c, n), c["LABEL_COLOR"]
-	if n.Waiting > 0 {
-		text = c["ORANGE"]
+	drawPill(c)
+	if popupOpen() {
+		drawPopup(readState(), c)
 	}
-	drawing := "off"
-	if label != "" {
-		drawing = "on"
-	}
-	sketchybar("--set", "net", "drawing=on", "icon="+glyphRobot, "icon.color="+accent,
-		"label="+label, "label.drawing="+drawing, "label.color="+text)
 }
 
-// drawPopup rebuilds the popup's rows in one SketchyBar call.
-func drawPopup(s State, self string) {
-	c := s.Colors
+// drawPopup rebuilds the popup's rows in one SketchyBar call: the Straw Net (the remote QR, a message
+// to the head tower, the GUI) while its server runs, caffeine and when the Mac sleeps, then Claude's accounts.
+func drawPopup(s State, c map[string]string) {
+	self, err := os.Executable()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "net: locate binary:", err)
+		return
+	}
 	args := []string{"--remove", `/net\.row\..*/`}
 	add := func(name string, props ...string) {
 		args = append(args, "--add", "item", name, "popup.net", "--set", name,
 			"background.drawing=off", "padding_left=6", "padding_right=6", fontIcon, fontLabel)
 		args = append(args, props...)
 	}
-	rows := s.Rows
-	for i, r := range rows {
-		if i == maxRows {
-			add("net.row.more", "icon.drawing=off", "label.color="+c["SPACE_INACTIVE"],
-				fmt.Sprintf("label=… %d more in the GUI", len(rows)-maxRows))
-			break
-		}
-		name := fmt.Sprintf("net.row.%d", i)
-		if r.Kind == "base" {
-			add(name, "icon.drawing=off", "label="+r.Name, "label.color="+c["ICON_COLOR"], fontHead)
-			continue
-		}
-		text := c["LABEL_COLOR"]
-		if r.Depth > 0 {
-			text = c["SPACE_OCCUPIED"]
-		}
-		props := []string{"icon=" + glyphOf(r.Mark), "icon.drawing=on", "icon.color=" + markColor(c, r.Mark),
-			fmt.Sprintf("label.padding_left=%d", RowIndent(r)), "label=" + RowLabel(r), "label.color=" + text}
-		// click_script runs through sh -c: only a key that needs no quoting goes into it
-		if SafeKey(r.Key) {
-			props = append(props, "click_script="+self+" click "+r.Key)
-		}
-		add(name, props...)
+	heading := func(name, label string) {
+		add(name, "icon.drawing=off", "label="+label, "label.color="+c["ICON_COLOR"], fontHead)
 	}
-	add("net.row.qr", "icon="+glyphQR, "icon.drawing=on", "icon.color="+c["ICON_COLOR"],
-		"label=Remote QR", "click_script="+self+" qr")
-	add("net.row.gui", "icon="+glyphOpen, "icon.drawing=on", "icon.color="+c["ICON_COLOR"],
-		"label=Open Straw Net", "click_script="+self+" gui")
+	row := func(name, glyph, color, label string, props ...string) {
+		add(name, append([]string{"icon=" + glyph, "icon.drawing=on", "icon.color=" + color,
+			"label=" + label, "label.color=" + c["LABEL_COLOR"]}, props...)...)
+	}
+
+	if s.Online {
+		heading("net.row.h.net", "Straw Net")
+		if qr := qrProps(c); qr != nil {
+			add(qrItem, qr...)
+		}
+		if s.Head != "" {
+			row("net.row.tell", glyphMessage, c["ICON_COLOR"], "Message the head tower…", "click_script="+self+" tell")
+		}
+		row("net.row.gui", glyphOpen, c["ICON_COLOR"], "Open Straw Net", "click_script="+self+" gui")
+	}
+
+	caf := readCaffeine()
+	heading("net.row.h.caf", "Caffeine")
+	cafColor := c["SPACE_INACTIVE"]
+	if caf.On {
+		cafColor = c["ORANGE"]
+	}
+	row("net.row.caf", glyphCoffee, cafColor, CaffeineLabel(caf), "click_script="+self+" caffeine toggle")
+	for _, d := range []struct {
+		name, label string
+		secs        int
+	}{{"1h", "Keep awake 1 hour", 3600}, {"3h", "Keep awake 3 hours", 3 * 3600}, {"inf", "Keep awake until turned off", 0}} {
+		row("net.row.caf."+d.name, glyphTimer, c["SPACE_INACTIVE"], d.label,
+			"label.color="+c["SPACE_OCCUPIED"], "click_script="+self+" caffeine on "+strconv.Itoa(d.secs))
+	}
+	power := readPower()
+	row("net.row.sleep", glyphSleep, c["SPACE_INACTIVE"], SleepLabel(caf, power))
+	if h := HoldersLabel(power); h != "" {
+		row("net.row.holders", glyphSleep, c["SPACE_INACTIVE"], h, "label.color="+c["SPACE_OCCUPIED"])
+	}
+
+	if accounts := readAccounts(); accounts != nil {
+		heading("net.row.h.claude", "Claude")
+		now := time.Now()
+		for i, a := range accounts {
+			mark, markColor := "○ ", c["SPACE_INACTIVE"]
+			if a.Active {
+				mark, markColor = "● ", c["GREEN"]
+			}
+			text := c["LABEL_COLOR"]
+			switch a.Status() {
+			case "login":
+				text = c["RED"]
+			case "limited", "unavailable":
+				text = c["YELLOW"]
+			default:
+				if t := UsageTone(c, a.Seven()); t != "" {
+					text = t
+				}
+			}
+			props := []string{"icon=" + mark + string(a.Num), "icon.drawing=on", "icon.color=" + markColor,
+				"label=" + AccountLabel(a, now), "label.color=" + text}
+			// click_script runs through sh -c: only an account number goes into it
+			if accountNum.MatchString(string(a.Num)) {
+				props = append(props, "click_script="+self+" claude switch "+string(a.Num))
+			}
+			add(fmt.Sprintf("net.row.claude.%d", i), props...)
+		}
+		row("net.row.dashboard", glyphDashboard, c["ICON_COLOR"], "Open ccswitch dashboard",
+			"label.color="+c["SPACE_INACTIVE"], "click_script="+self+" claude dashboard")
+	}
 	sketchybar(args...)
 }
 
@@ -116,39 +177,44 @@ func popupOpen() bool {
 
 func closePopup() {
 	// The QR's pairing code stays valid for ten minutes, so it leaves with the popup
-	sketchybar("--set", "net", "popup.drawing=off", "--remove", qrItem)
+	sketchybar("--set", "net", "popup.drawing=off", "--remove", `/net\.row\..*/`)
 	_ = os.Remove(popupFlag)
-	_ = os.Remove(qrFile)
+	clearQR()
 }
 
+// toggle opens the popup, or closes it. It opens from the caches at once; then it makes the remote
+// QR while Tailscale is up, and refreshes Claude when its accounts moved outside the pill.
 func toggle() error {
 	if popupOpen() {
 		closePopup()
 		return nil
 	}
-	// A QR from an earlier opening may be used up or expired
-	sketchybar("--remove", qrItem)
-	_ = os.Remove(qrFile)
-	s := readState()
-	if s.Colors == nil {
-		c, err := theme()
-		if err != nil {
-			return err
-		}
-		s.Colors = c
-	}
-	self, err := os.Executable()
+	clearQR() // a QR from an earlier opening may be used up or expired
+	c, err := colors()
 	if err != nil {
-		return fmt.Errorf("locate binary: %w", err)
+		return err
 	}
-	drawPopup(s, self)
+	s := readState()
 	if err := os.MkdirAll(cacheDir, 0o700); err != nil {
 		return fmt.Errorf("cache dir: %w", err)
+	}
+	wantQR := s.Online && tailnetUp()
+	if wantQR {
+		_ = os.WriteFile(qrWant, nil, 0o600)
 	}
 	if err := os.WriteFile(popupFlag, nil, 0o600); err != nil {
 		return fmt.Errorf("popup flag: %w", err)
 	}
+	drawPopup(s, c)
 	sketchybar("--set", "net", "popup.drawing=on")
+	if accountsMoved() {
+		if err := refreshClaude(); err == nil {
+			redraw()
+		}
+	}
+	if wantQR {
+		return makeQR()
+	}
 	return nil
 }
 

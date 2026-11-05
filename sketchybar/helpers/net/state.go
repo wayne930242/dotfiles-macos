@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 var (
@@ -21,10 +25,12 @@ var (
 	lastJump  = filepath.Join(cacheDir, "net-last-jump")
 )
 
-// State is the feed's cache: the rows, and the theme colors so a click needs no theme lookup.
+// State is the feed's cache: the rows (for alt-w), the head tower's key, and the theme colors so a
+// click needs no theme lookup.
 type State struct {
 	Online bool              `json:"online"`
 	Rows   []Row             `json:"rows"`
+	Head   string            `json:"head,omitempty"`
 	Colors map[string]string `json:"colors"`
 }
 
@@ -111,7 +117,7 @@ func configDir() (string, error) {
 	return filepath.Dir(filepath.Dir(filepath.Dir(exe))), nil
 }
 
-var themeVars = []string{"LABEL_COLOR", "ICON_COLOR", "ORANGE", "BLUE", "PURPLE", "GREEN", "RED",
+var themeVars = []string{"LABEL_COLOR", "ICON_COLOR", "ORANGE", "BLUE", "PURPLE", "GREEN", "RED", "YELLOW",
 	"SPACE_INACTIVE", "SPACE_OCCUPIED", "BORDER_ACTIVE_COLOR"}
 
 // theme reads the colors from the SketchyBar and JankyBorders themes, so this program keeps none of its own.
@@ -140,4 +146,50 @@ shift 2; for v in "$@"; do echo "$v=${!v}"; done`
 		}
 	}
 	return colors, nil
+}
+
+// colors are the feed's cached theme colors, or the theme's when the cache lacks any.
+func colors() (map[string]string, error) {
+	c := readState().Colors
+	for _, v := range themeVars {
+		if c[v] == "" {
+			return theme()
+		}
+	}
+	return c, nil
+}
+
+// guiPost sends a write to the GUI server as its local page does: the page's origin and the CSRF
+// secret it wrote into gui.json.
+func guiPost(path string, body any) (int, []byte, error) {
+	base, err := guiURL()
+	if err != nil {
+		return 0, nil, err
+	}
+	csrf, err := guiCSRF()
+	if err != nil {
+		return 0, nil, err
+	}
+	u, err := url.Parse(base)
+	if err != nil {
+		return 0, nil, fmt.Errorf("gui url: %w", err)
+	}
+	b, err := json.Marshal(body)
+	if err != nil {
+		return 0, nil, err
+	}
+	req, err := http.NewRequest(http.MethodPost, base+path, bytes.NewReader(b))
+	if err != nil {
+		return 0, nil, withoutURL(err)
+	}
+	req.Header.Set("Origin", u.Scheme+"://"+u.Host)
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("X-SB-CSRF", csrf)
+	resp, err := (&http.Client{Timeout: 30 * time.Second}).Do(req)
+	if err != nil {
+		return 0, nil, withoutURL(err)
+	}
+	defer resp.Body.Close()
+	reply, err := io.ReadAll(io.LimitReader(resp.Body, 1<<20))
+	return resp.StatusCode, reply, err
 }

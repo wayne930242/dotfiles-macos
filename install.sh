@@ -182,7 +182,7 @@ build_helpers() {
     echo "🔨 Building SketchyBar helpers..."
 
     if ! command -v go &>/dev/null; then
-        echo "   ⚠️  Go not found; the net pill stays hidden until ./install.sh runs with Go"
+        echo "   ⚠️  Go not found; the agent pill stays hidden until ./install.sh runs with Go"
     elif (cd "$DOTFILES_DIR/sketchybar/helpers/net" && go build -trimpath -ldflags="-s -w" -o ../bin/net .); then
         echo "   ✅ sketchybar/helpers/bin/net"
     else
