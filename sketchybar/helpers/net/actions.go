@@ -100,6 +100,9 @@ func openGUI(key string) error {
 	}
 	if key != "" {
 		for _, r := range readState().Rows {
+			if r.Key == key && r.Role == "head" {
+				return exec.Command("open", base+"head").Run()
+			}
 			if r.Key == key {
 				return exec.Command("open", base+"w/"+url.PathEscape(r.Base)+"/s/"+url.PathEscape(key)).Run()
 			}

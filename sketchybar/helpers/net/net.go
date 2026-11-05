@@ -8,6 +8,8 @@ import (
 // The net as the Straw Boss GUI server streams it; only the fields the bar shows.
 type Net struct {
 	Bases []Base `json:"bases"`
+	// The head tower, first in the list; "absent" until the boss first talks to it.
+	Head *Unit `json:"head"`
 }
 
 type Base struct {
@@ -28,6 +30,7 @@ type Unit struct {
 	Role  string `json:"role"`
 	Mark  string `json:"mark"`
 	Ended bool   `json:"ended"`
+	State string `json:"state"`
 	Subs  []Unit `json:"subs"`
 }
 
@@ -43,7 +46,7 @@ type Row struct {
 	Last  bool   `json:"last"`
 }
 
-// Flatten lists each base, then its tower, then each tab's units and the units outside a tab,
+// Flatten lists the head tower first (once it exists), then each base, then its tower, then each tab's units and the units outside a tab,
 // every unit followed by its live subagents. Ended units are left out.
 func Flatten(n Net) []Row {
 	var rows []Row
@@ -65,6 +68,9 @@ func Flatten(n Net) []Row {
 		for i, s := range subs {
 			unit(s, base, "", depth+1, i == len(subs)-1)
 		}
+	}
+	if n.Head != nil && n.Head.State != "absent" {
+		unit(*n.Head, "", "head", 0, false)
 	}
 	for _, b := range n.Bases {
 		rows = append(rows, Row{Kind: "base", Base: b.ID, Name: b.Label})
@@ -112,6 +118,7 @@ func Count(rows []Row) Counts {
 const (
 	glyphRobot = "\U000f06a9"
 	glyphTower = "\U000f043b"
+	glyphCrown = "\U000f01a5"
 	glyphStar  = "\uf005"
 	glyphOpen  = "\U000f03cc"
 	glyphQR    = "\U000f0432"
@@ -171,6 +178,8 @@ func RowLabel(r Row) string {
 	}
 	lead := ""
 	switch r.Role {
+	case "head":
+		lead = glyphCrown + " "
 	case "tower":
 		lead = glyphTower + " "
 	case "main":

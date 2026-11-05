@@ -168,13 +168,13 @@ func TestQRImage(t *testing.T) {
 
 func TestSafeKey(t *testing.T) {
 	for key, want := range map[string]bool{
-		"0b9f3c1e-6f0a-4a57-9b52-2f1d3c4e5a6b":   true,
+		"0b9f3c1e-6f0a-4a57-9b52-2f1d3c4e5a6b":    true,
 		"2026-10-25T08-19-24-135Z_ab2272d4.jsonl": true,
-		"launcher/worker-1":                      true,
-		"":                                       false,
-		"x; rm -rf ~":                            false,
-		"a$(id)":                                 false,
-		"name with space":                        false,
+		"launcher/worker-1":                       true,
+		"":                                        false,
+		"x; rm -rf ~":                             false,
+		"a$(id)":                                  false,
+		"name with space":                         false,
 	} {
 		if got := SafeKey(key); got != want {
 			t.Errorf("SafeKey(%q) = %v, want %v", key, got, want)
@@ -189,5 +189,22 @@ func TestWithoutURLDropsToken(t *testing.T) {
 	}
 	if msg := withoutURL(err).Error(); strings.Contains(msg, "SECRETTOKEN") {
 		t.Fatalf("token kept: %s", msg)
+	}
+}
+
+func TestFlattenHead(t *testing.T) {
+	n := Net{Head: &Unit{Key: "h", Name: "主塔台", Mark: "working", State: "live"}, Bases: []Base{{ID: "w1", Label: "Root"}}}
+	want := []Row{
+		{Kind: "unit", Key: "h", Name: "主塔台", Role: "head", Mark: "working"},
+		{Kind: "base", Base: "w1", Name: "Root"},
+	}
+	if got := Flatten(n); !reflect.DeepEqual(got, want) {
+		t.Fatalf("Flatten head:\n got %+v\nwant %+v", got, want)
+	}
+	if got := Flatten(Net{Head: &Unit{Key: "h", Name: "head", State: "absent"}}); len(got) != 0 {
+		t.Fatalf("absent head drawn: %+v", got)
+	}
+	if got := RowLabel(Row{Kind: "unit", Role: "head", Name: "主塔台"}); got != glyphCrown+" 主塔台" {
+		t.Fatalf("head label %q", got)
 	}
 }
