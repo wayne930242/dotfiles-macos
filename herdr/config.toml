@@ -36,9 +36,9 @@ rows = [
   ["branch", "git_status"],
 ]
 
-# system 會用 osascript 發 macOS 通知，多一個不受 herdr 控制的系統提示音；改成只在 herdr 裡顯示
+# system 會用 osascript 發 macOS 通知，多一個不受 herdr 控制的系統提示音；herdr 是只在 herdr 裡顯示，目前用 off 整個關掉
 [ui.toast]
-delivery = "herdr"
+delivery = "off"
 
 # 內建提示音太大聲，專注時會被嚇到，herdr 沒有音量設定，只能換成本身小聲的檔案。
 # 用 macOS 內建音效降約 15dB 轉 mp3：Done 用 Tink、Request 用 Pop，聽聲音就分得出
@@ -47,6 +47,8 @@ delivery = "herdr"
 [ui.sound]
 done_path = "sounds/done.mp3"
 request_path = "sounds/request.mp3"
+# 目前整個關掉提示音；要恢復時刪掉這行
+enabled = false
 
 # Straw Boss 的 herdr plugin：切換側邊欄 Agents 列的 net 檢視（tower → main → member，subagent 排在開它的人底下）。
 [[keys.command]]
