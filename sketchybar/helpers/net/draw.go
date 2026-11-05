@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -87,11 +88,13 @@ func redraw() {
 // drawPopup rebuilds the popup's rows in one SketchyBar call: the Straw Net (the remote QR, a message
 // to the head tower, the GUI) while its server runs, caffeine and when the Mac sleeps, then Claude's accounts.
 func drawPopup(s State, c map[string]string) {
-	self, err := os.Executable()
+	exe, err := os.Executable()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "net: locate binary:", err)
 		return
 	}
+	// click_script runs through sh -c
+	self := "'" + strings.ReplaceAll(exe, "'", `'\''`) + "'"
 	args := []string{"--remove", `/net\.row\..*/`}
 	add := func(name string, props ...string) {
 		args = append(args, "--add", "item", name, "popup.net", "--set", name,
@@ -175,6 +178,12 @@ func popupOpen() bool {
 	return err == nil
 }
 
+// popupOpenAs reports whether the popup is open, and is still the opening that wrote nonce.
+func popupOpenAs(nonce string) bool {
+	b, err := os.ReadFile(popupFlag)
+	return err == nil && string(b) == nonce
+}
+
 func closePopup() {
 	// The QR's pairing code stays valid for ten minutes, so it leaves with the popup
 	sketchybar("--set", "net", "popup.drawing=off", "--remove", `/net\.row\..*/`)
@@ -202,7 +211,9 @@ func toggle() error {
 	if wantQR {
 		_ = os.WriteFile(qrWant, nil, 0o600)
 	}
-	if err := os.WriteFile(popupFlag, nil, 0o600); err != nil {
+	// Each opening gets its own nonce, so a QR request from an earlier opening cannot draw into this one
+	nonce := strconv.FormatInt(time.Now().UnixNano(), 36)
+	if err := os.WriteFile(popupFlag, []byte(nonce), 0o600); err != nil {
 		return fmt.Errorf("popup flag: %w", err)
 	}
 	drawPopup(s, c)
@@ -213,7 +224,7 @@ func toggle() error {
 		}
 	}
 	if wantQR {
-		return makeQR()
+		return makeQR(nonce)
 	}
 	return nil
 }

@@ -150,7 +150,7 @@ brew services start borders
 點開分三段：
 
 - **Straw Net**，只在 [Straw Boss](https://github.com/wayne930242/pi-straw-boss) GUI 伺服器在跑時出現：一次性的 remote 配對 QR code（十分鐘內有效），Tailscale 已連線時一點開就產生，用手機掃描就能開 GUI，remote access 沒開的話會先打開；「Message the head tower…」會跳出輸入框，把你打的字照 GUI 輸入框的方式送給 head tower；以及「Open Straw Net」。
-- **Caffeine**：咖啡因有沒有開、還剩多久；點它切換，關著時會開到手動關掉為止，開著時會關掉。關掉會結束你所有的 `caffeinate`，agent 開的也一起關。「Keep awake 1 hour」「3 hours」「until turned off」會把現有的換成一個新的 `caffeinate -dims`。下面兩列是依目前電源還要閒置多久才會睡眠，以及還有什麼讓電腦保持清醒（例如播放聲音時的 `coreaudiod`）。
+- **Caffeine**：咖啡因有沒有開、還剩多久；點它切換，關著時會開到手動關掉為止，開著時會關掉。關掉會結束你所有的 `caffeinate`，agent 開的也一起關。「Keep awake 1 hour」「3 hours」「until turned off」會開一個新的 `caffeinate -dims`，取代膠囊之前開的那個；agent 開的不受影響。下面兩列是依目前電源還要閒置多久才會睡眠，以及還有什麼讓電腦保持清醒（例如播放聲音時的 `coreaudiod`）。
 - **Claude**：每個帳號的 7 天用量和重置倒數，點帳號就切換過去，最後一列可以在 Herdr 打開 ccswitch dashboard。上次更新後若有新增、移除帳號，或在膠囊以外切換了帳號，點開時會先照快取顯示，再立刻更新一次。
 
 有 agent 等你時，焦點視窗的邊框會變成橘色，按 `alt-w` 就會跳過去。

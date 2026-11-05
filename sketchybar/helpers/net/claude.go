@@ -185,11 +185,20 @@ func refreshClaude() error {
 	if err := json.Unmarshal(out, &accounts); err != nil {
 		return fmt.Errorf("ccswitch --json: %w", err)
 	}
-	tmp := claudeCache + ".tmp"
-	if err := os.WriteFile(tmp, out, 0o600); err != nil {
+	// A unique temporary file: the 30 s tick, an opening popup, and a switch may refresh at once
+	tmp, err := os.CreateTemp(cacheDir, "claude-*.json")
+	if err != nil {
 		return fmt.Errorf("write claude cache: %w", err)
 	}
-	return os.Rename(tmp, claudeCache)
+	_, werr := tmp.Write(out)
+	if cerr := tmp.Close(); werr == nil {
+		werr = cerr
+	}
+	if werr != nil {
+		_ = os.Remove(tmp.Name())
+		return fmt.Errorf("write claude cache: %w", werr)
+	}
+	return os.Rename(tmp.Name(), claudeCache)
 }
 
 // claudeDue reports whether the last refresh attempt is older than claudeEvery.

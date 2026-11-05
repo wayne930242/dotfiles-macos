@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"slices"
 	"strconv"
@@ -33,6 +34,7 @@ var (
 	assertionHead = regexp.MustCompile(`^\s*pid (\d+)\(([^)]*)\): \[[^]]*\] \S+ (\w+)`)
 	timeoutLine   = regexp.MustCompile(`Timeout will fire in (\d+) secs`)
 	sleepLine     = regexp.MustCompile(`^\s*sleep\s+(\d+)(?:\s+\(sleep prevented by ([^)]*)\))?`)
+	idleTime      = regexp.MustCompile(`"HIDIdleTime" = (\d+)`)
 )
 
 // ParseCaffeine reads `pmset -g assertions`: each caffeinate's sleep assertions and their timeouts.
@@ -163,7 +165,7 @@ func readPower() Power {
 	batt, _ := exec.Command("pmset", "-g", "batt").Output()
 	idle := 0
 	if out, err := exec.Command("ioreg", "-c", "IOHIDSystem", "-d", "4").Output(); err == nil {
-		if m := regexp.MustCompile(`"HIDIdleTime" = (\d+)`).FindSubmatch(out); m != nil {
+		if m := idleTime.FindSubmatch(out); m != nil {
 			ns, _ := strconv.ParseInt(string(m[1]), 10, 64)
 			idle = int(ns / 1e9)
 		}
@@ -173,6 +175,7 @@ func readPower() Power {
 
 // stopCaffeine ends every caffeinate of this user, an agent's too: off means the Mac may sleep.
 func stopCaffeine() {
+	_ = os.Remove(caffeinePID)
 	pids := readCaffeine().PIDs
 	if out, err := exec.Command("pgrep", "-x", "-U", strconv.Itoa(os.Getuid()), "caffeinate").Output(); err == nil {
 		for _, f := range strings.Fields(string(out)) {
@@ -193,10 +196,38 @@ func stopCaffeine() {
 	}
 }
 
-// startCaffeine replaces whatever caffeinate runs with one for secs seconds, or until turned off when secs is 0.
-// It keeps the display, the disks, and the system awake, in its own session so it outlives this click.
+// The pill's own caffeinate, so a new duration replaces it and leaves agents' alone
+var caffeinePID = filepath.Join(cacheDir, "caffeine.pid")
+
+// stopOwnCaffeine ends the caffeinate the pill started last, when that PID still is a caffeinate.
+func stopOwnCaffeine() {
+	b, err := os.ReadFile(caffeinePID)
+	_ = os.Remove(caffeinePID)
+	if err != nil {
+		return
+	}
+	pid, err := strconv.Atoi(strings.TrimSpace(string(b)))
+	if err != nil || pid <= 1 {
+		return
+	}
+	// A PID can be reused once its process ends: kill only a caffeinate
+	if out, err := exec.Command("ps", "-p", strconv.Itoa(pid), "-o", "comm=").Output(); err != nil || filepath.Base(strings.TrimSpace(string(out))) != "caffeinate" {
+		return
+	}
+	_ = syscall.Kill(pid, syscall.SIGTERM)
+	for range 20 {
+		if syscall.Kill(pid, 0) != nil {
+			return
+		}
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
+// startCaffeine replaces the pill's own caffeinate with one for secs seconds, or until turned off when
+// secs is 0; an agent's caffeinate keeps running. It keeps the display, the disks, and the system awake,
+// in its own session so it outlives this click.
 func startCaffeine(secs int) error {
-	stopCaffeine()
+	stopOwnCaffeine()
 	args := []string{"-dims"}
 	if secs > 0 {
 		args = append(args, "-t", strconv.Itoa(secs))
@@ -206,9 +237,13 @@ func startCaffeine(secs int) error {
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("caffeinate: %w", err)
 	}
+	pid := cmd.Process.Pid
 	_ = cmd.Process.Release()
+	if err := os.MkdirAll(cacheDir, 0o700); err == nil {
+		_ = os.WriteFile(caffeinePID, []byte(strconv.Itoa(pid)), 0o600)
+	}
 	for range 20 {
-		if readCaffeine().On {
+		if slices.Contains(readCaffeine().PIDs, pid) {
 			return nil
 		}
 		time.Sleep(100 * time.Millisecond)

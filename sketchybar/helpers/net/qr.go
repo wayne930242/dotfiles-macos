@@ -130,12 +130,12 @@ func QRSide() int {
 	return qrSide
 }
 
-// makeQR fetches a fresh pairing QR into the open popup's QR row, or the reason it failed.
-func makeQR() error {
+// makeQR fetches a fresh pairing QR into the QR row of the popup opening that nonce names, or the reason it failed.
+func makeQR(nonce string) error {
 	p, err := remotePair()
-	// The request can take seconds: a popup closed meanwhile gets no QR, and no pairing code
-	// stays on disk
-	if !popupOpen() {
+	// The request can take seconds: a popup closed or opened again meanwhile gets no QR from it, and
+	// no pairing code stays on disk
+	if !popupOpenAs(nonce) {
 		return err
 	}
 	if err != nil {
@@ -149,8 +149,10 @@ func makeQR() error {
 			return fmt.Errorf("write qr: %w", err)
 		}
 	}
-	if !popupOpen() {
-		clearQR()
+	if !popupOpenAs(nonce) {
+		if !popupOpen() {
+			clearQR()
+		}
 		return err
 	}
 	c, cerr := colors()

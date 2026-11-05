@@ -2,8 +2,13 @@ package main
 
 import (
 	"encoding/json"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
+	"syscall"
 	"testing"
 	"time"
 )
@@ -169,5 +174,42 @@ func TestListedAccounts(t *testing.T) {
 	}
 	if got := cachedAccounts(accountsOf(t, `[{"num":"1","email":"a@x.io"},{"num":"3","email":"c@x.io","active":true}]`)); !reflect.DeepEqual(got, want) {
 		t.Fatalf("cachedAccounts = %v", got)
+	}
+}
+
+func TestPopupOpenAs(t *testing.T) {
+	old := popupFlag
+	popupFlag = filepath.Join(t.TempDir(), "flag")
+	defer func() { popupFlag = old }()
+	if popupOpenAs("a") {
+		t.Fatal("closed popup read as open")
+	}
+	if err := os.WriteFile(popupFlag, []byte("b"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if popupOpenAs("a") || !popupOpenAs("b") || !popupOpen() {
+		t.Fatal("an opening's nonce not told apart")
+	}
+}
+
+// The pill's PID file may name a reused PID: only a caffeinate is killed.
+func TestStopOwnCaffeineSparesOthers(t *testing.T) {
+	old := caffeinePID
+	caffeinePID = filepath.Join(t.TempDir(), "caffeine.pid")
+	defer func() { caffeinePID = old }()
+	other := exec.Command("sleep", "30")
+	if err := other.Start(); err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = other.Process.Kill(); _ = other.Wait() }()
+	if err := os.WriteFile(caffeinePID, []byte(strconv.Itoa(other.Process.Pid)), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	stopOwnCaffeine()
+	if err := other.Process.Signal(syscall.Signal(0)); err != nil {
+		t.Fatalf("a process that is not caffeinate was killed: %v", err)
+	}
+	if _, err := os.Stat(caffeinePID); !os.IsNotExist(err) {
+		t.Fatal("PID file kept")
 	}
 }
