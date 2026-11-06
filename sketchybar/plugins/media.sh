@@ -84,8 +84,9 @@ if [[ -z "$limit" ]]; then
     exit 0
 fi
 # A fit holds until the label, the bound, or the SketchyBar process changes; refitting on
-# every update would redraw the pill every 5 s.
-key="$(pgrep -x sketchybar | head -1) $limit $LABEL"
+# every update would redraw the pill every 5 s. pgrep leaves out its own ancestors, the
+# SketchyBar server among them, unless given -a; -o picks the server over its CLI clients.
+key="$(pgrep -a -o -x sketchybar || true) $limit $LABEL"
 if [[ "$(head -1 "$state" 2>/dev/null)" == "$key" ]]; then
     exit 0
 fi
